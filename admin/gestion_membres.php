@@ -8,7 +8,7 @@ require_once '../inc/init.php';
 
 $afficherFormulaire = false;
 
-//1. Vérification administrateur
+// Vérification administrateur
 if (!estAdmin())
 	{
 	// Si l'utilisateur n'est pas connecté ou n'est pas admin, le rediriger vers connection
@@ -16,7 +16,7 @@ if (!estAdmin())
 	exit ();
 	}
 
-//8. Modification d'un membre
+// Modification d'un membre
 if (!empty($_POST))
 	{
 	$contenu = validerMembre($_POST, !empty($_POST['mdp']));
@@ -53,7 +53,7 @@ if (!empty($_POST))
 		$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
 	}
 
-//7. Suppression d'un membre
+// Suppression d'un membre
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
 	{
 	$resultat = executerRequete ("DELETE FROM membre WHERE id = :id", array (':id' => $_GET['suppression']));
@@ -62,7 +62,8 @@ if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'o
 	else
 		$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression du membre.</div>';
 	}
-// Modification d'un membre
+
+// Demande de modification d'un membre
 else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'est qu'on a cliqué sur "modification" dans le tableau ci-dessous
 	{
 	$resultat = executerRequete ("SELECT * FROM membre WHERE id = :id", array (':id' => $_GET['modification']));
@@ -73,7 +74,7 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 		}
 	}
 
-//6. Affichage des membres dans le back-office :
+// Affichage des membres dans le back-office :
 $resultat = executerRequete ("SELECT * FROM membre");
 $contenu .='<div class="table-responsive">';
 $contenu .=   '<table class="table">';
@@ -113,10 +114,10 @@ $contenu .='</div>';
 
 require_once '../inc/header.php';
 
-//2. Navigation entre les pages d'administration
+// Navigation entre les pages d'administration
 navigation_admin ('Membres');
 
- // pour afficher les messages et le tableua des membres le tableau des membres
+ // pour afficher les messages et le tableau des membres
 echo $contenu;
 if ($afficherFormulaire)
 	{
@@ -166,6 +167,9 @@ if ($afficherFormulaire)
 			</div>
 			<?php
 			// Un admin n'a pas le droit de s'enlever à lui même le rôle admin. Sinon, on risque de ne plus avoir d'admin du tout ...
+			//XXX ça ne suffit pas : on peut avoir deux pages ouvertes sur deux admin différents
+			//XXX La vraie condition, c'est qu'on n'a pas le droit de supprier le rôle 'admin' au dernier admin
+			//XXX C'est donc pas ici que ça se gère, mais en requête de suppremssion ou modif d'un membre
 			if ($id != $_SESSION['membre']['id'])
 				{
 				?>

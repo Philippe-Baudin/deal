@@ -66,7 +66,7 @@ if ($filtreMembre)
 	$marqueurs [':pseudo'] = $filtreMembre;
 	$premiere = false;
 	}
-if ($filtrePrix)
+if ($filtrePrix && $filtrePrix < 1e7)
 	{
 	if ($premiere)
 		$clauseWhere .= ' WHERE ';
@@ -130,12 +130,17 @@ while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 	echo     '</div>';
 	echo '</div>'; // "row"
 	echo '<div class="row">';
-	echo     '<div class="col-sm-2">';
-	echo          '<h4>'.$pseudo.'</h5>';
+	echo     '<div class="col-sm-9">';
+	echo         '<div class="row">';
+	echo             '<h4>'.$pseudo.'&nbsp;</h4>';
+	if (isset($listeNotes[$pseudo])) echo '<p>'.noteEnEtoiles($listeNotes[$pseudo]).'</p>';
+	echo         '</div>';
 	echo     '</div>';
+	/*
 	echo     '<div class="col-sm-7">';
 	echo          '<p> '.(isset ($listeNotes[$pseudo]) ? (' note : '.sprintf ("%.1f", $listeNotes[$pseudo])) : '').'</p>';
 	echo      '</div>';
+	*/
 	echo      '<div class="col-sm">';
 	echo          "<h4>$prix €</h4>";
 	echo      '</div>';

@@ -41,10 +41,10 @@ if ($resultat)
 		}
 	}
 
-// liste des membres
-// -----------------
+// liste des membres ayant publié au moins une annonce
+// ---------------------------------------------------
 $listeMembres = array ();
-$resultat = executerRequete("SELECT id, pseudo FROM membre ORDER BY pseudo");
+$resultat = executerRequete("SELECT id, pseudo FROM membre where 0 < (SELECT COUNT(id) FROM annonce WHERE membre_id = membre.id) ORDER BY pseudo");
 if ($resultat)
 	{
 	while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
@@ -105,7 +105,7 @@ $contenu .=         '</div><br>';
 $contenu .=         '<div class="form-group">';
 $contenu .=             '<label for="prix">Prix :</label>';
 $contenu .=             '<input type="range" class="custom-range" min="0" max="7" step="0.1" id="range-prix">';
-$contenu .=             '<p style="font-size:0.8rem;" id="affichage-prix">prix maximum : 5000 €</p>';
+$contenu .=             '<p style="font-size:0.8rem;" id="affichage-prix"></p>';
 $contenu .=         '</div>';
 
 
@@ -157,12 +157,6 @@ require_once 'connexion_modale.php';
 // Affichage du contenu qu'on vient de construire
 echo $contenu;
 ?>
-<p>étoile vide :</p>
-<p><i class="far fa-star"></i></p>
-<p>pleine :</p>
-<p><i class="fas fa-star"></i></p>
-<p>demi :</p>
-<p><i class="fas fa-star-half-alt"></i></p>
 
 <!-- Un peu de javaScript, pour envoyer les requêtes AJAX correspondant aux filtres et tri -->
 <script>
@@ -230,7 +224,10 @@ echo $contenu;
 				prix = Math.pow(10,rangePrix.val());
 				prix = Math.round (prix*100)/100;
 				}
-			affichagePrix.html('Prix maximum : '+prix+' €');
+			if (rangePrix.val() == 7)
+				affichagePrix.html('');
+			else
+				affichagePrix.html('Prix maximum : '+prix+' €');
 			return prix;
 		}
 
@@ -248,6 +245,7 @@ echo $contenu;
 
 		// A l'affichage de la page, afficher le prix maxi et lancer la requête AJAX pour afficher la sélection d'anonces courante
 		rangePrix.val(Math.log(afficherPrix(filtrePrix))/Math.LN10);
+		afficherPrix ();
 		requeteAjax ();
 
 	}); // document ready

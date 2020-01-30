@@ -3,11 +3,12 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Deal</title>
-	<!-- CDN Bootstrap CSS -->
+	<!-- Font Awesome CSS -->
 	<script
 		src="https://kit.fontawesome.com/0937b307e2.js"
 		crossorigin="anonymous">
 	</script>
+	<!-- CDN Bootstrap CSS -->
 	<script
 		src="https://code.jquery.com/jquery-3.4.1.min.js"
 		integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
@@ -34,15 +35,15 @@
 </head>
 <body>
 
-<?php
-// Deconnexion de l'internaute
-if (isset ($_GET['action']) && $_GET['action'] == 'deconnexion')
-	{
-	unset ($_SESSION['membre']); // supprime la partie 'membre' de la session (sans toucher à un éventuel panier)
-	header ('location:'.RACINE_SITE.'index.php');
-	exit ();
-	}
-?>
+	<?php
+	// Deconnexion de l'internaute
+	if (isset ($_GET['action']) && $_GET['action'] == 'deconnexion')
+		{
+		unset ($_SESSION['membre']); // supprime la partie 'membre' de la session (sans toucher à un éventuel panier)
+		header ('location:'.RACINE_SITE.'index.php');
+		exit ();
+		}
+	?>
 
 	<!-- navigation -->
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">

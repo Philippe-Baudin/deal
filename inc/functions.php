@@ -90,6 +90,24 @@ function navigation_admin ($titre)
 		}
 	}
 
+// Convertir une note en suite d'étoiles FontAwesome
+function noteEnEtoiles ($note)
+	{
+	$i=0;
+	$retour = '';
+	$nombreEtoiles = floor($note);
+	$demiEtoile = floor($note-$nombreEtoiles+.5);
+	for ($i=0; $i<$nombreEtoiles; $i++)
+		$retour .= '<i class="fas fa-star"></i>'; // étoile pleine
+	if ($demiEtoile)
+		{
+		$retour .= '<i class="fas fa-star-half-alt"></i>'; // demi-étoile
+		$i++;
+		}
+	for (; $i<5; $i++)
+		$retour .= '<i class="far fa-star"></i>'; // étoile vide
+	return $retour;
+	}
 
 // ----------------------------------------------
 // Requete SQL :
