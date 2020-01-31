@@ -170,9 +170,10 @@ if ($afficherFormulaire)
 			//XXX ça ne suffit pas : on peut avoir deux pages ouvertes sur deux admin différents
 			//XXX La vraie condition, c'est qu'on n'a pas le droit de supprier le rôle 'admin' au dernier admin
 			//XXX C'est donc pas ici que ça se gère, mais en requête de suppremssion ou modif d'un membre
-			if ($id != $_SESSION['membre']['id'])
-				{
+			if ($id == $_SESSION['membre']['id']) :
 				?>
+				<input type="hidden" name="role" value="admin">
+			<?php else: ?>
 				<div class="form-group col-md-6">
 					<label for="role">Statut</label>
 					<select name="role" class="form-control">
@@ -180,9 +181,7 @@ if ($afficherFormulaire)
 						<option value="admin"<?php if (isset($role) && $role=='admin') echo 'selected'; ?>>admin</option>
 					</select>
 				</div>
-				<?php
-				}
-			?>
+			<?php endif ?>
 		</div>
 		<button type="submit" class="btn btn-primary">Enregistrer</button>
 	</form>

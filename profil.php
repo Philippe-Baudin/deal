@@ -74,10 +74,11 @@ if ($requeteCompteAnnonces->fetch (PDO::FETCH_NUM)[0] != '0')
 //			n'afficher que les commentaires dont la date est > à sa date
 		$commentaires .= '<h5>annonce "'.$annonce['titre'].', date : '.$annonce['date'].'"</h5>';
 		// Afficher les commentaires de chaque annonce
-		$requeteCommentaires = executerRequete ("SELECT pseudo, commentaire, commentaire.date_enregistrement date
-		                             FROM commentaire, membre
-		                             WHERE annonce_id = :id AND membre.id=commentaire.membre_id
-		                             ORDER BY date DESC", array (':id' => $annonce['id']));
+		$requeteCommentaires = executerRequete ("SELECT pseudo, a.commentaire, a.date_enregistrement date
+		                             FROM commentaire a, membre
+		                             WHERE a.annonce_id = :id AND membre.id=a.membre_id
+		                               AND (NOT EXISTS (SELECT id FROM commentaire b WHERE b.annonce_id=a.annonce_id AND b.membre_id=:moi) OR (a.date_enregistrement >= (SELECT MAX(date_enregistrement) FROM commentaire c WHERE c.annonce_id = a.annonce_id AND c.membre_id = :moi)))
+		                             ORDER BY date DESC", array (':id' => $annonce['id'], ':moi' => $_SESSION['membre']['id']));
 		if ($requeteCommentaires->rowCount() > 0)
 			{
 			while ($resultat = $requeteCommentaires->fetch (PDO::FETCH_ASSOC))
@@ -107,7 +108,7 @@ if ($resultat['nombre'] != '0')
 	                             ORDER BY note.date_enregistrement DESC", array (':id' => $id));
 	while ($resultat = $requete->fetch (PDO::FETCH_ASSOC))
 		{
-		$avis .= "<h5>$resultat[pseudo] vous mets une note de $resultat[note]/20</h5>";
+		$avis .= "<h5>$resultat[pseudo] vous mets une note de $resultat[note]</h5>";
 		$avis .= "<p>$resultat[avis]</p>";
 		}
 	} // fin if ($resultat['nombre'] == '0')

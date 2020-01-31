@@ -266,7 +266,7 @@ if ($afficherFormulaire)
 		
 		<div>
 			<div><label for="description_courte">Description courte</label></div>
-			<div><input style="width:100%" ype="text" name="description_courte" id="description_courte" value="<?php echo $description_courte??'' ?>"></div>
+			<div><input style="width:100%" type="text" name="description_courte" id="description_courte" value="<?php echo $description_courte??'' ?>"></div>
 		</div>
 		
 		<div>

@@ -42,7 +42,7 @@ $contenu .= '<h4>Membres les mieux notés</h4>';
 $resultat=executerRequete("SELECT pseudo, COUNT(note) nombreAvis, AVG(note) moyenne FROM membre LEFT JOIN note ON membre.id=note.membre_id2 GROUP BY membre.id ORDER BY moyenne DESC LIMIT 5");
 $table = $resultat->fetchAll (PDO::FETCH_ASSOC);
 for ($i=0; $i<5 && $i<$resultat->rowCount(); $i++)
-	$contenu .= '<p>'.($i+1).' - '. $table[$i]['pseudo'].' : '.sprintf ("%.1f", $table[$i]['moyenne']/4).' étoiles basé sur '.$table[$i]['nombreAvis'].' avis</p>';
+	$contenu .= '<p>'.($i+1).' - '. $table[$i]['pseudo'].' : '.noteEnEtoiles($table[$i]['moyenne']).' (basé sur '.$table[$i]['nombreAvis'].' avis)</p>';
 $contenu .= '</div>'; // class="col-sm-6">';
 
 $contenu .= '<div class="col-sm-6">';

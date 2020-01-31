@@ -82,7 +82,7 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retourn
 	$contenu .= '<a href="?modification='.$ligne['id'].'#formulaire">Modifier</a> ';
 	$contenu .= '<a href="?suppression='.$ligne['id'].'" ';
 	if (isset($nombreAnnonces[$id]))
-		$contenu .= 'onclick="return confirm(\'Il y a '.$nombreAnnonces[$id].' annonces pour cette catégorie. Etes vous certain de vouloir supprimer cette catégorie et les annonces concernées ?\')">Supprimer</a>';
+		$contenu .= 'onclick="alert(\'Il y a '.$nombreAnnonces[$id].' annonces pour cette catégorie. Vous ne pouvez pas la supprimer.\'); return false;">Supprimer</a>';
 	else
 		$contenu .= 'onclick="return confirm(\'Etes vous certain de vouloir supprimer cette catégorie ?\')">Supprimer</a>';
 	$contenu .= '</td>';

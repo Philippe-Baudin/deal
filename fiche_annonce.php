@@ -209,135 +209,139 @@ $contenu .= '<a href="index.php">Retour vers les annonces</a>';
 $contenu .= '</div>';
 $contenu .= '</div>';
 
-// Fenetre modale pour enregistrer un  commentaire sur une annonce
-$contenu .= '<div class="modal fade" id="modaleCommentaire" tabindex="-1" role="dialog" aria-labelledby="modaleCommentaireTitle" aria-hidden="true">';
-$contenu .=   '<div class="modal-dialog modal-dialog-centered modal-lg" role="document">';
-$contenu .=     '<div class="modal-content">';
-$contenu .=       '<div class="modal-header">';
-$contenu .=         '<h5 class="modal-title" id="exampleModalLongTitle">Déposer un commentaire</h5>';
-$contenu .=         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
-$contenu .=           '<span aria-hidden="true">&times;</span>';
-$contenu .=         '</button>';
-$contenu .=       '</div>';
-$contenu .=       '<div class="modal-body">';
-$contenu .=         '<form method="post" action="">';
-$contenu .=           '<input type="hidden" name="id" value="'.$id.'">';
-$contenu .=           '<div class="form-group">';
-$contenu .=             '<label for="commentaire" class="col-form-label">Postez un commentaire pour poser une question ou obtenir des précisions sur le produit ou le service proposé :</label>';
-$contenu .=             '<textarea class="form-control" id="commentaire" name="commentaire" rows="5"></textarea>';
-$contenu .=           '</div>';
-$contenu .=           '<div class="row">';
-$contenu .=             '<div class="col-sm-2">';
-$contenu .=               '<button type="submit" class="btn btn-primary">Envoyer</button>';
-$contenu .=             '</div>';
-$contenu .=             '<div class="col-sm-2">';
-$contenu .=               '<button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>';
-$contenu .=             '</div>';
-$contenu .=           '</div>';
-$contenu .=         '</form>';
-$contenu .=       '</div>';
-$contenu .=     '</div>';
-$contenu .=   '</div>';
-$contenu .= '</div>';
+// Définition des fenêtres modales que seu un membre connecté peut activer
+if (estConnecte())
+  {
+  // Fenetre modale pour enregistrer un  commentaire sur une annonce
+  $contenu .= '<div class="modal fade" id="modaleCommentaire" tabindex="-1" role="dialog" aria-labelledby="modaleCommentaireTitle" aria-hidden="true">';
+  $contenu .=   '<div class="modal-dialog modal-dialog-centered modal-lg" role="document">';
+  $contenu .=     '<div class="modal-content">';
+  $contenu .=       '<div class="modal-header">';
+  $contenu .=         '<h5 class="modal-title" id="exampleModalLongTitle">Déposer un commentaire</h5>';
+  $contenu .=         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
+  $contenu .=           '<span aria-hidden="true">&times;</span>';
+  $contenu .=         '</button>';
+  $contenu .=       '</div>';
+  $contenu .=       '<div class="modal-body">';
+  $contenu .=         '<form method="post" action="">';
+  $contenu .=           '<input type="hidden" name="id" value="'.$id.'">';
+  $contenu .=           '<div class="form-group">';
+  $contenu .=             '<label for="commentaire" class="col-form-label">Postez un commentaire pour poser une question ou obtenir des précisions sur le produit ou le service proposé :</label>';
+  $contenu .=             '<textarea class="form-control" id="commentaire" name="commentaire" rows="5"></textarea>';
+  $contenu .=           '</div>';
+  $contenu .=           '<div class="row">';
+  $contenu .=             '<div class="col-sm-2">';
+  $contenu .=               '<button type="submit" class="btn btn-primary">Envoyer</button>';
+  $contenu .=             '</div>';
+  $contenu .=             '<div class="col-sm-2">';
+  $contenu .=               '<button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>';
+  $contenu .=             '</div>';
+  $contenu .=           '</div>';
+  $contenu .=         '</form>';
+  $contenu .=       '</div>';
+  $contenu .=     '</div>';
+  $contenu .=   '</div>';
+  $contenu .= '</div>';
 
-if ($pseudo == $_SESSION['membre']['pseudo'])
-	{
-	// Fenêtre modale pour refuser qu'un membre se note lui-même
-	$contenu .= '<div class="modal fade" id="modaleAvis" tabindex="-1" role="dialog" aria-labelledby="modaleAvisTitle" aria-hidden="true">';
-	$contenu .=   '<div class="modal-dialog modal-dialog-centered modal-lg" role="document">';
-	$contenu .=     '<div class="modal-content">';
-	$contenu .=       '<div class="modal-header">';
-	$contenu .=         '<h5 class="modal-title" id="exampleModalLongTitle">Vous ne pouvez pas vous noter vous-même !</h5>';
-	$contenu .=         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
-	$contenu .=           '<span aria-hidden="true">&times;</span>';
-	$contenu .=         '</button>';
-	$contenu .=       '</div>';
-	$contenu .=       '<div class="modal-body">';
-	$contenu .=          '<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>';
-	$contenu .=       '</div>';
-	$contenu .=     '</div>';
-	$contenu .=   '</div>';
-	$contenu .= '</div>';
-	}
-else
-	{
-	// Fenêtre modale pour enregistrer un avis sur l'auteur de l'annonce
-	$contenu .= '<div class="modal fade" id="modaleAvis" tabindex="-1" role="dialog" aria-labelledby="modaleAvisTitle" aria-hidden="true">';
-	$contenu .=   '<div class="modal-dialog modal-dialog-centered modal-lg" role="document">';
-	$contenu .=     '<div class="modal-content">';
-	$contenu .=       '<div class="modal-header">';
-	$contenu .=         '<h5 class="modal-title" id="exampleModalLongTitle">Donnez votre avis sur '.$pseudo.' et notez l'.(($civilite=='M.')?'e':'a').' :</h5>';
-	$contenu .=         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
-	$contenu .=           '<span aria-hidden="true">&times;</span>';
-	$contenu .=         '</button>';
-	$contenu .=       '</div>';
-	$contenu .=       '<div class="modal-body">';
-	$contenu .=         '<form method="post" action="">';
-	$contenu .=           '<input type="hidden" name="id" value="'.$id.'">';
-	$contenu .=           '<input type="hidden" name="auteur" value="'.$auteur.'">';
-	$contenu .=           '<div class="form-group">';
-	$contenu .=             '<label for="avis" class="col-form-label">Votre avis :</label>';
-	$contenu .=             '<textarea class="form-control" id="avis" name="avis" rows="5"></textarea>';
-	$contenu .=           '</div>';
-	$contenu .=           '<div class="input-group mb-3">';
-	$contenu .=             '<div class="input-group-prepend">';
-	$contenu .=               '<label class="input-group-text" for="note">Note</label>';
-	$contenu .=             '</div>';
-	$contenu .=             '<select id="note" name="note">';
-	$contenu .=               '<option>0</option>';
-	$contenu .=               '<option>1</option>';
-	$contenu .=               '<option>2</option>';
-	$contenu .=               '<option>3</option>';
-	$contenu .=               '<option>4</option>';
-	$contenu .=               '<option selected>5</option>';
-	$contenu .=             '</select>';
-	$contenu .=           '</div>';
-	$contenu .=           '<div class="row">';
-	$contenu .=             '<div class="col-sm-2">';
-	$contenu .=               '<button type="submit" class="btn btn-primary">Envoyer</button><br><br>';
-	$contenu .=             '</div>';
-	$contenu .=             '<div class="col-sm">';
-	$contenu .=               '<button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>';
-	$contenu .=             '</div>';
-	$contenu .=           '</div>';
-	$contenu .=         '</form>';
-	$contenu .=       '</div>';
-	$contenu .=     '</div>';
-	$contenu .=   '</div>';
-	$contenu .= '</div>';
-	}
+  if ($pseudo == $_SESSION['membre']['pseudo'])
+  	{
+  	// Fenêtre modale pour refuser qu'un membre se note lui-même
+  	$contenu .= '<div class="modal fade" id="modaleAvis" tabindex="-1" role="dialog" aria-labelledby="modaleAvisTitle" aria-hidden="true">';
+  	$contenu .=   '<div class="modal-dialog modal-dialog-centered modal-lg" role="document">';
+  	$contenu .=     '<div class="modal-content">';
+  	$contenu .=       '<div class="modal-header">';
+  	$contenu .=         '<h5 class="modal-title" id="exampleModalLongTitle">Vous ne pouvez pas vous noter vous-même !</h5>';
+  	$contenu .=         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
+  	$contenu .=           '<span aria-hidden="true">&times;</span>';
+  	$contenu .=         '</button>';
+  	$contenu .=       '</div>';
+  	$contenu .=       '<div class="modal-body">';
+  	$contenu .=          '<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>';
+  	$contenu .=       '</div>';
+  	$contenu .=     '</div>';
+  	$contenu .=   '</div>';
+  	$contenu .= '</div>';
+  	}
+  else
+  	{
+  	// Fenêtre modale pour enregistrer un avis sur l'auteur de l'annonce
+  	$contenu .= '<div class="modal fade" id="modaleAvis" tabindex="-1" role="dialog" aria-labelledby="modaleAvisTitle" aria-hidden="true">';
+  	$contenu .=   '<div class="modal-dialog modal-dialog-centered modal-lg" role="document">';
+  	$contenu .=     '<div class="modal-content">';
+  	$contenu .=       '<div class="modal-header">';
+  	$contenu .=         '<h5 class="modal-title" id="exampleModalLongTitle">Donnez votre avis sur '.$pseudo.' et notez l'.(($civilite=='M.')?'e':'a').' :</h5>';
+  	$contenu .=         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
+  	$contenu .=           '<span aria-hidden="true">&times;</span>';
+  	$contenu .=         '</button>';
+  	$contenu .=       '</div>';
+  	$contenu .=       '<div class="modal-body">';
+  	$contenu .=         '<form method="post" action="">';
+  	$contenu .=           '<input type="hidden" name="id" value="'.$id.'">';
+  	$contenu .=           '<input type="hidden" name="auteur" value="'.$auteur.'">';
+  	$contenu .=           '<div class="form-group">';
+  	$contenu .=             '<label for="avis" class="col-form-label">Votre avis :</label>';
+  	$contenu .=             '<textarea class="form-control" id="avis" name="avis" rows="5"></textarea>';
+  	$contenu .=           '</div>';
+  	$contenu .=           '<div class="input-group mb-3">';
+  	$contenu .=             '<div class="input-group-prepend">';
+  	$contenu .=               '<label class="input-group-text" for="note">Note</label>';
+  	$contenu .=             '</div>';
+  	$contenu .=             '<select id="note" name="note">';
+  	$contenu .=               '<option>0</option>';
+  	$contenu .=               '<option>1</option>';
+  	$contenu .=               '<option>2</option>';
+  	$contenu .=               '<option>3</option>';
+  	$contenu .=               '<option>4</option>';
+  	$contenu .=               '<option selected>5</option>';
+  	$contenu .=             '</select>';
+  	$contenu .=           '</div>';
+  	$contenu .=           '<div class="row">';
+  	$contenu .=             '<div class="col-sm-2">';
+  	$contenu .=               '<button type="submit" class="btn btn-primary">Envoyer</button><br><br>';
+  	$contenu .=             '</div>';
+  	$contenu .=             '<div class="col-sm">';
+  	$contenu .=               '<button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>';
+  	$contenu .=             '</div>';
+  	$contenu .=           '</div>';
+  	$contenu .=         '</form>';
+  	$contenu .=       '</div>';
+  	$contenu .=     '</div>';
+  	$contenu .=   '</div>';
+  	$contenu .= '</div>';
+  	}
 
-// Fenêtre modale pour contacter l'auteur de l'annonce
-$contenu .= '<div class="modal fade" id="modaleContact" tabindex="-1" role="dialog" aria-labelledby="modaleContactTitle" aria-hidden="true">';
-$contenu .=   '<div class="modal-dialog modal-dialog-centered modal-lg" role="document">';
-$contenu .=     '<div class="modal-content">';
-$contenu .=       '<div class="modal-header">';
-$contenu .=         '<h5 class="modal-title" id="exampleModalLongTitle">contacter '.$pseudo.' ('.$email.')</h5>';
-$contenu .=         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
-$contenu .=           '<span aria-hidden="true">&times;</span>';
-$contenu .=         '</button>';
-$contenu .=       '</div>';
-$contenu .=       '<div class="modal-body">';
-$contenu .=         '<form method="post" action="">';
-$contenu .=           '<input type="hidden" name="id" value="'.$id.'">';
-$contenu .=           '<input type="hidden" name="auteur" value="'.$auteur.'">';
-$contenu .=           '<div class="form-group">';
-$contenu .=             '<label for="message" class="col-form-label">Votre message :</label>';
-$contenu .=             '<textarea class="form-control" id="message" name="message" rows="5"></textarea>';
-$contenu .=           '</div>';
-$contenu .=           '<div class="row">';
-$contenu .=             '<div class="col-sm-2">';
-$contenu .=               '<button type="submit" class="btn btn-primary">Envoyer</button><br><br>';
-$contenu .=             '</div>';
-$contenu .=             '<div class="col-sm">';
-$contenu .=               '<button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>';
-$contenu .=             '</div>';
-$contenu .=           '</div>';
-$contenu .=         '</form>';
-$contenu .=       '</div>';
-$contenu .=     '</div>';
-$contenu .=   '</div>';
-$contenu .= '</div>';
+  // Fenêtre modale pour contacter l'auteur de l'annonce
+  $contenu .= '<div class="modal fade" id="modaleContact" tabindex="-1" role="dialog" aria-labelledby="modaleContactTitle" aria-hidden="true">';
+  $contenu .=   '<div class="modal-dialog modal-dialog-centered modal-lg" role="document">';
+  $contenu .=     '<div class="modal-content">';
+  $contenu .=       '<div class="modal-header">';
+  $contenu .=         '<h5 class="modal-title" id="exampleModalLongTitle">contacter '.$pseudo.' ('.$email.')</h5>';
+  $contenu .=         '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
+  $contenu .=           '<span aria-hidden="true">&times;</span>';
+  $contenu .=         '</button>';
+  $contenu .=       '</div>';
+  $contenu .=       '<div class="modal-body">';
+  $contenu .=         '<form method="post" action="">';
+  $contenu .=           '<input type="hidden" name="id" value="'.$id.'">';
+  $contenu .=           '<input type="hidden" name="auteur" value="'.$auteur.'">';
+  $contenu .=           '<div class="form-group">';
+  $contenu .=             '<label for="message" class="col-form-label">Votre message :</label>';
+  $contenu .=             '<textarea class="form-control" id="message" name="message" rows="5"></textarea>';
+  $contenu .=           '</div>';
+  $contenu .=           '<div class="row">';
+  $contenu .=             '<div class="col-sm-2">';
+  $contenu .=               '<button type="submit" class="btn btn-primary">Envoyer</button><br><br>';
+  $contenu .=             '</div>';
+  $contenu .=             '<div class="col-sm">';
+  $contenu .=               '<button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>';
+  $contenu .=             '</div>';
+  $contenu .=           '</div>';
+  $contenu .=         '</form>';
+  $contenu .=       '</div>';
+  $contenu .=     '</div>';
+  $contenu .=   '</div>';
+  $contenu .= '</div>';
+  }
 
 require_once 'inc/header.php';
 require_once 'connexion_modale.php';

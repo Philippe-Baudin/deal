@@ -104,7 +104,7 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retourn
 	extract ($ligne);
 	$contenu .= '<tr>';
 	$contenu .= '    <th scope="row">' . $id . '</th>';
-	$contenu .= '    <td>' . $note . '</td>';
+	$contenu .= '    <td>' . noteEnEtoiles($note) . '</td>';
 	$contenu .= '    <td>' . $avis . '</td>';
 	$contenu .= '    <td>' . $auteur . '</td>';
 	$contenu .= '    <td>' . $cible . '</td>';
