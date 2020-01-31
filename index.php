@@ -15,6 +15,7 @@ if (!isset($_SESSION['filtre']['ville']))     $_SESSION['filtre']['ville']     =
 if (!isset($_SESSION['filtre']['membre']))    $_SESSION['filtre']['membre']    = '0';
 if (!isset($_SESSION['filtre']['prix']))      $_SESSION['filtre']['prix']      = '10000';
 if (!isset($_SESSION['triAccueil']))          $_SESSION['triAccueil']          = '0';
+if (!isset($_SESSION['pageAccueil']))         $_SESSION['pageAccueil']         = '0';
 
 
 // ---------------------------------------------------------------
@@ -155,10 +156,13 @@ require_once 'inc/header.php';
 require_once 'connexion_modale.php';
 
 // Affichage du contenu qu'on vient de construire
+// ----------------------------------------------
 echo $contenu;
 ?>
 
-<!-- Un peu de javaScript, pour envoyer les requêtes AJAX correspondant aux filtres et tri -->
+<!-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -->
+<!-- Un peu de javaScript, pour envoyer les requêtes AJAX correspondant aux filtres et tri. -->
+<!-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -->
 <script>
 	$(function(){ // document ready
 
@@ -169,6 +173,7 @@ echo $contenu;
 			echo 'let filtreMembre    = "'.$_SESSION['filtre']['membre'].'";';
 			echo 'let filtrePrix      = "'.$_SESSION['filtre']['prix'].'";';
 			echo 'let triAccueil      = "'.$_SESSION['triAccueil'].'";';
+			echo 'let pageAccueil     = "'.$_SESSION['pageAccueil'].'";';
 		?>
 
 		function requeteAjax ()
@@ -194,6 +199,7 @@ echo $contenu;
 			                               filtreMembre    : filtreMembre,
 			                               filtrePrix      : filtrePrix,
 			                               triAccueil      : triAccueil,
+			                               pageAccueil     : pageAccueil,
 			                             }, reponse, 'html');
 			}
 

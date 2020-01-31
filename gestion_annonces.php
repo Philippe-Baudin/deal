@@ -141,7 +141,9 @@ if (!empty($_POST))
 		if ($resultat)
 			{
 			//XXX Mettre le message en modale et redirect vers la fiche annonce
-			$contenu .= '<div class="alert alert-success">L\'annonce a été enregistrée.</div>';
+			// $contenu .= '<div class="alert alert-success">L\'annonce a été enregistrée.</div>';
+			header ('location:fiche_annonce.php?id='.$id);
+			exit ();
 			}
 		else
 			$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
@@ -150,7 +152,7 @@ if (!empty($_POST))
 
 // Compter les annonces, pour la pagination
 $requete = executerRequete ("SELECT COUNT(id) FROM annonce;");
-$nombrePages = ceil ($requete->fetch(PDO::FETCH_NUM)[0]/taillePage);
+$nombrePages = ceil ($requete->fetch(PDO::FETCH_NUM)[0]/TAILLE_PAGE);
 
 // Suppression d'une annonce
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
@@ -199,14 +201,15 @@ require_once 'inc/header.php';
 echo '<style> .container {padding:0;margin:auto;}</style>';
 
 //2. Navigation entre les pages d'administration
-navigation_admin ('Annonces');
+if (!isset($_GET['creation']))
+	navigation_admin ('Annonces');
 
 echo $contenu; // pour afficher notamment les messages
 
 //6. Affichage du tableau des annonces :
 if ($afficherTableau)
 	{
-	// Selection de l'ordre de tri -->
+	// Selection de l'ordre et du sens du tri -->
 	echo '<div>';
 	echo     '<label for="tri">Trier par :&nbsp;</label>';
 	echo     '<select name="tri" class="tri">';
@@ -229,7 +232,7 @@ if ($afficherTableau)
 	echo         '<option value="DESC"' .(($sens=='DESC')? ' selected':'').'>décroissant</option>';
 	echo     '</select>';
 	echo '</div>';
-	echo '<div id="tableau">';
+	echo '<div id="tableau" class="table-responsive-sm">';
 	//       Emplacement du tableau, qui sera rempli via AJAX en fonction du tri choisi ci-dessus -->
 	echo '</div>';
 
@@ -254,93 +257,109 @@ if ($afficherFormulaire)
 	{
 	isset($annonce_courante) && extract ($annonce_courante);
 ?>
-	<form id="formulaire" method="post" action="gestion_annonces.php?page=<?php echo $numeroPage ?>" enctype=multipart/form-data>
-		<div>
-			<input type="hidden" name="id" value="<?php echo $id??0 ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
-		</div>
-
-		<div>
-			<div><label for="titre">Titre</label></div>
-			<div><input style="width:100%" type="text" name="titre" id="titre" value="<?php echo $titre??'' ?>"></div>
-		</div>
-		
-		<div>
-			<div><label for="description_courte">Description courte</label></div>
-			<div><input style="width:100%" type="text" name="description_courte" id="description_courte" value="<?php echo $description_courte??'' ?>"></div>
-		</div>
-		
-		<div>
-			<div><label for="description_longue">Description longue</label></div>
-			<div><textarea style="width:100%;height:20vh" type="text" name="description_longue" id="description_longue"><?php echo $description_longue??'' ?></textarea>
-		</div>
-		
-		<div>
-			<div><label for="prix">Prix</label></div>
-			<div><input style="width:100%" type="text" name="prix" id="prix" value="<?php echo $prix??'' ?>"></div>
-		</div>
-		
-		<div>
-			<div><label for="photo">Photo</label></div>
-			<div>
-				<?php
-					// Upload de la photo
-					if (isset($photo)) 
-						{
-						echo "<img src=$photo style='max-height:200px;'>";
-						echo '<input type="hidden" name="photo_actuelle" value="'.($photo??'').'">';
-						}
-				?>
-				<input type="file" name="photo" id="photo"> <!-- NE PAS OUBLIER l'attribut "enctype" dans la balise <form> -->
+	<div class="cadre-formulaire">
+		<form id="formulaire" method="post" action="gestion_annonces.php?page=<?php echo $numeroPage ?>" enctype=multipart/form-data>
+			<input type="hidden" name="id" value="<?php echo $id??0 ?>">
+			<div class="form-row">
+				<div class="form-group col-md-4">
+					<div><label for="titre">Titre :</label></div>
+					<div><input style="width:100%" type="text" name="titre" id="titre" class="form-control" value="<?php echo $titre??'' ?>"></div>
+				</div>
+				<div class="form-group col-md-8">
+					<div><label for="description_courte">Description courte :</label></div>
+					<div><input style="width:100%" type="text" name="description_courte" id="description_courte" class="form-control" value="<?php echo $description_courte??'' ?>"></div>
+				</div>
 			</div>
-		</div>
-		
-		<div>
-			<div><label for="pays">Pays</label></div>
-			<div><input style="width:100%" type="text" name="pays" id="pays" value="<?php echo $pays??'' ?>"></div>
-		</div>
-		
-		<div>
-			<div><label for="ville">Ville</label></div>
-			<div><input style="width:100%" type="text" name="ville" id="ville" value="<?php echo $ville??'' ?>"></div>
-		</div>
-		
-		<div>
-			<div><label for="adresse">Adresse</label></div>
-			<div><input style="width:100%" type="text" name="adresse" id="adresse" value="<?php echo $adresse??'' ?>"></div>
-		</div>
-		<div>
-			<div><label for="code_postal">Code postal</label></div>
-			<div><input style="width:100%" type="text" name="code_postal" id="code_postal" value="<?php echo $code_postal??'' ?>"></div>
-		</div>
-
-		<?php if (estAdmin()): /* seul l'admin peut changer l'auteur d'une annonce */ ?>
-		<div>
-			<div><label for="pseudo">Membre</label></div>
-			<div><input style="width:100%" type="text" name="pseudo" id="pseudo" value="<?php echo $pseudo??$_SESSION['membre']['pseudo'] ?>"></div>
-		</div>
-		<?php endif ?>
-		
-		<div>
-			<div><label for="categorie">Categorie</label></div>
-			<div>
-				<select name="categorie">
+			<div class="form-row">
+				<div class="form-group col-md-12">
+					<div><label for="description_longue">Description longue :</label></div>
+					<div><textarea style="width:100%;height:25vh" type="text" name="description_longue" id="description_longue" class="form-control"><?php echo $description_longue??'' ?></textarea></div>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-2">
+					<div><label for="prix">Prix :</label></div>
+					<div><input style="width:100%" type="text" name="prix" id="prix" value="<?php echo $prix??'' ?>" class="form-control"></div>
+				</div>
+				<div class="form-group col-md-6">
+					<div><label for="photo">Photo :</label></div>
+					<div>
+						<?php
+							// Upload de la photo
+							if (!empty($photo)) 
+								{
+								echo "<img src=$photo style='max-height:200px;'>";
+								echo '<input type="hidden" name="photo_actuelle" value="'.($photo??'').'">';
+								}
+						?>
+						<input type="file" name="photo" id="photo" class="btn btn-secondary"> <!-- NE PAS OUBLIER l'attribut "enctype" dans la balise <form> -->
+					</div>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-6">
+					<div><label for="adresse">Adresse :</label></div>
+					<div><input style="width:100%" type="text" name="adresse" id="adresse" value="<?php echo $adresse??'' ?>" class="form-control"></div>
+				</div>
+				<div class="form-group col-md-2">
+					<div><label for="code_postal">Code postal :</label></div>
+					<div><input style="width:100%" type="text" name="code_postal" id="code_postal" value="<?php echo $code_postal??'' ?>" class="form-control"></div>
+				</div>
+				<div class="form-group col-md-2">
+					<div><label for="ville">Ville :</label></div>
+					<div><input style="width:100%" type="text" name="ville" id="ville" value="<?php echo $ville??'' ?>" class="form-control"></div>
+				</div>
+				<div class="form-group col-md-2">
+					<div><label for="pays">Pays :</label></div>
+					<div><input style="width:100%" type="text" name="pays" id="pays" value="<?php echo $pays??'' ?>" class="form-control"></div>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-6">
+					<div><label for="categorie">Catégorie :</label></div>
+					<div>
+						<select name="categorie" class="form-control">
+							<?php
+							foreach ($liste_categories as $valeur)
+								echo '<option value="'.$valeur[0].'"'.(isset($categorie)&&($valeur[0]==$categorie)?' selected':'').'>'.$valeur[0].'</option>';
+							?>
+						</select>
+					</div>
+				</div>
+			</div>
+			<?php if (estAdmin() && !isset($_GET['creation'])): /* seul l'admin peut changer l'auteur et la date d'enregistrement d'une annonce */ ?>
+			<div class="form-row">
+				<div class="form-group col-md-6">
+					<div>
+						<div><label for="pseudo">Auteur :</label></div>
+						<div><input style="width:100%" type="text" name="pseudo" id="pseudo" value="<?php echo $pseudo??$_SESSION['membre']['pseudo'] ?>" class="form-control"></div>
+					</div>
+				</div>
+				<div class="form-group col-md-6">
+					<div>
+						<div><label for="date_enregistrement">Date d'enregistrement :</label></div>
+						<div><input style="width:100%" type="text" name="date_enregistrement" id="date_enregistrement" value="<?php echo $date_enregistrement??'' ?>" class="form-control"></div>
+					</div>
+				</div>
+			</div>
+			<?php endif; ?>
+			<div class="form-row">
+				<div class="form-group col-md-1">
+				</div>
+				<div class="form-group col-md-2">
+					<button type="submit" class="btn btn-primary">&nbsp; Enregistrer &nbsp;</button>
+				</div>
+				<div class="form-group col-md-2">
 					<?php
-					foreach ($liste_categories as $valeur)
-						echo '<option value="'.$valeur[0].'"'.(isset($categorie)&&($valeur[0]==$categorie)?' selected':'').'>'.$valeur[0].'</option>';
+					if (estAdmin() && !isset($_GET['creation']))
+						echo '<a href="'.RACINE_SITE.'gestion_annonces.php?page='.$numeroPage.'" class="btn btn-secondary">&nbsp; Annuler &nbsp;</a>';
+					else
+						echo '<a href="'.RACINE_SITE.'index.php" class="btn btn-secondary">&nbsp; Annuler &nbsp;</a>';
 					?>
-				</select>
+				</div>
 			</div>
-		</div>
-		
-		<?php if (estAdmin()): /* seul l'admin peut changer la date d'une annonce */ ?>
-		<div>
-			<div><label for="date_enregistrement">Date d'enregistrement</label></div>
-			<div><input style="width:100%" type="text" name="date_enregistrement" id="date_enregistrement" value="<?php echo $date_enregistrement??'' ?>"></div>
-		</div>
-		<?php endif ?>
-		
-		<div class="mt-2"><input type="submit" value="Enregistrer"></div>
-	</form>
+		</form>
+	</div>
 <?php
 
 	} // fin if ($afficherFormulaire)

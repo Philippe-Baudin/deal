@@ -1,0 +1,38 @@
+.liens-noirs,.liens-noirs:link,.liens_noirs:visited,.liens_noirs:hover,.liens_noirs:active {
+	color:black;
+	}
+#zoom {
+	position: fixed;
+	display: flex;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: -10;
+	justify-content: center;
+	vertical-align: middle;
+	align-items: center;
+	justify-content: center;
+}
+#zoom #cadre {
+	position: relative;
+	display: flex;
+	margin: auto;
+	vertical-align: middle;
+	align-items: center;
+	justify-content: center;
+	}
+#zoom img {
+	max-width: 1px;
+	max-height: 100%;
+	height: auto;
+	transition: max-width 0.5s;
+	}
+.cadre-formulaire {
+	max-width:90vw;
+	margin:10px auto;
+	border:solid black 1px;
+	padding:10px;
+	box-shadow: 2px 2px 4px grey;
+	}
+

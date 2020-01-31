@@ -1,20 +1,21 @@
 <?php
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// index.php
-// filtre et tri de la liste des annonces à afficher
-// délégation de l'affichage de la liste à "liste_annonce.php" via des requêtes ajax
+// liste_annonces.php
+// Affichage de la liste d'annonces demandées par index.php via une requête AJAX
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once 'inc/init.php';
 
 if (empty($_POST))
 	exit ();
 
+// Les consignes envoyées par la requête AJAV
 $filtreCategorie = $_POST['filtreCategorie'] ?? '0';
 $filtreMembre    = $_POST['filtreMembre']    ?? '0';
 $filtreVille     = $_POST['filtreVille']     ?? '0';
 $filtrePrix      = $_POST['filtrePrix']      ?? '0';
 $triAccueil      = $_POST['triAccueil']      ?? '0';
 
+// Memoriser les consignes dans la session pour qu'elles survivent à de futurs changement de page
 $_SESSION['filtre']['categorie'] = $filtreCategorie;
 $_SESSION['filtre']['membre']    = $filtreMembre;
 $_SESSION['filtre']['ville']     = $filtreVille;
@@ -30,53 +31,39 @@ while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 	$listeNotes[$pseudo] = $moyenne;
 	}
 
+// Ecriture de la requête de sélection des annonces à présenter, accompagnée du tableau des marqueurs
+// --------------------------------------------------------------------------------------------------
+
+// La liste des champs voulus et des tables.
 $marqueurs = array ();
 $requete = 'SELECT a.id id, titre, photo, description_longue, prix, pseudo
             FROM annonce a
             LEFT JOIN membre ON membre_id = membre.id';
-$clauseWhere = '';
-$premiere = true;
+
+// la clause WHERE
+$clauseWhere = ' WHERE membre_id IS NOT NULL';
 if ($filtreCategorie)
 	{
-	if ($premiere)
-		$clauseWhere .= ' WHERE ';
-	else
-		$clauseWhere .= ' AND ';
-	$clauseWhere .= 'categorie_id = :categorie_id';
+	$clauseWhere .= ' AND categorie_id = :categorie_id';
 	$marqueurs [':categorie_id'] = $filtreCategorie;
-	$premiere = false;
 	}
 if ($filtreVille)
 	{
-	if ($premiere)
-		$clauseWhere .= ' WHERE ';
-	else
-		$clauseWhere .= ' AND ';
-	$clauseWhere .= 'ville = :ville';
+	$clauseWhere .= ' AND ville = :ville';
 	$marqueurs [':ville'] = $filtreVille;
-	$premiere = false;
 	}
 if ($filtreMembre)
 	{
-	if ($premiere)
-		$clauseWhere .= ' WHERE ';
-	else
-		$clauseWhere .= ' AND ';
-	$clauseWhere .= 'pseudo = :pseudo';
+	$clauseWhere .= ' AND pseudo = :pseudo';
 	$marqueurs [':pseudo'] = $filtreMembre;
-	$premiere = false;
 	}
 if ($filtrePrix && $filtrePrix < 1e7)
 	{
-	if ($premiere)
-		$clauseWhere .= ' WHERE ';
-	else
-		$clauseWhere .= ' AND ';
-	$clauseWhere .= 'prix <= :prix';
+	$clauseWhere .= ' AND prix <= :prix';
 	$marqueurs [':prix'] = $filtrePrix;
-	$premiere = false;
 	}
 
+// la clause ORDER BY
 switch ($triAccueil)
 	{
 	case 0  : $clauseOrderBy = ' ORDER BY a.date_enregistrement DESC'; break;
@@ -118,7 +105,7 @@ while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 		{
 		echo '<div class="col-sm-4">';
 		echo     '<a href="fiche_annonce.php?id='.$id.'">';
-		echo         '<img src='.$photo.' style="max-width:100%">';
+		echo         '<img src='.$photo.' style="max-width:100%; max-height:150px">';
 		echo     '</a>';
 		echo '</div>'; // "col-sm-4"
 		}
@@ -136,11 +123,6 @@ while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 	if (isset($listeNotes[$pseudo])) echo '<p>'.noteEnEtoiles($listeNotes[$pseudo]).'</p>';
 	echo         '</div>';
 	echo     '</div>';
-	/*
-	echo     '<div class="col-sm-7">';
-	echo          '<p> '.(isset ($listeNotes[$pseudo]) ? (' note : '.sprintf ("%.1f", $listeNotes[$pseudo])) : '').'</p>';
-	echo      '</div>';
-	*/
 	echo      '<div class="col-sm">';
 	echo          "<h4>$prix €</h4>";
 	echo      '</div>';

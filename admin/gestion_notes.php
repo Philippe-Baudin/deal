@@ -19,8 +19,8 @@ if (!estAdmin())
 if (!empty($_POST))
 	{
 	extract ($_POST);
-	if (!isset ($note) || !is_numeric($note) || $note*1 > 20)
-		$contenu .= '<div class="alert alert-danger">La note doit être un nombre entre 0 et 20.</div>';
+	if (!isset ($note) || !is_numeric($note) || $note*1 > 5)
+		$contenu .= '<div class="alert alert-danger">La note doit être un nombre entre 0 et 5.</div>';
 
 	if (!isset ($avis) || strlen($avis) < 3)
 		$contenu .= '<div class="alert alert-danger">L\'avis doit comporter au moins 3 caractères.</div>';
@@ -103,14 +103,17 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retourn
 	{
 	extract ($ligne);
 	$contenu .= '<tr>';
-	$contenu .= '    <th scope="row">' . $id . '</th>';
-	$contenu .= '    <td>' . noteEnEtoiles($note) . '</td>';
-	$contenu .= '    <td>' . $avis . '</td>';
-	$contenu .= '    <td>' . $auteur . '</td>';
-	$contenu .= '    <td>' . $cible . '</td>';
-	$contenu .= '    <td>' . $date_enregistrement . '</td>';
+	$contenu .=     '<th scope="row">' . $id . '</th>';
+	$contenu .=     '<td>' . noteEnEtoiles($note) . '</td>';
+	$contenu .=     '<td>' . $avis . '</td>';
+	$contenu .=     '<td>' . $auteur . '</td>';
+	$contenu .=     '<td>' . $cible . '</td>';
+	$contenu .=     '<td>' . $date_enregistrement . '</td>';
 	// Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
-	$contenu .= '<td><a href="?modification='.$ligne['id'].'#formulaire">Modifier</a>'."\n".'<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer cette note ?\')">Supprimer</a></td>';
+	$contenu .=     '<td>';
+	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="liens-noirs">'.MODIFIER.'</a>'."\n";
+	$contenu .=         '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer cette note ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+	$contenu .=     '</td>';
 	$contenu .= '</tr>';
 	}
 $contenu .=   '</table>';
@@ -132,37 +135,49 @@ if ($afficherFormulaire)
 
 	//3. Formulaire de création/modification des notes
 ?>
-	<form id="formulaire" method="post" action="gestion_notes.php" >
-		<div>
-			<input type="hidden" name="id" value="<?php echo $id??0 ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
+	<div class="cadre-formulaire">
+	<form id="formulaire" method="post" action="gestion_notes.php">
+		<input type="hidden" name="id" value="<?php echo $id ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
+		<div class="form-row">
+			<div class="form-group col-md-3">
+				<label for="note">Note :</label>
+				<select id="note" name="note">
+					<option value="0" selected>0 &star;&star;&star;&star;&star;</option>
+					<option value="1" <?php echo (isset($note)&&$note=='1')?'selected':'' ?>>1 &starf;&star;&star;&star;&star;</option>
+					<option value="2" <?php echo (isset($note)&&$note=='2')?'selected':'' ?>>2 &starf;&starf;&star;&star;&star;</option>
+					<option value="3" <?php echo (isset($note)&&$note=='3')?'selected':'' ?>>3 &starf;&starf;&starf;&star;&star;</option>
+					<option value="4" <?php echo (isset($note)&&$note=='4')?'selected':'' ?>>4 &starf;&starf;&starf;&starf;&star;</option>
+					<option value="5" <?php echo (isset($note)&&$note=='5')?'selected':'' ?>>5 &starf;&starf;&starf;&starf;&starf;</option>
+				</select>
+			</div>
 		</div>
-
-		<div>
-			<div><label for="note">Note</label></div>
-			<div><input type="text" name="note" id="note" value="<?php echo $note??'' ?>"></div>
+		<div class="form-row">
+			<div class="form-group col-md-12">
+				<label for="avis">Avis :</label>
+				<textarea style="height:20vh" type="text" name="avis" id="avis" class="form-control"><?php echo $avis ?></textarea>
+			</div>
 		</div>
-
-		<div>
-			<div><label for="note">Avis</label></div>
-			<div><textarea style="width:80vw;height:20vh" type="text" name="avis" id="note"><?php echo $avis ?></textarea>
+		<div class="form-row">
+			<div class="form-group col-md-3">
+				<label for="auteur">Auteur de l'avis :</label>
+				<input type="text" name="cible" id="cible" class="form-control" value="<?php echo $auteur??'' ?>">
+			</div>
+			<div class="form-group col-md-3">
+				<label for="auteur">Membre concerné :</label>
+				<input type="text" name="auteur" id="auteur" class="form-control" value="<?php echo $cible??'' ?>">
+			</div>
+			<div class="form-group col-md-6">
+				<label for="auteur">Date enregistrement :</label>
+				<input type="text" name="date_enregistrement" id="date_enregistrement" class="form-control" value="<?php echo $date_enregistrement??'' ?>">
+			</div>
 		</div>
-		
-		<div>
-			<div><label for="pseudo">Auteur</label></div>
-			<div><input type="text" name="auteur" id="auteur" value="<?php echo $auteur??'' ?>"></div>
+		<div class="form-row">
+			<div class="form-group col-md-4">
+			</div>
+			<div class="form-group col-md-6">
+				<button type="submit" class="btn btn-primary">&nbsp; Enregistrer &nbsp;</button>
+			</div>
 		</div>
-
-		<div>
-			<div><label for="mots_cles">Membre</label></div>
-			<div><input type="text" name="cible" id="cible" value="<?php echo $cible??'' ?>"></div>
-		</div>
-
-		<div>
-			<div><label for="mots_cles">Date Enregistrement</label></div>
-			<div><input type="text" name="date_enregistrement" id="date_enregistrement" value="<?php echo $date_enregistrement??'' ?>"></div>
-		</div>
-
-		<div class="mt-2"><input type="submit" value="Enregistrer"></div>
 	</form>
 <?php
 

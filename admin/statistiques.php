@@ -80,7 +80,7 @@ $contenu .= '</div>'; // padding
 
 require_once '../inc/header.php';
 
-//2. Navigation entre les pages d'administration
+// Navigation entre les pages d'administration
 navigation_admin ('Statistiques');
 
 echo $contenu;

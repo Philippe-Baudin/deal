@@ -22,7 +22,12 @@ session_start ();
 define('RACINE_SITE', '/evaluation/'); // dossier dans lequel se situe le site (dans localhost). Sert à transformer les chemins relatifs en absolus pour les inclusions à différents niveaux.
 
 // Définition du nombre d'items par page dans le tableau des annonces
-define('taillePage', 6);
+define('TAILLE_PAGE', 6);
+
+// Définition de quelques icônes FontAwesome
+define('LOUPE', '<i class="fa fa-search liens-noirs" aria-hidden="true"></i>');
+define('POUBELLE', '<i class="fa fa-trash-o liens-noirs" aria-hidden="true"></i>');
+define ('MODIFIER', '<i class="fa fa-pencil-square-o liens-noirs" aria-hidden="true"></i>');
 
 // Quelques variables pour afficher du contenu html
 $contenu = '';

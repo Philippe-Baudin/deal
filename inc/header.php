@@ -32,6 +32,9 @@
 		integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
 		crossorigin="anonymous"
 	>
+	<link rel="stylesheet" href="<?php echo RACINE_SITE ?>css/style.css">
+
+	<!--<link rel="stylesheet" href="<?php echo RACINE_SITE ?>css/style.css">-->
 </head>
 <body>
 
@@ -82,6 +85,6 @@
 	</nav>
 
 	<!-- Contenu de la page -->
-	<div class="container" style="min-height:80vh;"> <!-- in fine, il faudrait mettre le style dans un fichier CSS -->
+	<div class="container" style="min-height:80vh;width:100%;max-width:100vw"> <!-- in fine, il faudrait mettre le style dans un fichier CSS -->
 		<div class="row">
 			<div class="col-12">

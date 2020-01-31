@@ -56,6 +56,10 @@ if (!empty($_POST))
 // Suppression d'un membre
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
 	{
+	$resultat = executerRequete ("UPDATE annonce SET  membre_id = NULL WHERE membre_id = :id", array (':id' => $_GET['suppression']));
+	$resultat = executerRequete ("UPDATE commentaire SET  membre_id = NULL WHERE membre_id = :id", array (':id' => $_GET['suppression']));
+	$resultat = executerRequete ("UPDATE note SET  membre_id1 = NULL WHERE membre_id1 = :id", array (':id' => $_GET['suppression']));
+	$resultat = executerRequete ("DELETE FROM note WHERE membre_id2 = :id", array (':id' => $_GET['suppression']));
 	$resultat = executerRequete ("DELETE FROM membre WHERE id = :id", array (':id' => $_GET['suppression']));
 	if ($resultat->rowCount() == 1)
 		$contenu .= '<div class="alert alert-success">Le membre a bien été supprimé.</div>';
@@ -73,6 +77,12 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 		$membre_courant = $resultat->fetch (PDO::FETCH_ASSOC);
 		}
 	}
+
+// Compter les annonces de chaque membre
+$nombreAnnonces = array ();
+$resultat = executerRequete ("SELECT membre_id, COUNT(id) nb from annonce group by membre_id");
+while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
+	$nombreAnnonces[$ligne['membre_id']] = $ligne['nb'];
 
 // Affichage des membres dans le back-office :
 $resultat = executerRequete ("SELECT * FROM membre");
@@ -92,21 +102,35 @@ $contenu .=              '<th scope="col">Date d\'enregistrement</th>';
 $contenu .=              '<th scope="col">Action</th>';
 $contenu .=          '</tr>';
 $contenu .=      '</thead>';
-while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retournée par la requête
+while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
 	{
 	extract ($ligne);
 	$contenu .= '<tr>';
-	$contenu .= '<th scope="row">' . $id . '</th>';
-	$contenu .= '<td>' . $pseudo . '</td>';
-	$contenu .= '<td>' . $civilite . '</td>';
-	$contenu .= '<td>' . $nom . '</td>';
-	$contenu .= '<td>' . $prenom . '</td>';
-	$contenu .= '<td>' . $email . '</td>';
-	$contenu .= '<td>' . $telephone . '</td>';
-	$contenu .= '<td>' . $role . '</td>';
-	$contenu .= '<td>' . $date_enregistrement . '</td>';
+	$contenu .=     '<th scope="row">' . $id . '</th>';
+	$contenu .=     '<td>' . $pseudo . '</td>';
+	$contenu .=     '<td>' . $civilite . '</td>';
+	$contenu .=     '<td>' . $nom . '</td>';
+	$contenu .=     '<td>' . $prenom . '</td>';
+	$contenu .=     '<td>' . $email . '</td>';
+	$contenu .=     '<td>' . $telephone . '</td>';
+	$contenu .=     '<td>' . $role . '</td>';
+	$contenu .=     '<td>' . $date_enregistrement . '</td>';
 	// Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
-	$contenu .= '<td><a href="?modification='.$ligne['id'].'#formulaire">Modifier</a>'."\n".'<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer ce membre?\')">Supprimer</a></td>';
+	$contenu .=     '<td>';
+	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="liens-noirs">'.MODIFIER.'</a>'."\n";
+	switch ($nombreAnnonces[$id]??'0')
+		{
+		case '0':
+			$contenu .= '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes-vous certain de vouloir supprimer le compte de '.$pseudo.' ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+			break;
+		case '1':
+			$contenu .= '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\''.$pseudo.' a déposé une annonce qui deviendra inaccessible aux utilisateurs si vous supprimez son compte. Etes-vous certain de vouloir supprimer son compte ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+			break;
+		default :
+			$contenu .= '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\''.$pseudo.' a déposé '.($nombreAnnonces[$id]??'0').' annonces. Si vous supprimez son compte, elles deviendront inaccessibles aux utilisateurs. Etes-vous certain de vouloir supprimer son compte ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+			break;
+		}
+	$contenu .=     '</td>';
 	$contenu .= '</tr>';
 	}
 $contenu .=   '</table>';
@@ -122,69 +146,105 @@ echo $contenu;
 if ($afficherFormulaire)
 	{
 	extract ($membre_courant);
-	//3. Formulaire de modification de membres
+	// Formulaire de modification de membres
 	?>
 	<br>
-	<form id="formulaire" method="post" action="gestion_membres.php">
-		<input type="hidden" name="id" value="<?php echo $id ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="pseudo">Pseudo</label>
-				<input type="text" name="pseudo" id="pseudo" class="form-control" value="<?php echo $pseudo ?>">
-			</div>
-			<div class="form-group col-md-6">
-				<label for="email">email</label>
-				<input type="text" name="email" id="email" class="form-control" value="<?php echo $email ?>">
-			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="mdp">Mot de passe (inchangé si le champ reste vide)</label>
-				<input type="password" name="mdp" id="mdp" class="form-control">
-			</div>
-			<div class="form-group col-md-6">
-				<label for="telephone">Téléphone</label>
-				<input type="text" name="telephone" id="telephone" class="form-control" value="<?php echo $telephone ?>">
-			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="nom">Nom</label>
-				<input type="text" name="nom" id="nom" class="form-control" value="<?php echo $nom ?>">
-			</div>
-			<div class="form-group col-md-6">
-				<label for="civilite">Civilité</label>
-				<select name="civilite" class="form-control">
-					<option value="M." selected>M.</option>
-					<option value="Mme"<?php if (isset($civilite) && $civilite=='Mme') echo 'selected'; ?>>Mme</option>
-				</select>
-			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-md-6">
-				<label for="prenom">Prénom</label>
-				<input type="text" name="prenom" id="prenom" class="form-control" value="<?php echo $prenom ?>">
-			</div>
-			<?php
-			// Un admin n'a pas le droit de s'enlever à lui même le rôle admin. Sinon, on risque de ne plus avoir d'admin du tout ...
-			//XXX ça ne suffit pas : on peut avoir deux pages ouvertes sur deux admin différents
-			//XXX La vraie condition, c'est qu'on n'a pas le droit de supprier le rôle 'admin' au dernier admin
-			//XXX C'est donc pas ici que ça se gère, mais en requête de suppremssion ou modif d'un membre
-			if ($id == $_SESSION['membre']['id']) :
-				?>
-				<input type="hidden" name="role" value="admin">
-			<?php else: ?>
+	<div class="cadre-formulaire">
+		<form id="formulaire" method="post" action="gestion_membres.php">
+			<input type="hidden" name="id" value="<?php echo $id ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
+			<div class="form-row">
 				<div class="form-group col-md-6">
-					<label for="role">Statut</label>
-					<select name="role" class="form-control">
-						<option value="user" selected>user</option>
-						<option value="admin"<?php if (isset($role) && $role=='admin') echo 'selected'; ?>>admin</option>
+					<label for="pseudo">Pseudo</label>
+					<input type="text" name="pseudo" id="pseudo" class="form-control" value="<?php echo $pseudo ?>">
+				</div>
+				<div class="form-group col-md-6">
+					<label for="email">email</label>
+					<input type="text" name="email" id="email" class="form-control" value="<?php echo $email ?>">
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-6">
+					<label for="mdp">Mot de passe (inchangé si le champ reste vide)</label>
+					<input type="password" name="mdp" id="mdp" class="form-control">
+				</div>
+				<div class="form-group col-md-6">
+					<label for="telephone">Téléphone</label>
+					<input type="text" name="telephone" id="telephone" class="form-control" value="<?php echo $telephone ?>">
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-6">
+					<label for="nom">Nom</label>
+					<input type="text" name="nom" id="nom" class="form-control" value="<?php echo $nom ?>">
+				</div>
+				<div class="form-group col-md-6">
+					<label for="civilite">Civilité</label>
+					<select name="civilite" class="form-control">
+						<option value="M." selected>M.</option>
+						<option value="Mme"<?php if (isset($civilite) && $civilite=='Mme') echo 'selected'; ?>>Mme</option>
 					</select>
 				</div>
-			<?php endif ?>
-		</div>
-		<button type="submit" class="btn btn-primary">Enregistrer</button>
-	</form>
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-6">
+					<label for="prenom">Prénom</label>
+					<input type="text" name="prenom" id="prenom" class="form-control" value="<?php echo $prenom ?>">
+				</div>
+				<?php
+				// Un admin n'a pas le droit de s'enlever à lui même le rôle admin. Sinon, on risque de ne plus avoir d'admin du tout ...
+				//XXX ça ne suffit pas : on peut avoir deux pages ouvertes sur deux admin différents
+				//XXX La vraie condition, c'est qu'on n'a pas le droit de supprimer le rôle 'admin' au dernier admin
+				//XXX C'est donc pas ici que ça se gère, mais en requête de suppression ou modif d'un membre
+				if ($id == $_SESSION['membre']['id']) :
+					?>
+					<input type="hidden" name="role" value="admin">
+				<?php else: ?>
+					<div class="form-group col-md-6">
+						<label for="role">Statut</label>
+						<select name="role" class="form-control">
+							<option value="user" selected>user</option>
+							<option value="admin"<?php if (isset($role) && $role=='admin') echo 'selected'; ?>>admin</option>
+						</select>
+					</div>
+				<?php endif ?>
+			</div>
+			<button type="submit" class="btn btn-primary">Enregistrer</button>
+		</form>
+	</div>
+
+	<!-- Modale de confirmation de la suppression d'un membre -->
+	<!--
+   <div class="modal fade" id="modaleSuppressionMembre" tabindex="-1" role="dialog" aria-labelledby="modaleSuppressionMembreTitle" aria-hidden="true">
+     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+       <div class="modal-content">
+         <div class="modal-header">
+           <h5 class="modal-title" id="exampleModalLongTitle">Suppression d'un membre</h5>
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+             <span aria-hidden="true">&times;</span>
+           </button>
+         </div>
+         <div class="modal-body">
+			<p>
+           <form method="post" action="">
+             <input type="hidden" name="id" value="'.$id.'">
+             <div class="form-group">
+               <label for="commentaire" class="col-form-label">Postez un commentaire pour poser une question ou obtenir des précisions sur le produit ou le service proposé :</label>
+               <textarea class="form-control" id="commentaire" name="commentaire" rows="5"></textarea>
+             </div>
+             <div class="row">
+               <div class="col-sm-2">
+                 <button type="submit" class="btn btn-primary">Envoyer</button>
+               </div>
+               <div class="col-sm-2">
+                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+               </div>
+             </div>
+           </form>
+         </div>
+       </div>
+     </div>
+   </div>
+-->
 	<?php
 	}
 

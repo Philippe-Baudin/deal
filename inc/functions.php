@@ -75,9 +75,9 @@ function navigation_admin ($titre)
 		{
 		echo '<div style="text-align:center;">';
 		if ($titre == 'Statistiques')
-			echo '<h1 classe="mt-4" style="pading:auto;">'.$titre.'</h1>';
+			echo '<h1 classe="mt-4">'.$titre.'</h1>';
 		else
-			echo '<h1 classe="mt-4" style="padding:auto;">Gestion des '.$titre.'</h1>';
+			echo '<h1 classe="mt-4">Gestion des '.$titre.'</h1>';
 		echo '</div>';
 		echo '<ul class="nav nav-tabs"> <!-- onglets -->';
 		echo '	<li><a class="nav-link'.($titre=='Annonces'?' active':'').'" href="'.RACINE_SITE.'gestion_annonces.php">Annonces</a></li>';

@@ -105,13 +105,16 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retourn
 	{
 	extract ($ligne);
 	$contenu .= '<tr>';
-	$contenu .= '<th scope="row">' . $id . '</th>';
-	$contenu .= '<td>' . $pseudo . '</td>';
-	$contenu .= '<td>' . $annonce . '</td>';
-	$contenu .= '<td>' . $commentaire . '</td>';
-	$contenu .= '<td>' . $date_enregistrement . '</td>';
-	// Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
-	$contenu .= '<td><a href="?modification='.$ligne['id'].'#formulaire">Modifier</a>'."\n".'<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer ce commentaire ?\')">Supprimer</a></td>';
+	$contenu .=     '<th scope="row">' . $id . '</th>';
+	$contenu .=     '<td>' . $pseudo . '</td>';
+	$contenu .=     '<td>' . $annonce . '</td>';
+	$contenu .=     '<td>' . $commentaire . '</td>';
+	$contenu .=     '<td>' . $date_enregistrement . '</td>';
+	                    // Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
+	$contenu .=     '<td>';
+	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="liens-noirs">'.MODIFIER.'</a>'."\n";
+	$contenu .=         '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes-vous certain de vouloir supprimer ce commentaire ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+	$contenu .=     '</td>';
 	$contenu .= '</tr>';
 	}
 $contenu .=   '</table>';

@@ -77,7 +77,7 @@ if (!empty($auteur))
 	                                    DATE_FORMAT(commentaire.date_enregistrement,'%d/%m/%Y') date
 	                             FROM commentaire, membre
 	                             WHERE membre.id = membre_id AND annonce_id = :id
-	                             ORDER BY commentaire.date_enregistrement DESC", array(':id'=>$id));
+	                             ORDER BY commentaire.date_enregistrement", array(':id'=>$id));
 	if ($requete->rowCount() > 0)
 		$commentaires = $requete->fetchAll (PDO::FETCH_ASSOC);
 	}
@@ -88,14 +88,15 @@ if (!empty($auteur))
 (- avec la meilleure coïncidence de mots)
 - aléatoires
 */
-$requete = executerRequete ("SELECT * FROM annonce WHERE categorie_id = :categorie_id AND id != :id ORDER BY RAND() LIMIT 4",
+define('NOMBRE_MAXI_SUGGESTIONS', 4);
+$requete = executerRequete ("SELECT * FROM annonce WHERE categorie_id = :categorie_id AND id != :id ORDER BY RAND() LIMIT ".NOMBRE_MAXI_SUGGESTIONS,
                             array ('categorie_id' => $id_categorie, ':id' => $id));
 $nombreSuggestions = $requete->rowCount();
 if ($nombreSuggestions == 0)
-	{
-	$requete = executerRequete ("SELECT * FROM annonce WHERE id != :id ORDER BY RAND() LIMIT 4", array (':id' => $id));
-	$nombreSuggestions = $requete->rowCount();
-	}
+  {
+  $requete = executerRequete ("SELECT * FROM annonce WHERE id != :id ORDER BY RAND() LIMIT ".NOMBRE_MAXI_SUGGESTIONS, array (':id' => $id));
+  $nombreSuggestions = $requete->rowCount();
+  }
 if ($nombreSuggestions > 0)
 	{
 	$suggestion = $requete->fetchAll (PDO::FETCH_ASSOC);
@@ -122,7 +123,7 @@ $contenu .= '<div class="row">';
 if (!empty($photo))
 	{
 	$contenu .= '<div class="col-sm-4">';
-	$contenu .=     '<img src='.$photo.' style="max-width:100%">';
+	$contenu .=     '<img src='.$photo.' class="zoomable" style="max-width:100%; max-height:300px">';
 	$contenu .= '</div>';
 	}
 $contenu .=     '<div class="col-sm">';
@@ -198,11 +199,18 @@ for ($i=0; $i<$nombreSuggestions; $i++)
 $contenu .= '</div>';
 $contenu .= '<hr>';
 $contenu .= '<div class="row">';
-$contenu .= '<div class="col-sm-9">';
+if (estAdmin())
+  $contenu .= '<div class="col-sm-7">';
+else
+  $contenu .= '<div class="col-sm-9">';
 if (estConnecte())
 	$contenu .= 'Deposer <a data-toggle="modal" href="#modaleCommentaire">un commentaire sur l\'annonce</a> ou <a data-toggle="modal" href="#modaleAvis">un avis sur '.$pseudo.'</a>';
 else
 	$contenu .= 'Deposer <a data-toggle="modal" href="#modaleConnexion">un commentaire sur l\'annonce</a> ou <a data-toggle="modal" href="#modaleConnexion">un avis sur '.$pseudo.'</a>';
+$contenu .= '</div>';
+$contenu .= '<div class="col-sm-2">';
+if (estAdmin())
+  $contenu .= '<a href="gestion_annonces.php?modification='.$id.'#formulaire">Modifier</a>';
 $contenu .= '</div>';
 $contenu .= '<div class="col-sm">';
 $contenu .= '<a href="index.php">Retour vers les annonces</a>';
@@ -286,14 +294,14 @@ if (estConnecte())
   	$contenu .=             '<div class="input-group-prepend">';
   	$contenu .=               '<label class="input-group-text" for="note">Note</label>';
   	$contenu .=             '</div>';
-  	$contenu .=             '<select id="note" name="note">';
-  	$contenu .=               '<option>0</option>';
-  	$contenu .=               '<option>1</option>';
-  	$contenu .=               '<option>2</option>';
-  	$contenu .=               '<option>3</option>';
-  	$contenu .=               '<option>4</option>';
-  	$contenu .=               '<option selected>5</option>';
-  	$contenu .=             '</select>';
+    $contenu .=             '<select id="note" name="note">';
+    $contenu .=               '<option value="0">0 &star;&star;&star;&star;&star;</option>';
+    $contenu .=               '<option value="1">1 &starf;&star;&star;&star;&star;</option>';
+    $contenu .=               '<option value="2">2 &starf;&starf;&star;&star;&star;</option>';
+    $contenu .=               '<option value="3">3 &starf;&starf;&starf;&star;&star;</option>';
+    $contenu .=               '<option value="4">4 &starf;&starf;&starf;&starf;&star;</option>';
+    $contenu .=               '<option value="5" selected>5 &starf;&starf;&starf;&starf;&starf;</option>';
+    $contenu .=               '</select>';
   	$contenu .=           '</div>';
   	$contenu .=           '<div class="row">';
   	$contenu .=             '<div class="col-sm-2">';
@@ -346,8 +354,19 @@ if (estConnecte())
 require_once 'inc/header.php';
 require_once 'connexion_modale.php';
 
+?>
+<!-- machinerie de zoom des images -->
+<div id="zoom">
+  <div id="cadre">
+    <img src="img/pixel.gif" alt="">
+  </div>
+</div>
+<?php
 
 echo $contenu;
 
 require_once 'inc/footer.php';
+?>
+<!-- script de zoom des images -->
+<script src="js/zoom.js"></script>
 

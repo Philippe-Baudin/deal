@@ -44,9 +44,10 @@ $resultat = executerRequete ("SELECT annonce.id id_annonce,
                                      pseudo,
                                      categorie.titre categorie,
                                      annonce.date_enregistrement date_enregistrement
-                              FROM annonce, categorie, membre
-                              WHERE membre_id=membre.id AND categorie_id=categorie.id
-                              ORDER BY ".$tri." ".$sens." LIMIT ".(taillePage*$page).','.taillePage);
+                              FROM annonce
+                              INNER JOIN categorie ON annonce.categorie_id=categorie.id
+                              LEFT JOIN membre ON annonce.membre_id=membre.id
+                              ORDER BY ".$tri." ".$sens." LIMIT ".(TAILLE_PAGE*$page).','.TAILLE_PAGE);
 
 // Affichage du tableau
 ?>
@@ -76,29 +77,31 @@ $resultat = executerRequete ("SELECT annonce.id id_annonce,
 		$page ++;
 
 		// pour chaque ligne retournée par la requête, une ligne de tableau
+		define ('NOMBRE_CARACTERES_MAX', 12);
 		while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
 			{
 			extract ($ligne);
-			if (strlen ($description_courte) > 20) $description_courte = mb_substr($description_courte, 0, 20, 'UTF-8').'...';
-			if (strlen ($description_longue) > 20) $description_longue = mb_substr($description_longue, 0, 20, 'UTF-8').'...';
-			echo '<tr>';
+			if (strlen ($description_courte) > NOMBRE_CARACTERES_MAX+3) $description_courte = mb_substr($description_courte, 0, NOMBRE_CARACTERES_MAX, 'UTF-8').'...';
+			if (strlen ($description_longue) > NOMBRE_CARACTERES_MAX+3) $description_longue = mb_substr($description_longue, 0, NOMBRE_CARACTERES_MAX, 'UTF-8').'...';
+			if (strlen ($adresse)            > NOMBRE_CARACTERES_MAX+3) $adresse            = mb_substr($adresse,            0, NOMBRE_CARACTERES_MAX, 'UTF-8').'...';
+			echo '<tr style="vertical-align:text-top;">';
 			echo '    <th scope="row">' . $id_annonce . '</th>';
 			echo '    <td>' . $titre . '</td>';
 			echo '    <td>' . $description_courte . '</td>';
 			echo '    <td>' . $description_longue . '</td>';
 			echo '    <td>' . sprintf("%.2f €", $prix) . '</td>';
-			echo '    <td><img src="' . $photo . '" style="width:100%; height:auto" ></td>';
+			echo '    <td><img src="' . $photo . '" style="width:100%; height:auto; max-height:120px;" ></td>';
 			echo '    <td>' . $pays . '</td>';
 			echo '    <td>' . $ville . '</td>';
 			echo '    <td>' . $adresse . '</td>';
 			echo '    <td>' . $code_postal . '</td>';
-			echo '    <td>' . $pseudo . '</td>';
+			echo '    <td>' . (($pseudo=='NULL')?'':$pseudo) . '</td>';
 			echo '    <td>' . $categorie . '</td>';
 			echo '    <td>' . $date_enregistrement . '</td>';
 			echo '    <td>';
-			echo '        <a href="fiche_annonce.php?id='.$ligne['id_annonce'].'">Voir</a>';
-			echo '        <a href="?modification='.$ligne['id_annonce'].'&page='.$page.'#formulaire" ">Modifier</a>';
-			echo '        <a href="?suppression='.$ligne['id_annonce'].'&page='.$page.'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer cette annonce ?\')">Supprimer</a>';
+			echo '        <a href="fiche_annonce.php?id='.$ligne['id_annonce'].'" class="liens-noirs">'.LOUPE.'</a>';
+			echo '        <a href="?modification='.$ligne['id_annonce'].'&page='.$page.'#formulaire"  class="liens-noirs">'.MODIFIER.'</a>';
+			echo '        <a href="?suppression='.$ligne['id_annonce'].'&page='.$page.'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer cette annonce ?\')" class="liens-noirs">'.POUBELLE.'</a>';
 			echo '    </td>';
 			echo '</tr>';
 			}

@@ -59,7 +59,6 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
 
 //6. Affichage du tableau des catégories : 
 $resultat = executerRequete ("SELECT * FROM categorie");
-$contenu .='<div>Nombre de catégories : ' . $resultat->rowCount() . '</div>';
 $contenu .='<div class="table-responsive">';
 $contenu .=   '<table class="table">';
 $contenu .=      '<thead class="thead-dark">';
@@ -67,6 +66,7 @@ $contenu .=          '<tr>';
 $contenu .=              '<th>Id</th>';
 $contenu .=              '<th>Titre</th>';
 $contenu .=              '<th>Mots-Clés</th>';
+$contenu .=              '<th>Nombre d\'annonces</th>';
 $contenu .=              '<th>Action</th>';
 $contenu .=          '</tr>';
 $contenu .=      '</thead>';
@@ -77,14 +77,15 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retourn
 	$contenu .= '<th scope="row">' . $id . '</th>';
 	$contenu .= '<td>' . $titre . '</td>';
 	$contenu .= '<td>' . $mots_cles . '</td>';
+	$contenu .= '<td>' . 	((isset($nombreAnnonces[$id]))?$nombreAnnonces[$id]:0) . '</td>';
 	// Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
 	$contenu .= '<td>';
-	$contenu .= '<a href="?modification='.$ligne['id'].'#formulaire">Modifier</a> ';
+	$contenu .= '<a href="?modification='.$ligne['id'].'#formulaire" class="liens-noirs">'.MODIFIER.'</a> ';
 	$contenu .= '<a href="?suppression='.$ligne['id'].'" ';
 	if (isset($nombreAnnonces[$id]))
-		$contenu .= 'onclick="alert(\'Il y a '.$nombreAnnonces[$id].' annonces pour cette catégorie. Vous ne pouvez pas la supprimer.\'); return false;">Supprimer</a>';
+		$contenu .= 'onclick="alert(\'Il y a '.$nombreAnnonces[$id].' annonces pour cette catégorie. Vous ne pouvez pas la supprimer.\'); return false;" class="liens-noirs">'.POUBELLE.'</a>';
 	else
-		$contenu .= 'onclick="return confirm(\'Etes vous certain de vouloir supprimer cette catégorie ?\')">Supprimer</a>';
+		$contenu .= 'onclick="return confirm(\'Etes vous certain de vouloir supprimer cette catégorie ?\')" class="liens-noirs">'.POUBELLE.'</a>';
 	$contenu .= '</td>';
 	$contenu .= '</tr>';
 	}
@@ -104,23 +105,31 @@ isset ($categorie_courante) && extract ($categorie_courante);
 
 //3. Formulaire de création/modification des catégories
 ?>
-<form id="formulaire" method="post" action="gestion_categories.php" >
-	<div>
-		<input type="hidden" name="id" value="<?php echo $id??0 ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
-	</div>
-
-	<div>
-		<div><label for="titre">Titre</label></div>
-		<div><input type="text" name="titre" id="titre" value="<?php echo $titre??'' ?>"></div>
-	</div>
-
-	<div>
-		<div><label for="mots_cles">Mots-Clés</label></div>
-		<div><input type="text" name="mots_cles" id="mots_cles" value="<?php echo $mots_cles??'' ?>"></div>
-	</div>
-
-	<div class="mt-2"><input type="submit" value="Enregistrer"></div>
-</form>
+<br>
+<div class="cadre-formulaire">
+	<form id="formulaire" method="post" action="gestion_categories.php">
+		<input type="hidden" name="id" value="<?php echo $id ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
+		<div class="form-row">
+			<div class="form-group col-md-1">
+			</div>
+			<div class="form-group col-md-3">
+				<label for="titre">Titre :</label>
+				<input type="text" name="titre" id="titre" class="form-control" value="<?php echo $titre??'' ?>">
+			</div>
+			<div class="form-group col-md-6">
+				<label for="email">Mots-Clés :</label>
+				<input type="text" name="mots_cles" id="mots_cles" class="form-control" value="<?php echo $mots_cles??'' ?>">
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="form-group col-md-4">
+			</div>
+			<div class="form-group col-md-6">
+				<button type="submit" class="btn btn-primary">&nbsp; Enregistrer &nbsp;</button>
+			</div>
+		</div>
+	</form>
+</div>
 <?php
 
 require_once '../inc/footer.php';
