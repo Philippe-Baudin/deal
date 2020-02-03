@@ -153,22 +153,7 @@ $contenu .= '</div>';
 // Header standard
 // ---------------
 require_once 'inc/header.php';
-require_once 'connexion_modale.php';
-require_once 'inscription_modale.php';
-
-// Affichage du contenu qu'on vient de construire
-// ----------------------------------------------
-if (!empty($messageInscription))
-	echo '<script>$(document).ready(function(){$("#modaleInscription").modal("show");});</script>';
-if (!empty($messageConnexion))
-	echo '<script>$(document).ready(function(){$("#modaleConnexion").modal("show");});</script>';
-
-echo $contenu;
 ?>
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<!-- Un peu de javaScript, pour envoyer les requêtes AJAX correspondant aux filtres et tri.  -->
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <script>
 	$(function(){ // document ready
 
@@ -197,6 +182,11 @@ echo $contenu;
 				$('#nombre-annonces').html(htmlNombreAnnonces);
 				$('#liste-annonces').html(contenu);
 
+				$('.page-item').on('click', 'a', function(e){
+					pageAccueil = e.target.id.substr(5, 1);
+					requeteAjax ();
+				});
+
 				}
 
 			// Emission de la requête AJAX
@@ -212,14 +202,17 @@ echo $contenu;
 		// listeners sur les différents select
 		$('select#categorie option').click(e=>{
 			filtreCategorie = e.target.value;
+			pageAccueil = 0;
 			requeteAjax ();
 		});
 		$('select#ville option').click(e=>{
 			filtreVille = e.target.value;
+			pageAccueil = 0;
 			requeteAjax ();
 		});
 		$('select#membre option').click(e=>{
 			filtreMembre = e.target.value;
+			pageAccueil = 0;
 			requeteAjax ();
 		});
 		$('select#tri option').click(e=>{
@@ -251,7 +244,7 @@ echo $contenu;
 		// Quand on lache le slider, lancer la requête AJAX
 		rangePrix.on('change', function(){
 			filtrePrix = afficherPrix ();
-			console.log(filtrePrix);
+			pageAccueil = 0;
 			requeteAjax ();
 		});
 
@@ -262,6 +255,23 @@ echo $contenu;
 
 	}); // document ready
 </script>
+<?php
+require_once 'connexion_modale.php';
+require_once 'inscription_modale.php';
+
+// Affichage du contenu qu'on vient de construire
+// ----------------------------------------------
+if (!empty($messageInscription))
+	echo '<script>$(document).ready(function(){$("#modaleInscription").modal("show");});</script>';
+if (!empty($messageConnexion))
+	echo '<script>$(document).ready(function(){$("#modaleConnexion").modal("show");});</script>';
+
+echo $contenu;
+?>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!-- Un peu de javaScript, pour envoyer les requêtes AJAX correspondant aux filtres et tri.  -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <?php
 
 // Et le footer standard

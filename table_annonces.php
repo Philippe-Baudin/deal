@@ -46,7 +46,7 @@ $resultat = executerRequete ("SELECT annonce.id id_annonce,
                               FROM annonce
                               INNER JOIN categorie ON annonce.categorie_id=categorie.id
                               LEFT JOIN membre ON annonce.membre_id=membre.id
-                              ORDER BY ".$tri." ".$sens." LIMIT ".(TAILLE_PAGE*$page).','.TAILLE_PAGE);
+                              ORDER BY ".$tri." ".$sens." LIMIT ".(TAILLE_PAGE_ANNONCE*$page).','.TAILLE_PAGE_ANNONCE);
 
 // Affichage du tableau
 ?>
@@ -89,7 +89,7 @@ $resultat = executerRequete ("SELECT annonce.id id_annonce,
 			echo '    <td>' . $description_courte . '</td>';
 			echo '    <td>' . $description_longue . '</td>';
 			echo '    <td>' . sprintf("%.2f €", $prix) . '</td>';
-			echo '    <td><img src="' . $photo . '" style="width:100%; height:auto; max-height:120px;" ></td>';
+			echo '    <td><img src="' . $photo . '" style="max-height:7vh;width:auto" ></td>';
 			echo '    <td>' . $pays . '</td>';
 			echo '    <td>' . $ville . '</td>';
 			echo '    <td>' . $adresse . '</td>';

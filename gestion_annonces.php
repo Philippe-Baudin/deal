@@ -165,7 +165,7 @@ if (!empty($_POST))
 
 // Compter les annonces, pour la pagination
 $requete = executerRequete ("SELECT COUNT(id) FROM annonce;");
-$nombrePages = ceil ($requete->fetch(PDO::FETCH_NUM)[0]/TAILLE_PAGE);
+$nombrePages = ceil ($requete->fetch(PDO::FETCH_NUM)[0]/TAILLE_PAGE_ANNONCE);
 
 // Suppression d'une annonce
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous

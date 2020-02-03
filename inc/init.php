@@ -22,7 +22,8 @@ session_start ();
 define('RACINE_SITE', '/evaluation/'); // dossier dans lequel se situe le site (dans localhost). Sert à transformer les chemins relatifs en absolus pour les inclusions à différents niveaux.
 
 // Définition du nombre d'items par page dans le tableau des annonces
-define('TAILLE_PAGE', 6);
+define('TAILLE_PAGE_ANNONCE', 6); // nombre d'annonce par page dans la page gestion_annonces.php
+define('TAILLE_PAGE_ACCUEIL', 3); // nombre d'annonce par page dans la page index.php
 
 // Définition de quelques icônes FontAwesome
 define('LOUPE', '<i class="fa fa-search lien-noir" aria-hidden="true"></i>');

@@ -135,6 +135,52 @@ if (isset ($_GET['modification']))
 		</div>
 	</form>
 </div>
-<?php
 
+<!-- Modale de confirmation de la suppression -->
+<div class="modal fade" id="modaleConfrmerSuppression" tabindex="-1" role="dialog" aria-labelledby="modaleConfrmerSuppressionTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modaleConfrmerSuppressionTitle">Etes-vous sûr de vouloir supprimer cette categorie ?</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="row">
+				<div class="col-sm-2">
+					<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="supprimerCategorie();">Oui</button>
+				</div>
+				<div class="col-sm">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modale d'interdiction de la suppression -->
+<div class="modal fade" id="modaleConfrmerSuppression" tabindex="-1" role="dialog" aria-labelledby="modaleConfrmerSuppressionTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modaleConfrmerSuppressionTitle">Vous ne pouvez pas supprimer une catégorie qui contient des annonces.</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	
+	function supprimerCategorie ()
+		{
+
+		}
+</script>
+<?php
 require_once '../inc/footer.php';

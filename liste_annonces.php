@@ -8,21 +8,22 @@ require_once 'inc/init.php';
 if (empty($_POST))
 	exit ();
 
-//echo 'avant : '; print_r ($_SESSION);
-
+//echo 'avant : '; print_r ($$requeteDecompte = "SELECT COUNT(id) FROM annonce";
 // Les consignes envoyées par la requête AJAX
 $filtreCategorie = $_POST['filtreCategorie'] ?? '0';
 $filtreMembre    = $_POST['filtreMembre']    ?? '0';
 $filtreVille     = $_POST['filtreVille']     ?? '0';
 $filtrePrix      = $_POST['filtrePrix']      ?? '0';
 $triAccueil      = $_POST['triAccueil']      ?? '0';
+$pageAccueil     = $_POST['pageAccueil']     ?? '0';
 
-// Memoriser les consignes dans la session pour qu'elles survivent à de futurs changement de page
+// Mémoriser les consignes dans la session pour qu'elles survivent à de futurs changement de page
 $_SESSION['filtre']['categorie'] = $filtreCategorie;
 $_SESSION['filtre']['membre']    = $filtreMembre;
 $_SESSION['filtre']['ville']     = $filtreVille;
 $_SESSION['filtre']['prix']      = $filtrePrix;
 $_SESSION['triAccueil']          = $triAccueil;
+$_SESSION['pageAccueil']         = $pageAccueil;
 
 //echo 'après : '; print_r ($_SESSION);
 
@@ -35,14 +36,18 @@ while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 	$listeNotes[$pseudo] = $moyenne;
 	}
 
-// Ecriture de la requête de sélection des annonces à présenter, accompagnée du tableau des marqueurs
-// --------------------------------------------------------------------------------------------------
+// Ecrire les requêtes de sélection des annonces à présenter, accompagnées du tableau des marqueurs
+// ------------------------------------------------------------------------------------------------
 
 // La liste des champs voulus et des tables.
 $marqueurs = array ();
-$requete = 'SELECT a.id id, titre, photo, description_longue, prix, pseudo, membre.id auteur
-            FROM annonce a
-            LEFT JOIN membre ON membre_id = membre.id';
+$requeteSelection = 'SELECT a.id id, titre, photo, description_longue, prix, pseudo, membre.id auteur
+                     FROM annonce a
+                     LEFT JOIN membre ON membre_id = membre.id';
+
+$requeteDecompte = "SELECT COUNT(a.id)
+                    FROM annonce a
+                    LEFT JOIN membre ON membre_id = membre.id";
 
 // la clause WHERE
 $clauseWhere = ' WHERE membre_id IS NOT NULL';
@@ -78,9 +83,19 @@ switch ($triAccueil)
 	default : $clauseOrderBy = ' ORDER BY a.date_enregistrement DESC'; break;
 	}
 
-// Exécuter la requête
-$resultat = executerRequete ($requete.$clauseWhere.$clauseOrderBy, $marqueurs);
-$nombreAnnonces = $resultat ? $resultat->rowCount() : 0;
+// Compter les annonces séleectionnées
+$resultat = executerRequete ($requeteDecompte.$clauseWhere, $marqueurs);
+$nombreAnnonces = $resultat ? ($resultat->fetch(PDO::FETCH_NUM)[0]) : 0;
+
+// En déduire les annonces à produire, en fonction du numéro de page
+if ($nombreAnnonces > TAILLE_PAGE_ACCUEIL)
+	{
+	$annonceDebut = TAILLE_PAGE_ACCUEIL*$pageAccueil;
+	$limite = ' LIMIT '.$annonceDebut.','.TAILLE_PAGE_ACCUEIL;
+	$nombrePages = ceil ($nombreAnnonces/TAILLE_PAGE_ACCUEIL);
+	}
+
+$resultat = executerRequete ($requeteSelection.$clauseWhere.$clauseOrderBy.($limite??''), $marqueurs);
 
 // Envoyer, en commentaire le nombre d'annonces sélectionnées,
 // suivi de suffisamment de blancs pour que le nombre d'annonces puisse augmenter au delà du raisonnable
@@ -134,5 +149,24 @@ while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 	echo          "<h4>$prix €</h4>";
 	echo      '</div>';
 	echo '</div>'; // "row"
+	}
+
+// Pagination
+if (isset($limite))
+	{
+	echo '<nav aria-label="Page navigation example">';
+	echo '<ul class="pagination">';
+	echo '<li class="page-item"><a class="page-link" '.(($pageAccueil==0)?'':(' id="page_'.($pageAccueil-1).'" onclick="return false" href="#"')).'>Précédente</a></li>';
+	for ($i=0; $i<$nombrePages; $i++)
+		echo '<li class="page-item'.(($i==$pageAccueil)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+	echo '<li class="page-item"><a class="page-link"'.(($pageAccueil==$nombrePages)?'':(' id="page_'.($pageAccueil-1).' onclick="return false" href="#"')).'>Suivante</a></li>';
+	/*
+	echo '<li class="page-item"><a class="page-link" '.(($pageAccueil==0)?'':(' id="page_'.($pageAccueil-1).'" ')).'>Précédente</a></li>';
+	for ($i=0; $i<$nombrePages; $i++)
+		echo '<li class="page-item'.(($i==$pageAccueil)?' active':'').'"><a class="page-link" id="page_'.$i.'" >'.($i+1).'</a></li>';
+	echo '<li class="page-item"><a class="page-link"'.(($pageAccueil==$nombrePages)?'':(' id="page_'.($pageAccueil-1).'" ')).'>Suivante</a></li>';
+	*/
+	echo '</ul>';
+	echo '</nav>';
 	}
 
