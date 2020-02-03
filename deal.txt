@@ -1,0 +1,64 @@
+Rendu le 14 février
+avoir mis sur un hébergeur et communiquer login et mdp admin à Christophe.
+
+BDD : le mot de passe doit être en 255 caractères
+
+BO Gestion des annonces : 3 actions : voir (loupe) supprimer (poubelle), modifier (?)
+
+BO gestion des catégories : pas de loupe : il n'y a pas de page catégorie
+Description courte = mots-clé
+
+BO gestion des membres : pas de loupe
+
+BO commentaires : pas de loupe mais ajouter un formulaire pour pouvoir modifier les commentaires (modération)
+
+BO Gestion des notes : pas s'embêter avec les étoiles (on peut le faire si on a du temps)
+pas de loupe, ajouter un formulaire pour modif
+
+BO stat. Le but est de faire du SQL
+membre les plus actifs : qui postent le plus de d'annonces
+
+FO Accueil
+les filtres doivent être combinés (and)
+le mieux c'est de faire une requête ajax sur l'évenement change() des sélections et du slider (et Christophe insiste).
+le tri : on prend les critères qu'on veut et on fait ça en ajax
+filtre par région : remplacer par ville ou 2 premiers chiffres du code postal
+Pas d'autocompletion sur la recherche
+On peut même aller jusqu'à supprimer le bouton recherche
+c'est la page la plus compliquée
+le lien
+
+FO Fiche annonce
+photo, description ...
+google map si on veut
+faire des suggestions
+On peut mettre un avis et une note sur l'annonceur et un commentaire sur l'annonce : modale (lightbox)
+au dessus des suggestions, il faut afficher les commentaires sur l'annonce
+il faut être connecté pour déposer un commentaire ou une note
+contacter 'Marie' : ouvre une modale (lightbox) de contact
+Les 2 points essentiels sont les liens en bas et en haut
+
+FO Déposer une annonce
+simple. les sélections sont dynamiques (catégories dans la base)
+
+FO profil
+Simplification  : si les éventuelles annonces du membre ont des commentaires on les affiche
+si le membre a des avis on les affiche
+et c'est tout
+
+Christophe trouve que le template Bootstrap n'est pas pratique
+
+Header
+	Espace membre menu déroulant (ou autre, peu importe) ayant obligatoirement les liens vers les pages :
+		visiteur : inscription, connexion
+		membre : deconnexion, profil
+Footer : lorem ipsum
+
+Contact : la fonction mail(), en php
+
+Bonus : compatibilité : on s'en fout un peu
+Sécurité : important (if isset($_GET), htmlspecialchar, requêtes préparées, etc.)
+
+
+
+

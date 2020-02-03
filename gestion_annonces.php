@@ -16,13 +16,13 @@ $_SESSION['tri'] = $tri;
 $_SESSION['sens'] = $sens;
 
 
-// 1. Droits d'accès
+// Droits d'accès
 // Il faut être un membre connecté
 // De plus, il faut avoir les droits administrateur pour modifier ou supprimer une annonce
 if (!estConnecte())
 	{
-	// Si l'utilisateur n'est pas connecté, le rediriger vers connection
-	header ('location:'.RACINE_SITE.'connexion.php');
+	// Si l'utilisateur n'est pas connecté, le rediriger vers l'accueil
+	header ('location:'.RACINE_SITE.'index.php');
 	exit ();
 	}
 if (estAdmin())
@@ -34,8 +34,8 @@ if (estAdmin())
 	}
 elseif (isset($_GET['suppression']) || isset($_GET['modification']))
 	{
-	// Si l'utilisateur voulant faire une modification ou une suppression n'est pas admin, le rediriger vers connection
-	header ('location:'.RACINE_SITE.'connexion.php');
+	// Si l'utilisateur voulant faire une modification ou une suppression n'est pas admin, le rediriger vers l'accueil
+	header ('location:'.RACINE_SITE.'index.php');
 	exit ();
 	}
 else
@@ -44,7 +44,7 @@ else
 	$afficherFormulaire = true;
 	}
 
-//8. Modification/Creation d'une annonce
+// Modification/Creation d'une annonce
 if (!empty($_POST))
 	{
 	extract ($_POST);
@@ -53,10 +53,10 @@ if (!empty($_POST))
 		$contenu .= '<div class="alert alert-danger">L\'id est invalide.</div>';
 
 	if (!isset ($description_courte) || strlen($description_courte) < 4 || strlen ($description_courte) > 255)
-		$contenu .= '<div class="alert alert-danger">La description courte doit être comprise entre 4 et 255 catactères.</div>';
+		$contenu .= '<div class="alert alert-danger">La description courte doit être comprise entre 4 et 255 caractères.</div>';
 
 	if (!isset ($description_longue) || strlen($description_longue) < 10)
-		$contenu .= '<div class="alert alert-danger">La description longue doit être comporter au moins 10 catactères.</div>';
+		$contenu .= '<div class="alert alert-danger">La description longue doit être comporter au moins 10 caractères.</div>';
 
 	$ok = false;
 	if (!isset ($prix) || !isFloat ($prix))
@@ -79,7 +79,7 @@ if (!empty($_POST))
 	if (!isset ($pseudo))
 		$pseudo = $_SESSION['membre']['pseudo'];
 	if (strlen($pseudo) < 4 || strlen ($pseudo) > 100)
-		$contenu .= '<div class="alert alert-danger">Le pseudo du membre doit être compris entre 4 et 20 catactères.</div>';
+		$contenu .= '<div class="alert alert-danger">Le pseudo du membre doit être compris entre 4 et 20 caractères.</div>';
 	else
 		{
 		$requete = executerRequete ("SELECT id FROM membre WHERE pseudo=:pseudo", array (':pseudo'=> $pseudo));
@@ -100,33 +100,20 @@ if (!empty($_POST))
 			$contenu .= '<div class="alert alert-danger">La catégorie n\'existe pas.</div>';
 		}
 
-	$photo_bdd = ''; // Par défaut, le champ est une string vide en BDD
-	if (isset($_POST['photo_actuelle'])) // Si on est en train de modifier le produit, on remet le chemin de la photo en BDD
-		{
-		$photo_bdd = $_POST['photo_actuelle'];
-		}
-	if (!empty ($_FILES['photo']['name'])) // si on a un nom de fichier, c'est qu'on est en train de le télécharger
-		{
-		// Construire un nom de fichier unique (on suppose que la référence est unique et qu'on l'a vérifié plus haut (voir unicité d'un pseudo dans l'inscription d'un membre))
-		$fichier_photo = 'ref' . $_POST['id'] . '_' . $_FILES['photo']['name'];
-		$photo_bdd = 'img/' . $fichier_photo; // nom du fichier à utiliser ultérieurement dans des balises <img>
-		copy($_FILES['photo']['tmp_name'], $photo_bdd);
-		}
-	// Note : dans la base de données on n'a enregistré que le path du fichier.
-
 	if (empty($contenu))
 		{
+		$photoBDD = ''; // Par défaut, le champ est une string vide en BDD
 		if (empty($id))
-			$string_requete = "INSERT INTO annonce VALUES (:id, :titre, :description_courte, :description_longue, :prix, :photo, :pays, :ville, :adresse, :code_postal, :membre_id, :categorie_id, NOW())";
+			$stringRequete = "INSERT INTO annonce VALUES (:id, :titre, :description_courte, :description_longue, :prix, :photo, :pays, :ville, :adresse, :code_postal, :membre_id, :categorie_id, NOW())";
 		else
-			$string_requete = "UPDATE annonce SET titre=:titre, description_courte=:description_courte, description_longue=:description_longue, prix=:prix, photo=:photo, pays=:pays, ville=:ville, adresse=:adresse, code_postal=:code_postal, membre_id=:membre_id, categorie_id=:categorie_id, date_enregistrement=".((isset($date_enregistrement)&& $date_enregistrement != '')?':date_enregistrement':'NOW()')." WHERE id=:id";
+			$stringRequete = "UPDATE annonce SET titre=:titre, description_courte=:description_courte, description_longue=:description_longue, prix=:prix, photo=:photo, pays=:pays, ville=:ville, adresse=:adresse, code_postal=:code_postal, membre_id=:membre_id, categorie_id=:categorie_id, date_enregistrement=".((isset($date_enregistrement)&& $date_enregistrement != '')?':date_enregistrement':'NOW()')." WHERE id=:id";
 
-		$array_requete = array ( ':id' => $id
+		$arrayRequete = array (  ':id' => $id
 		                       , ':titre' => $titre
 		                       , ':description_courte' => $description_courte
 		                       , ':description_longue' => $description_longue
 		                       , ':prix' => $prix
-		                       , ':photo' => $photo_bdd
+		                       , ':photo' => $photoBDD
 		                       , ':pays' => $pays
 		                       , ':ville' => $ville
 		                       , ':adresse' => $adresse
@@ -134,20 +121,46 @@ if (!empty($_POST))
 		                       , ':membre_id' => $membre_id
 		                       , ':categorie_id' => $categorie_id
 		                       );
-		if (!empty($id) && isset($date_enregistrement) && $date_enregistrement != '') $array_requete[':date_enregistrement'] = $date_enregistrement;
-		//$contenu .= "<p>$string_requete</p>";
-		$resultat = executerRequete ($string_requete, $array_requete);
-		//debug ($resultat);
+		if (!empty($id) && isset($date_enregistrement) && $date_enregistrement != '')
+			$arrayRequete[':date_enregistrement'] = $date_enregistrement;
+		$resultat = executerRequete ($stringRequete, $arrayRequete);
 		if ($resultat)
 			{
-			//XXX Mettre le message en modale et redirect vers la fiche annonce
-			// $contenu .= '<div class="alert alert-success">L\'annonce a été enregistrée.</div>';
-			header ('location:fiche_annonce.php?id='.$id);
-			exit ();
+			if (empty($id))
+				{
+				$resultat = executerRequete("SELECT id FROM annonce ORDER BY id DESC LIMIT 1");
+				$id = $resultat->fetch(PDO::FETCH_NUM[0]);
+				}
+			if (isset($_POST['photo_actuelle'])) // Si on est en train de modifier le produit, on remet le chemin de la photo en BDD
+				{
+				$photoBDD = $_POST['photo_actuelle'];
+				}
+			if (!empty ($_FILES['photo']['name'])) // si on a un nom de fichier, c'est qu'on est en train de le télécharger
+				{
+				$extension = substr ($_FILES['photo']['name'], -4);
+				if (strcasecmp($extension, '.gif') && strcasecmp($extension, '.jpg') && strcasecmp($extension, '.png') && strcasecmp($extension, '.bmp'))
+					$contenu .= '<div class="alert alert-danger">Fichier photo invalide</div>';
+				else
+					{
+					// Construire un nom de fichier unique (on suppose que la référence est unique et qu'on l'a vérifié plus haut (voir unicité d'un pseudo dans l'inscription d'un membre))
+					$fichierPhoto = 'ref' . $id . '_' . $_FILES['photo']['name'];
+					$photoBDD = 'img/' . $fichierPhoto; // nom du fichier à utiliser ultérieurement dans des balises <img>
+					copy($_FILES['photo']['tmp_name'], $photoBDD);
+					}
+				}
+			if (empty($contenu))
+				{
+				//XXX Mettre le message en modale et redirect vers la fiche annonce
+				// $contenu .= '<div class="alert alert-success">L\'annonce a été enregistrée.</div>';
+				executerRequete("UPDATE annonce set photo=:photo WHERE id=:id", array(':photo'=>$photoBDD, ':id'=>$id));
+				header ('location:fiche_annonce.php?id='.$id);
+				exit ();
+				}
 			}
-		else
-			$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
 		}
+	$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
+	$afficherFormulaire = true;
+	$annonceCourante = $_POST;
 	} // if (!empty($_POST))
 
 // Compter les annonces, pour la pagination
@@ -157,15 +170,18 @@ $nombrePages = ceil ($requete->fetch(PDO::FETCH_NUM)[0]/TAILLE_PAGE);
 // Suppression d'une annonce
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
 	{
-	$resultat = executerRequete ("DELETE FROM commentaire WHERE annonce_id = :id", array (':id' => $_GET['suppression']));
-	if ($resultat)
+	// Récupérer l'URL de la photo et supprimer le fichier
+	$resultat = executerRequete ("SELECT photo FROM annonce WHERE annonce_id = :id", array (':id' => $_GET['suppression']));
+	if ($resultat && $resultat->rowCount()==1)
 		{
-		$resultat = executerRequete ("DELETE FROM annonce WHERE id = :id", array (':id' => $_GET['suppression']));
-		if ($resultat->rowCount() == 1)
-			$contenu .= '<div class="alert alert-success">L\'annonce a bien été supprimé.</div>';
-		else
-			$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression de l\'annonce.</div>';
+		$photo = $resultat->fetch(PDO::FETCH_NUM)[0];
+		if (!empty($photo))
+			unlink ('../'.$photo);
 		}
+	$resultat = executerRequete ("DELETE FROM commentaire WHERE annonce_id = :id", array (':id' => $_GET['suppression']));
+	$resultat = executerRequete ("DELETE FROM annonce WHERE id = :id", array (':id' => $_GET['suppression']));
+	if ($resultat->rowCount() == 1)
+		$contenu .= '<div class="alert alert-success">L\'annonce a bien été supprimée.</div>';
 	else
 		$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression de l\'annonce.</div>';
 	}
@@ -177,7 +193,7 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 	if ($resultat->rowCount() == 1)
 		{
 		$afficherFormulaire = true;
-		$annonce_courante = $resultat->fetch (PDO::FETCH_ASSOC);
+		$annonceCourante = $resultat->fetch (PDO::FETCH_ASSOC);
 		}
 	}
 if (isset ($_GET['page']))
@@ -193,26 +209,27 @@ else
 	$numeroPage = 1;
 	}
 $resultat = executerRequete ("SELECT titre FROM categorie");
-$liste_categories = $resultat->fetchAll (PDO::FETCH_NUM);
+$listeCategories = $resultat->fetchAll (PDO::FETCH_NUM);
 
 
 
 require_once 'inc/header.php';
-echo '<style> .container {padding:0;margin:auto;}</style>';
+echo '<script>$(".container").css("padding","0").css("margin","0");</script>';
+//echo '<style> .container {padding:0;margin:auto;}</style>';
 
-//2. Navigation entre les pages d'administration
+// Navigation entre les pages d'administration
 if (!isset($_GET['creation']))
-	navigation_admin ('Annonces');
+	navigationAdmin ('Annonces');
 
 echo $contenu; // pour afficher notamment les messages
 
-//6. Affichage du tableau des annonces :
+// Affichage du tableau des annonces :
 if ($afficherTableau)
 	{
 	// Selection de l'ordre et du sens du tri -->
 	echo '<div>';
-	echo     '<label for="tri">Trier par :&nbsp;</label>';
-	echo     '<select name="tri" class="tri">';
+	echo     '<label for="critere-tri">Trier par :&nbsp;</label>';
+	echo     '<select name="tri" class="tri" id="critere-tri">';
 	echo         '<option value="id_annonce"'         .(($tri=='id_annonce')?         ' selected':'').'>Id</option>';
 	echo         '<option value="titre"'              .(($tri=='titre')?              ' selected':'').'>Titre</option>';
 	echo         '<option value="description_courte"' .(($tri=='description_courte')? ' selected':'').'>Description courte</option>';
@@ -232,7 +249,7 @@ if ($afficherTableau)
 	echo         '<option value="DESC"' .(($sens=='DESC')? ' selected':'').'>décroissant</option>';
 	echo     '</select>';
 	echo '</div>';
-	echo '<div id="tableau" class="table-responsive-sm">';
+	echo '<div id="tableau" class="table-responsive-sm" style="margin:10px">';
 	//       Emplacement du tableau, qui sera rempli via AJAX en fonction du tri choisi ci-dessus -->
 	echo '</div>';
 
@@ -241,7 +258,7 @@ if ($afficherTableau)
 		{
 		echo '<nav aria-label="Page navigation example">';
 		echo '<ul class="pagination">';
-		echo '<li class="page-item"><a class="page-link"'.(($numeroPage==1)?'':(' href="?page='.($numeroPage-1))).'">Précédente</a></li>';
+		echo '<li class="page-item"><a class="page-link"'.(($numeroPage==1)?'':(' href="?page='.($numeroPage-1).'"')).'>Précédente</a></li>';
 		for ($i=1; $i<=$nombrePages; $i++)
 			echo '<li class="page-item'.(($i==$numeroPage)?' active':'').'"><a class="page-link" href="?page='.$i.'">'.$i.'</a></li>';
 		echo '<li class="page-item"><a class="page-link"'.(($numeroPage==$nombrePages)?'':(' href="?page='.($numeroPage+1))).'">Suivante</a></li>';
@@ -255,7 +272,7 @@ if ($afficherTableau)
 // Formulaire de création/modification des annonces
 if ($afficherFormulaire)
 	{
-	isset($annonce_courante) && extract ($annonce_courante);
+	isset($annonceCourante) && extract ($annonceCourante);
 ?>
 	<div class="cadre-formulaire">
 		<form id="formulaire" method="post" action="gestion_annonces.php?page=<?php echo $numeroPage ?>" enctype=multipart/form-data>
@@ -273,7 +290,7 @@ if ($afficherFormulaire)
 			<div class="form-row">
 				<div class="form-group col-md-12">
 					<div><label for="description_longue">Description longue :</label></div>
-					<div><textarea style="width:100%;height:25vh" type="text" name="description_longue" id="description_longue" class="form-control"><?php echo $description_longue??'' ?></textarea></div>
+					<div><textarea style="width:100%;height:25vh" name="description_longue" id="description_longue" class="form-control"><?php echo $description_longue??'' ?></textarea></div>
 				</div>
 			</div>
 			<div class="form-row">
@@ -318,9 +335,9 @@ if ($afficherFormulaire)
 				<div class="form-group col-md-6">
 					<div><label for="categorie">Catégorie :</label></div>
 					<div>
-						<select name="categorie" class="form-control">
+						<select name="categorie" id="categorie" class="form-control">
 							<?php
-							foreach ($liste_categories as $valeur)
+							foreach ($listeCategories as $valeur)
 								echo '<option value="'.$valeur[0].'"'.(isset($categorie)&&($valeur[0]==$categorie)?' selected':'').'>'.$valeur[0].'</option>';
 							?>
 						</select>

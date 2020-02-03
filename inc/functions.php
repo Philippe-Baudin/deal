@@ -11,7 +11,7 @@ function debug ($var)
 // ---------------------------
 // Fonctions liées au membre :
 // ---------------------------
-// Si 'membre' existe dans la session, c'est que l'internaute est passé par la page de connection avec le bon pseudo/mdp
+// Si 'membre' existe dans la session, c'est que l'internaute est passé par la connexion avec le bon pseudo/mdp
 // et que nous avons rempli la session avec ses infos.
 function estConnecte()
 	{
@@ -28,21 +28,21 @@ function validerMembre ($donnees, $controlerMdp=true)
 
 	// Il faut valider chacun des champs du formulaire
 	if (!isset($donnees['pseudo']) || strlen ($donnees['pseudo']) < 4 || strlen ($donnees['pseudo']) > 20)
-		$retour .= '<div class="alert alert-danger">Le pseudo doit être compris entre 4 et 20 catactères.</div>';
+		$retour .= '<div class="alert alert-danger">Le pseudo doit être compris entre 4 et 20 caractères.</div>';
 		//XXX ajouter test sur les caractères (regex)
 
 	if ($controlerMdp)
 		{
 		if (!isset($donnees['mdp']) || strlen ($donnees['mdp']) < 8 || strlen ($donnees['mdp']) > 50)
-			$retour .= '<div class="alert alert-danger">Le mot de passe doit être compris entre 8 et 50 catactères.</div>';
+			$retour .= '<div class="alert alert-danger">Le mot de passe doit être compris entre 8 et 50 caractères.</div>';
 			//XXX ajouter test sur les caractères (regex)
 		}
 
 	if (!isset($donnees['nom']) || strlen ($donnees['nom']) < 2 || strlen ($donnees['nom']) > 45)
-		$retour .= '<div class="alert alert-danger">Le nom doit être compris entre 2 et 45 catactères.</div>';
+		$retour .= '<div class="alert alert-danger">Le nom doit être compris entre 2 et 45 caractères.</div>';
 
 	if (!isset($donnees['prenom']) || strlen ($donnees['prenom']) < 2 || strlen ($donnees['prenom']) > 45)
-		$retour .= '<div class="alert alert-danger">Le prénom doit être compris entre 2 et 45 catactères.</div>';
+		$retour .= '<div class="alert alert-danger">Le prénom doit être compris entre 2 et 45 caractères.</div>';
 
 	if (!isset($donnees['telephone']) || !preg_match ('#^[0-9]{10}$#', $donnees['telephone'])) // epression régulière linux-like
 		$retour .= '<div class="alert alert-danger">Le numero de telephone est invalide.</div>';
@@ -69,15 +69,15 @@ function isFloat($value)
 	return (strval(floatval($value)) == $value);
 	}
 
-function navigation_admin ($titre)
+function navigationAdmin ($titre)
 	{
 	if (estAdmin())
 		{
 		echo '<div style="text-align:center;">';
 		if ($titre == 'Statistiques')
-			echo '<h1 classe="mt-4">'.$titre.'</h1>';
+			echo '<h1 class="mt-4">'.$titre.'</h1>';
 		else
-			echo '<h1 classe="mt-4">Gestion des '.$titre.'</h1>';
+			echo '<h1 class="mt-4">Gestion des '.$titre.'</h1>';
 		echo '</div>';
 		echo '<ul class="nav nav-tabs"> <!-- onglets -->';
 		echo '	<li><a class="nav-link'.($titre=='Annonces'?' active':'').'" href="'.RACINE_SITE.'gestion_annonces.php">Annonces</a></li>';
@@ -94,7 +94,7 @@ function navigation_admin ($titre)
 function noteEnEtoiles ($note)
 	{
 	$i=0;
-	$retour = '';
+	$retour = '<span style="font-size:0.7rem">';
 	$nombreEtoiles = floor($note);
 	$demiEtoile = floor($note-$nombreEtoiles+.5);
 	for ($i=0; $i<$nombreEtoiles; $i++)
@@ -106,6 +106,7 @@ function noteEnEtoiles ($note)
 		}
 	for (; $i<5; $i++)
 		$retour .= '<i class="far fa-star"></i>'; // étoile vide
+	$retour .= '</span>';
 	return $retour;
 	}
 

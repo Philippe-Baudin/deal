@@ -2,12 +2,11 @@
 require_once 'inc/init.php';
 if (!estAdmin())
 	{
-	header ('location:'.RACINE_SITE.'connexion.php');
 	exit ();
 	}
 $page = ($_POST['page'] ?? 1) -1;
 $tri  = $_POST['tri'] ?? $_SESSION['tri'] ?? 'date_enregistrement';
-$sens  = $_POST['sens'] ?? $_SESSION['sens'] ?? 'ASC';
+$sens = $_POST['sens'] ?? $_SESSION['sens'] ?? 'ASC';
 $_SESSION['tri'] = $tri;
 $_SESSION['sens'] = $sens;
 
@@ -99,9 +98,9 @@ $resultat = executerRequete ("SELECT annonce.id id_annonce,
 			echo '    <td>' . $categorie . '</td>';
 			echo '    <td>' . $date_enregistrement . '</td>';
 			echo '    <td>';
-			echo '        <a href="fiche_annonce.php?id='.$ligne['id_annonce'].'" class="liens-noirs">'.LOUPE.'</a>';
-			echo '        <a href="?modification='.$ligne['id_annonce'].'&page='.$page.'#formulaire"  class="liens-noirs">'.MODIFIER.'</a>';
-			echo '        <a href="?suppression='.$ligne['id_annonce'].'&page='.$page.'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer cette annonce ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+			echo '        <a href="fiche_annonce.php?id='.$ligne['id_annonce'].'" class="lien-noir">'.LOUPE.'</a>';
+			echo '        <a href="?modification='.$ligne['id_annonce'].'&page='.$page.'#formulaire"  class="lien-noir">'.MODIFIER.'</a>';
+			echo '        <a href="?suppression='.$ligne['id_annonce'].'&page='.$page.'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer cette annonce ?\')" class="lien-noir">'.POUBELLE.'</a>';
 			echo '    </td>';
 			echo '</tr>';
 			}

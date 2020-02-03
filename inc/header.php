@@ -48,41 +48,64 @@
 		}
 	?>
 
-	<!-- navigation -->
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		<div class="container">
-			<!-- marque -->
-			<a class="navbar-brand" href="<?php echo RACINE_SITE . 'index.php'; ?>">DEAL</a> <!-- on utilise la constante RACINE_SITE pour avoir un lien absolu, ne pas dépendre de l'emplacement du fichier ou ceci sera inclu -->
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<a class="navbar-brand" href="<?php echo RACINE_SITE ?>index.php">Deal</a>
 
-			<!-- le menu burger -->
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#nav1" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-				<span class=navbar-toggler-icon></span>
-			</button>
-
-			<!-- le menu classique -->
-			<div class="collapse navbar-collapse" id="nav1">
-				<ul class="navbar-nav ml-auto"> <!-- ml-auto signifie margin-left auto -->
-					<?php
-					echo '<li><a class="nav-link" href="'.RACINE_SITE.'gestion_annonces.php?creation">Nouvelle annonce</a></li>';
-					if (estConnecte())
-						{
-						echo '<li><a class="nav-link" href="'.RACINE_SITE.'profil.php">Profil</a></li>';
-						echo '<li><a class="nav-link" href="'.RACINE_SITE.'?action=deconnexion">Deconnexion</a></li>';
-						}
-					else
-						{
-						echo '<li><a class="nav-link" href="'.RACINE_SITE.'inscription.php">Inscription</a></li>';
-						echo '<li><a class="nav-link" data-toggle="modal" href="#modaleConnexion">Connexion</a></li>';
-						}
-					if (estAdmin())
-						{
-						echo '<li><a class="nav-link" href="'.RACINE_SITE.'gestion_annonces.php">Administration</a></li>';
-						}
-					?>
-				</ul>
-			</div> <!-- fin menu classique -->
-		</div> <!-- fin div container -->
+		<div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+			<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+				<?php 
+				if (estConnecte())
+					{
+					echo '<li class="nav-item active">';
+					echo     '<a class="nav-link" href="'.RACINE_SITE.'gestion_annonces.php?creation">Déposer une annonce</a>';
+					echo '</li>';
+					}
+				if (estAdmin())
+					{
+					echo '<li class="nav-item">';
+					echo     '<a class="nav-link" href="'.RACINE_SITE.'gestion_annonces.php">Administration</a>';
+					echo '</li>';
+					}
+				?>
+			</ul>
+			<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+				<li class="nav-item active dropdown">
+					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="fas fa-user"></i> &nbsp;<?php echo $_SESSION['membre']['pseudo']??'Espace membre' ?>
+					</a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+						<?php 
+						if (estConnecte())
+							{
+							echo '<a class="dropdown-item" href="'.RACINE_SITE.'profil.php">Profil</a>';
+							echo '<a class="dropdown-item" href="'.RACINE_SITE.'?action=deconnexion">Deconnexion</a>';
+							}
+						else
+							{
+							echo '<a class="dropdown-item" data-toggle="modal" href="#modaleConnexion">Connexion</a>';
+							echo '<a class="dropdown-item" data-toggle="modal" href="#modaleInscription">Inscription</a>';
+							}
+						?>
+					</div>
+				</li>
+			</ul>
+			<form class="form-inline my-2 my-lg-0">
+				<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+				<button class="btn btn-outline-success my-2 my-sm-0" type="submit"><img src="<?php echo RACINE_SITE.'img/loupe.png' ?>" title="rechercher"></button>
+			</form>
+		</div>
 	</nav>
+
+<!-- machinerie de zoom des images -->
+<div id="zoom">
+	<div id="cadre">
+		<img src="img/pixel.gif" alt="">
+	</div>
+</div>
+
 
 	<!-- Contenu de la page -->
 	<div class="container" style="min-height:80vh;width:100%;max-width:100vw"> <!-- in fine, il faudrait mettre le style dans un fichier CSS -->

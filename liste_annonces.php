@@ -8,7 +8,9 @@ require_once 'inc/init.php';
 if (empty($_POST))
 	exit ();
 
-// Les consignes envoyées par la requête AJAV
+//echo 'avant : '; print_r ($_SESSION);
+
+// Les consignes envoyées par la requête AJAX
 $filtreCategorie = $_POST['filtreCategorie'] ?? '0';
 $filtreMembre    = $_POST['filtreMembre']    ?? '0';
 $filtreVille     = $_POST['filtreVille']     ?? '0';
@@ -21,6 +23,8 @@ $_SESSION['filtre']['membre']    = $filtreMembre;
 $_SESSION['filtre']['ville']     = $filtreVille;
 $_SESSION['filtre']['prix']      = $filtrePrix;
 $_SESSION['triAccueil']          = $triAccueil;
+
+//echo 'après : '; print_r ($_SESSION);
 
 // Récupérer la note de chaque membre
 $listeNotes = array ();
@@ -36,7 +40,7 @@ while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 
 // La liste des champs voulus et des tables.
 $marqueurs = array ();
-$requete = 'SELECT a.id id, titre, photo, description_longue, prix, pseudo
+$requete = 'SELECT a.id id, titre, photo, description_longue, prix, pseudo, membre.id auteur
             FROM annonce a
             LEFT JOIN membre ON membre_id = membre.id';
 
@@ -119,7 +123,10 @@ while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 	echo '<div class="row">';
 	echo     '<div class="col-sm-9">';
 	echo         '<div class="row">';
-	echo             '<h4>'.$pseudo.'&nbsp;</h4>';
+	if (estAdmin())
+		echo         '<a href="admin/gestion_membres.php?modification='.$auteur.'#formulaire"><h4>'.$pseudo.'&nbsp;</h4></a>';
+	else
+		echo         '<h4>'.$pseudo.'&nbsp;</h4>';
 	if (isset($listeNotes[$pseudo])) echo '<p>'.noteEnEtoiles($listeNotes[$pseudo]).'</p>';
 	echo         '</div>';
 	echo     '</div>';

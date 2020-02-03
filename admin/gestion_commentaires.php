@@ -7,23 +7,23 @@
 require_once '../inc/init.php';
 
 $afficherFormulaire = false;
-//1. Vérification administrateur
+// Vérification administrateur
 if (!estAdmin())
 	{
-	// Si l'utilisateur n'est pas connecté ou n'est pas admin, le rediriger vers connection
-	header ('location:../connexion.php');
+	// Si l'utilisateur n'est pas connecté ou n'est pas admin, le rediriger vers l'accueil
+	header ('location:../index.php');
 	exit ();
 	}
 
-//8. Modification d'un commentaire
+// Modification d'un commentaire
 if (!empty($_POST))
 	{
 	extract ($_POST);
 	if (!isset ($commentaire) || strlen($commentaire) < 10 )
-		$contenu .= '<div class="alert alert-danger">Le commentaire doit comprendre au moins 10 catactères.</div>';
+		$contenu .= '<div class="alert alert-danger">Le commentaire doit comprendre au moins 10 caractères.</div>';
 
 	if (!isset ($pseudo) || strlen($pseudo) < 4 || strlen ($pseudo) > 100)
-		$contenu .= '<div class="alert alert-danger">Le pseudo du membre doit être compris entre 4 et 20 catactères.</div>';
+		$contenu .= '<div class="alert alert-danger">Le pseudo du membre doit être compris entre 4 et 20 caractères.</div>';
 	else
 		{
 		$requete = executerRequete ("SELECT id FROM membre WHERE pseudo=:pseudo", array (':pseudo'=> $pseudo));
@@ -58,10 +58,14 @@ if (!empty($_POST))
 	if (empty($contenu) && $requete)
 		$contenu .= '<div class="alert alert-success">Le commentaire a été enregistrée.</div>';
 	else
+		{
 		$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
+		$afficherFormulaire = true;
+		$commentaireCourant = $_POST;
+		}
 	}
 
-//7. Suppression d'un commentaire
+// Suppression d'un commentaire
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
 	{
 	$resultat = executerRequete ("DELETE FROM commentaire WHERE id = :id", array (':id' => $_GET['suppression']));
@@ -79,13 +83,13 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 	if ($resultat->rowCount() == 1)
 		{
 		$afficherFormulaire = true;
-		$commentaire_courant = $resultat->fetch (PDO::FETCH_ASSOC);
+		$commentaireCourant = $resultat->fetch (PDO::FETCH_ASSOC);
 		}
 	else
 		$contenu .= '<div class="alert alert-danger">Erreur interne.</div>';
 	}
 
-//6. Affichage du tableau des commentaires : 
+// Affichage du tableau des commentaires : 
 $resultat = executerRequete ("SELECT c.id id, c.commentaire commentaire, m.pseudo pseudo, a.id annonce, c.date_enregistrement date_enregistrement
                               FROM commentaire c, membre m, annonce a
                               WHERE c.membre_id=m.id AND c.annonce_id=a.id");
@@ -112,8 +116,8 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retourn
 	$contenu .=     '<td>' . $date_enregistrement . '</td>';
 	                    // Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
 	$contenu .=     '<td>';
-	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="liens-noirs">'.MODIFIER.'</a>'."\n";
-	$contenu .=         '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes-vous certain de vouloir supprimer ce commentaire ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="lien-noir">'.MODIFIER.'</a>'."\n";
+	$contenu .=         '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes-vous certain de vouloir supprimer ce commentaire ?\')" class="lien-noir">'.POUBELLE.'</a>';
 	$contenu .=     '</td>';
 	$contenu .= '</tr>';
 	}
@@ -126,45 +130,49 @@ $mots_cles = '';
 
 require_once '../inc/header.php';
 
-//2. Navigation entre les pages d'administration
-navigation_admin ('Commentaires');
+// Navigation entre les pages d'administration
+navigationAdmin ('Commentaires');
 
 echo $contenu; // pour afficher notamment le tableau des commentaires
 if ($afficherFormulaire)
 	{
-	isset ($commentaire_courant) && extract ($commentaire_courant);
+	isset ($commentaireCourant) && extract ($commentaireCourant);
 
-	//3. Formulaire de création/modification des commentaires
+	// Formulaire de création/modification des commentaires
 ?>
-	<form id="formulaire" method="post" action="gestion_commentaires.php" >
-		<div>
+	<div class="cadre-formulaire">
+		<form id="formulaire" method="post" action="gestion_commentaires.php">
 			<input type="hidden" name="id" value="<?php echo $id??0 ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
-		</div>
-
-		<div>
-			<div><label for="commentaire">Commentaire</label></div>
-			<div><textarea style="width:80vw;height:20vh" type="text" name="commentaire" id="commentaire"><?php echo $commentaire ?></textarea>
-		</div>
-		
-		<div>
-			<div><label for="pseudo">Membre</label></div>
-			<div><input type="text" name="pseudo" id="pseudo" value="<?php echo $pseudo??'' ?>"></div>
-		</div>
-
-		<div>
-			<div><label for="mots_cles">Annonce</label></div>
-			<div><input type="text" name="annonce" id="annonce" value="<?php echo $annonce??'' ?>"></div>
-		</div>
-
-		<div>
-			<div><label for="mots_cles">Date Enregistrement</label></div>
-			<div><input type="text" name="date_enregistrement" id="date_enregistrement" value="<?php echo $date_enregistrement??'' ?>"></div>
-		</div>
-
-		<div class="mt-2"><input type="submit" value="Enregistrer"></div>
-	</form>
+			<div class="form-row">
+				<div class="form-group col-md-12">
+					<label for="commentaire">Commentaire :</label>
+					<textarea style="height:20vh" name="commentaire" id="commentaire" class="form-control"><?php echo $commentaire??'' ?></textarea>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-3">
+					<label for="pseudo">Membre :</label>
+					<input type="text" name="pseudo" id="pseudo" class="form-control" value="<?php echo $pseudo??'' ?>">
+				</div>
+				<div class="form-group col-md-3">
+					<label for="annonce">Annonce :</label>
+					<input type="text" name="annonce" id="annonce" class="form-control" value="<?php echo $annonce??'' ?>">
+				</div>
+				<div class="form-group col-md-6">
+					<label for="date_enregistrement">Date enregistrement :</label>
+					<input type="text" name="date_enregistrement" id="date_enregistrement" class="form-control" value="<?php echo $date_enregistrement??'' ?>">
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-4">
+				</div>
+				<div class="form-group col-md-6">
+					<button type="submit" class="btn btn-primary">&nbsp; Enregistrer &nbsp;</button>
+				</div>
+			</div>
+		</form>
+	</div>
 <?php
-
 	}
 
 require_once '../inc/footer.php';

@@ -1,0 +1,17 @@
+1. considérer le champ saisi comme un unique mot-clef
+2. séparer par les espaces et faire des recherches sur chaque mot
+3. associer les mots par AND ou OR
+4. ajouter le -
+
+
+chercher les mots clefs
+	dans les catégories (titre et mots-cles)
+	si pas trouvé, 
+	dans les titres, libelles long et libelles courts des annonces
+dresser la liste des id d'annonces contenant les mots clef
+	afficher l'intersection avec la sélection courante
+	si l'intersection est nulle RAZ de la sélection
+
+si on change la sélection, afficher les résultat correspondant
+	=> jusqu'à quand ?
+		tant qu'il y a qch dans le champ recherche ?

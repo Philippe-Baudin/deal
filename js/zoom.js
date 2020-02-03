@@ -15,7 +15,7 @@ if ((requete=matchMedia("(min-width: 680px)")).matches)
 	function zoomer (evenement)
 		{
 		body.css ("overflowY", "hidden"); // pour empêcher de scroller quand la page est cachée
-		cible_zoom.attr ("src", evenement.target.src.replace ("_mini", "")); // donner son adresse à l'image zoomée
+		cible_zoom.attr ("src", evenement.target.src); // donner son adresse à l'image zoomée
 		support_zoom.css( "zIndex", 2 );  // mettre l'image zoomée au premier plan
 		cible_zoom.css ("maxWidth", "100%"); // et lui donner la largeur maxi
 		}
@@ -23,7 +23,7 @@ if ((requete=matchMedia("(min-width: 680px)")).matches)
 		{
 		support_zoom.css( "zIndex", -2 ) // cacher le zoom sous la page
 		body.css ("overflowY", "auto"); // remettre le scrolling
-		cible_zoom.attr ("src", "images/pixel.gif"); // remplacer l'image par une image transparente de 1x1 pixel
+		cible_zoom.attr ("src", "img/pixel.gif"); // remplacer l'image par une image transparente de 1x1 pixel
 		cible_zoom.css ("maxWidth", "1px") // et remettre la taille au mini pour permettre la prochaine transition
 		}
 

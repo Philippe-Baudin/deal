@@ -10,7 +10,7 @@ $pdo = new PDO( 'mysql:host=localhost;dbname=deal'
               	      , PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
               	      )
               );
- if ($pdo == false) die('Connexion impossible : ' . mysql_error());
+if ($pdo == false) die('Connexion impossible : ' . mysql_error());
 // Note: il est judicieux de supprimer l'affichage des erreurs SQL quand on passe en production.
 // Si on veut le garder uniquement pour les pages admin, il faut deux instances de PDO .
 
@@ -25,14 +25,14 @@ define('RACINE_SITE', '/evaluation/'); // dossier dans lequel se situe le site (
 define('TAILLE_PAGE', 6);
 
 // Définition de quelques icônes FontAwesome
-define('LOUPE', '<i class="fa fa-search liens-noirs" aria-hidden="true"></i>');
-define('POUBELLE', '<i class="fa fa-trash-o liens-noirs" aria-hidden="true"></i>');
-define ('MODIFIER', '<i class="fa fa-pencil-square-o liens-noirs" aria-hidden="true"></i>');
+define('LOUPE', '<i class="fa fa-search lien-noir" aria-hidden="true"></i>');
+define('POUBELLE', '<i class="fa fa-trash-o lien-noir" aria-hidden="true"></i>');
+define ('MODIFIER', '<i class="fa fa-pencil-square-o lien-noir" aria-hidden="true"></i>');
 
 // Quelques variables pour afficher du contenu html
 $contenu = '';
-$contenu_gauche = '';
-$contenu_droite = '';
+$contenuGauche = '';
+$contenuDroite = '';
 
 // Inclusion des fonctions
 require_once 'functions.php';

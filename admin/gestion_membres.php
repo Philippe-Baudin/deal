@@ -11,8 +11,8 @@ $afficherFormulaire = false;
 // Vérification administrateur
 if (!estAdmin())
 	{
-	// Si l'utilisateur n'est pas connecté ou n'est pas admin, le rediriger vers connection
-	header ('location:../connexion.php');
+	// Si l'utilisateur n'est pas connecté ou n'est pas admin, le rediriger vers l'accueil
+	header ('location:../index.php');
 	exit ();
 	}
 
@@ -50,7 +50,11 @@ if (!empty($_POST))
 	if (empty($contenu) && isset($requete))
 		$contenu .= '<div class="alert alert-success">Le membre a été enregistré.</div>';
 	else
+		{
 		$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
+		$afficherFormulaire = true;
+		$membreCourant = $_POST;
+		}
 	}
 
 // Suppression d'un membre
@@ -74,7 +78,7 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 	if ($resultat->rowCount() == 1)
 		{
 		$afficherFormulaire = true;
-		$membre_courant = $resultat->fetch (PDO::FETCH_ASSOC);
+		$membreCourant = $resultat->fetch (PDO::FETCH_ASSOC);
 		}
 	}
 
@@ -90,7 +94,7 @@ $contenu .='<div class="table-responsive">';
 $contenu .=   '<table class="table">';
 $contenu .=      '<thead class="thead-dark">';
 $contenu .=          '<tr>';
-$contenu .=              '<th scope="col">Id_membre</th>';
+$contenu .=              '<th scope="col">Id</th>';
 $contenu .=              '<th scope="col">Pseudo</th>';
 $contenu .=              '<th scope="col">Civilité</th>';
 $contenu .=              '<th scope="col">Nom</th>';
@@ -117,17 +121,17 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
 	$contenu .=     '<td>' . $date_enregistrement . '</td>';
 	// Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
 	$contenu .=     '<td>';
-	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="liens-noirs">'.MODIFIER.'</a>'."\n";
+	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="lien-noir">'.MODIFIER.'</a>'."\n";
 	switch ($nombreAnnonces[$id]??'0')
 		{
 		case '0':
-			$contenu .= '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes-vous certain de vouloir supprimer le compte de '.$pseudo.' ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+			$contenu .= '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes-vous certain de vouloir supprimer le compte de '.$pseudo.' ?\')" class="lien-noir">'.POUBELLE.'</a>';
 			break;
 		case '1':
-			$contenu .= '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\''.$pseudo.' a déposé une annonce qui deviendra inaccessible aux utilisateurs si vous supprimez son compte. Etes-vous certain de vouloir supprimer son compte ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+			$contenu .= '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\''.$pseudo.' a déposé une annonce qui deviendra inaccessible aux utilisateurs si vous supprimez son compte. Etes-vous certain de vouloir supprimer son compte ?\')" class="lien-noir">'.POUBELLE.'</a>';
 			break;
 		default :
-			$contenu .= '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\''.$pseudo.' a déposé '.($nombreAnnonces[$id]??'0').' annonces. Si vous supprimez son compte, elles deviendront inaccessibles aux utilisateurs. Etes-vous certain de vouloir supprimer son compte ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+			$contenu .= '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\''.$pseudo.' a déposé '.($nombreAnnonces[$id]??'0').' annonces. Si vous supprimez son compte, elles deviendront inaccessibles aux utilisateurs. Etes-vous certain de vouloir supprimer son compte ?\')" class="lien-noir">'.POUBELLE.'</a>';
 			break;
 		}
 	$contenu .=     '</td>';
@@ -139,13 +143,13 @@ $contenu .='</div>';
 require_once '../inc/header.php';
 
 // Navigation entre les pages d'administration
-navigation_admin ('Membres');
+navigationAdmin ('Membres');
 
- // pour afficher les messages et le tableau des membres
+// pour afficher les messages et le tableau des membres
 echo $contenu;
 if ($afficherFormulaire)
 	{
-	extract ($membre_courant);
+	extract ($membreCourant);
 	// Formulaire de modification de membres
 	?>
 	<br>
@@ -179,9 +183,9 @@ if ($afficherFormulaire)
 				</div>
 				<div class="form-group col-md-6">
 					<label for="civilite">Civilité</label>
-					<select name="civilite" class="form-control">
-						<option value="M." selected>M.</option>
-						<option value="Mme"<?php if (isset($civilite) && $civilite=='Mme') echo 'selected'; ?>>Mme</option>
+					<select name="civilite" id="civilite" class="form-control">
+						<option value="M."<?php if (isset($civilite) && $civilite=='M.') echo ' selected'; ?>>M.</option>
+						<option value="Mme"<?php if (isset($civilite) && $civilite=='Mme') echo ' selected'; ?>>Mme</option>
 					</select>
 				</div>
 			</div>
@@ -201,9 +205,9 @@ if ($afficherFormulaire)
 				<?php else: ?>
 					<div class="form-group col-md-6">
 						<label for="role">Statut</label>
-						<select name="role" class="form-control">
-							<option value="user" selected>user</option>
-							<option value="admin"<?php if (isset($role) && $role=='admin') echo 'selected'; ?>>admin</option>
+						<select name="role" id="role" class="form-control">
+							<option value="user"<?php if (isset($role) && $role=='user') echo ' selected'; ?>>user</option>
+							<option value="admin"<?php if (isset($role) && $role=='admin') echo ' selected'; ?>>admin</option>
 						</select>
 					</div>
 				<?php endif ?>
@@ -218,14 +222,14 @@ if ($afficherFormulaire)
      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
        <div class="modal-content">
          <div class="modal-header">
-           <h5 class="modal-title" id="exampleModalLongTitle">Suppression d'un membre</h5>
+           <h5 class="modal-title" id="modaleSuppressionMembreLongTitle">Suppression d'un membre</h5>
            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
              <span aria-hidden="true">&times;</span>
            </button>
          </div>
          <div class="modal-body">
 			<p>
-           <form method="post" action="">
+           <form method="post" action="#">
              <input type="hidden" name="id" value="'.$id.'">
              <div class="form-group">
                <label for="commentaire" class="col-form-label">Postez un commentaire pour poser une question ou obtenir des précisions sur le produit ou le service proposé :</label>

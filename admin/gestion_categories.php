@@ -6,31 +6,39 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once '../inc/init.php';
 
-$afficherFormulaire = false;
-//1. Vérification administrateur
+// Vérification administrateur
 if (!estAdmin())
 	{
-	// Si l'utilisateur n'est pas connecté ou n'est pas admin, le rediriger vers connection
-	header ('location:../connexion.php');
+	// Si l'utilisateur n'est pas connecté ou n'est pas admin, le rediriger vers l'accueil
+	header ('location:../index.php');
 	exit ();
 	}
 
-//8. Modification d'une catégorie
+// Modification ou ajout d'une catégorie
 if (!empty($_POST))
 	{
 	extract ($_POST);
 	if (!isset ($titre) || strlen($titre) < 4 || strlen ($titre) > 100)
-		$contenu .= '<div class="alert alert-danger">Le titre doit être compris entre 4 et 100 catactères.</div>';
+		$contenu .= '<div class="alert alert-danger">Le titre doit être compris entre 4 et 100 caractères.</div>';
 
 	if (empty($contenu))
-		$requete = executerRequete ("REPLACE INTO categorie VALUES (:id, :titre, :mots_cles)", array (':id' => $id, ':titre' => $titre, ':mots_cles' => $mots_cles));
-	if (empty($contenu) && $requete)
+		{
+		if (empty($id))
+			$resultat = executerRequete ("INSERT INTO categorie VALUES (0, :titre, :mots_cles)", array (':titre' => $titre, ':mots_cles' => $mots_cles));
+		else
+			$resultat = executerRequete ("UPDATE categorie SET titre=:titre, mots_cles=:mots_cles WHERE id=:id", array (':id' => $id, ':titre' => $titre, ':mots_cles' => $mots_cles));
+		}
+	if (empty($contenu) && $resultat && $resultat->rowCount() == 1)
 		$contenu .= '<div class="alert alert-success">La catégorie a été enregistrée.</div>';
 	else
+		{
 		$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
+		$categorieCourante = $_POST;
+		}
+
 	}
 
-//7. Suppression d'une catégorie
+// Suppression d'une catégorie
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
 	{
 	$resultat = executerRequete ("DELETE FROM categorie WHERE id = :id", array (':id' => $_GET['suppression']));
@@ -44,20 +52,15 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 	{
 	$resultat = executerRequete ("SELECT * FROM categorie WHERE id = :id", array (':id' => $_GET['modification']));
 	if ($resultat->rowCount() == 1)
-		{
-		$afficherFormulaire = true;
-		$categorie_courante = $resultat->fetch (PDO::FETCH_ASSOC);
-		}
+		$categorieCourante = $resultat->fetch (PDO::FETCH_ASSOC);
 	}
 
 // Nombre d'annonces pour chaque categorie
 $resultat = executerRequete ("SELECT categorie_id, COUNT(*) nombre FROM annonce GROUP BY categorie_id");
 while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
-	{
 	$nombreAnnonces[$ligne['categorie_id']] = $ligne['nombre']*1;
-	}
 
-//6. Affichage du tableau des catégories : 
+// Affichage du tableau des catégories : 
 $resultat = executerRequete ("SELECT * FROM categorie");
 $contenu .='<div class="table-responsive">';
 $contenu .=   '<table class="table">';
@@ -80,12 +83,12 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retourn
 	$contenu .= '<td>' . 	((isset($nombreAnnonces[$id]))?$nombreAnnonces[$id]:0) . '</td>';
 	// Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
 	$contenu .= '<td>';
-	$contenu .= '<a href="?modification='.$ligne['id'].'#formulaire" class="liens-noirs">'.MODIFIER.'</a> ';
+	$contenu .= '<a href="?modification='.$ligne['id'].'#formulaire" class="lien-noir">'.MODIFIER.'</a> ';
 	$contenu .= '<a href="?suppression='.$ligne['id'].'" ';
 	if (isset($nombreAnnonces[$id]))
-		$contenu .= 'onclick="alert(\'Il y a '.$nombreAnnonces[$id].' annonces pour cette catégorie. Vous ne pouvez pas la supprimer.\'); return false;" class="liens-noirs">'.POUBELLE.'</a>';
+		$contenu .= 'onclick="alert(\'Il y a '.$nombreAnnonces[$id].' annonces pour cette catégorie. Vous ne pouvez pas la supprimer.\'); return false;" class="lien-noir">'.POUBELLE.'</a>';
 	else
-		$contenu .= 'onclick="return confirm(\'Etes vous certain de vouloir supprimer cette catégorie ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+		$contenu .= 'onclick="return confirm(\'Etes vous certain de vouloir supprimer cette catégorie ?\')" class="lien-noir">'.POUBELLE.'</a>';
 	$contenu .= '</td>';
 	$contenu .= '</tr>';
 	}
@@ -97,18 +100,20 @@ $mots_cles = '';
 
 require_once '../inc/header.php';
 
-//2. Navigation entre les pages d'administration
-navigation_admin ('Catégories');
+// Navigation entre les pages d'administration
+navigationAdmin ('Catégories');
 
 echo $contenu; // pour afficher notamment le tableau des catégories
-isset ($categorie_courante) && extract ($categorie_courante);
+isset ($categorieCourante) && extract ($categorieCourante);
 
-//3. Formulaire de création/modification des catégories
+// Formulaire de création/modification des catégories
+echo '<br>';
+if (isset ($_GET['modification']))
+	echo '<div><p style="text-align: center;">Modifier la catégorie '.$titre.' (id '.$id.')</p></div>';
 ?>
-<br>
 <div class="cadre-formulaire">
 	<form id="formulaire" method="post" action="gestion_categories.php">
-		<input type="hidden" name="id" value="<?php echo $id ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
+		<input type="hidden" name="id" value="<?php echo $id??'' ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
 		<div class="form-row">
 			<div class="form-group col-md-1">
 			</div>
@@ -117,7 +122,7 @@ isset ($categorie_courante) && extract ($categorie_courante);
 				<input type="text" name="titre" id="titre" class="form-control" value="<?php echo $titre??'' ?>">
 			</div>
 			<div class="form-group col-md-6">
-				<label for="email">Mots-Clés :</label>
+				<label for="mots_cles">Mots-Clés :</label>
 				<input type="text" name="mots_cles" id="mots_cles" class="form-control" value="<?php echo $mots_cles??'' ?>">
 			</div>
 		</div>

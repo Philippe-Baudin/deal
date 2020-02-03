@@ -2,7 +2,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // index.php
 // filtre et tri de la liste des annonces à afficher
-// délégation de l'affichage de la liste à "liste_annonce.php" via des requêtes ajax
+// délégation de l'affichage de la liste à "liste_annonces.php" via des requêtes ajax
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once 'inc/init.php';
 $_SESSION['page courante'] = 'index.php';
@@ -104,7 +104,7 @@ $contenu .=         '</div><br>';
 // par prix maximum
 // ----------------
 $contenu .=         '<div class="form-group">';
-$contenu .=             '<label for="prix">Prix :</label>';
+$contenu .=             '<label for="range-prix">Prix :</label>';
 $contenu .=             '<input type="range" class="custom-range" min="0" max="7" step="0.1" id="range-prix">';
 $contenu .=             '<p style="font-size:0.8rem;" id="affichage-prix"></p>';
 $contenu .=         '</div>';
@@ -154,15 +154,21 @@ $contenu .= '</div>';
 // ---------------
 require_once 'inc/header.php';
 require_once 'connexion_modale.php';
+require_once 'inscription_modale.php';
 
 // Affichage du contenu qu'on vient de construire
 // ----------------------------------------------
+if (!empty($messageInscription))
+	echo '<script>$(document).ready(function(){$("#modaleInscription").modal("show");});</script>';
+if (!empty($messageConnexion))
+	echo '<script>$(document).ready(function(){$("#modaleConnexion").modal("show");});</script>';
+
 echo $contenu;
 ?>
 
-<!-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -->
-<!-- Un peu de javaScript, pour envoyer les requêtes AJAX correspondant aux filtres et tri. -->
-<!-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!-- Un peu de javaScript, pour envoyer les requêtes AJAX correspondant aux filtres et tri.  -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <script>
 	$(function(){ // document ready
 

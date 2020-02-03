@@ -2,7 +2,7 @@
 require_once 'inc/init.php';
 $message = '';
 
-// 2. Deconnexion de l'internaute
+// Deconnexion de l'internaute
 //debug ($_GET);
 if (isset ($_GET['action']) && $_GET['action'] == 'deconnexion')
 	{
@@ -10,14 +10,14 @@ if (isset ($_GET['action']) && $_GET['action'] == 'deconnexion')
 	$message .= '<div class="alert alert-info">Vous êtes déconnecté</div>';
 	}
 
-// 3. Internaute déjà connecté : on le redirige vers son profil
+// Internaute déjà connecté : on le redirige vers son profil
 if (estConnecte())
 	{
 	header ('location:profil.php'); // on redirige vers le profil
 	exit (); // et on quitte le script
 	}
 
-// 1. Traitement du formulaire de connexion
+// Traitement du formulaire de connexion
 //debug ($_POST);
 if ($_POST) // si le formulaire a été envoyé
 	{
@@ -61,7 +61,7 @@ echo $message; // pour la deconnexion
 echo $contenu; // pour la connexion
 ?>
 
-<form method="post" action="">
+<form method="post" action="#">
 	<div>
 		<input type="hidden" name="connexion" value="connexion">
 	</div>

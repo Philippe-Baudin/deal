@@ -7,15 +7,15 @@
 require_once '../inc/init.php';
 
 $afficherFormulaire = false;
-//1. Vérification administrateur
+// Vérification administrateur
 if (!estAdmin())
 	{
-	// Si l'utilisateur n'est pas connecté ou n'est pas admin, le rediriger vers connection
-	header ('location:../connexion.php');
+	// Si l'utilisateur n'est pas connecté ou n'est pas admin, le rediriger vers l'accueil
+	header ('location:../index.php');
 	exit ();
 	}
 
-//8. Modification d'une note
+// Modification d'une note
 if (!empty($_POST))
 	{
 	extract ($_POST);
@@ -26,7 +26,7 @@ if (!empty($_POST))
 		$contenu .= '<div class="alert alert-danger">L\'avis doit comporter au moins 3 caractères.</div>';
 
 	if (!isset ($auteur) || strlen($auteur) < 4 || strlen ($auteur) > 100)
-		$contenu .= '<div class="alert alert-danger">Le pseudo de l\'auteur de la note doit être compris entre 4 et 20 catactères.</div>';
+		$contenu .= '<div class="alert alert-danger">Le pseudo de l\'auteur de la note doit être compris entre 4 et 20 caractères.</div>';
 	else
 		{
 		$requete = executerRequete ("SELECT id FROM membre WHERE pseudo=:auteur", array (':auteur'=> $auteur));
@@ -37,7 +37,7 @@ if (!empty($_POST))
 		}
 
 	if (!isset ($cible) || strlen($cible) < 4 || strlen ($cible) > 100)
-		$contenu .= '<div class="alert alert-danger">Le pseudo concerné par la note doit être compris entre 4 et 20 catactères.</div>';
+		$contenu .= '<div class="alert alert-danger">Le pseudo concerné par la note doit être compris entre 4 et 20 caractères.</div>';
 	else
 		{
 		$requete = executerRequete ("SELECT id FROM membre WHERE pseudo=:cible", array (':cible'=> $cible));
@@ -55,10 +55,15 @@ if (!empty($_POST))
 	if (empty($contenu) && $requete)
 		$contenu .= '<div class="alert alert-success">La note a été enregistrée.</div>';
 	else
+		{
 		$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
+		$afficherFormulaire = true;
+		$noteCourante = $_POST;
+		}
+
 	}
 
-//7. Suppression d'une note
+// Suppression d'une note
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
 	{
 	$resultat = executerRequete ("DELETE FROM note WHERE id = :id", array (':id' => $_GET['suppression']));
@@ -76,13 +81,13 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 	if ($resultat->rowCount() == 1)
 		{
 		$afficherFormulaire = true;
-		$note_courante = $resultat->fetch (PDO::FETCH_ASSOC);
+		$noteCourante = $resultat->fetch (PDO::FETCH_ASSOC);
 		}
 	else
 		$contenu .= '<div class="alert alert-danger">Erreur interne.</div>';
 	}
 
-//6. Affichage du tableau des notes : 
+// Affichage du tableau des notes : 
 $resultat = executerRequete ("SELECT n.id id, note, avis, m1.pseudo auteur, m2.pseudo cible, n.date_enregistrement date_enregistrement
                               FROM note n, membre m1, membre m2
                               WHERE m1.id = membre_id1 and m2.id = membre_id2");
@@ -111,8 +116,8 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retourn
 	$contenu .=     '<td>' . $date_enregistrement . '</td>';
 	// Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
 	$contenu .=     '<td>';
-	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="liens-noirs">'.MODIFIER.'</a>'."\n";
-	$contenu .=         '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer cette note ?\')" class="liens-noirs">'.POUBELLE.'</a>';
+	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="lien-noir">'.MODIFIER.'</a>'."\n";
+	$contenu .=         '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer cette note ?\')" class="lien-noir">'.POUBELLE.'</a>';
 	$contenu .=     '</td>';
 	$contenu .= '</tr>';
 	}
@@ -125,60 +130,61 @@ $mots_cles = '';
 
 require_once '../inc/header.php';
 
-//2. Navigation entre les pages d'administration
-navigation_admin ('Notes');
+// Navigation entre les pages d'administration
+navigationAdmin ('Notes');
 
 echo $contenu; // pour afficher notamment le tableau des notes
 if ($afficherFormulaire)
 	{
-	isset ($note_courante) && extract ($note_courante);
+	isset ($noteCourante) && extract ($noteCourante);
 
-	//3. Formulaire de création/modification des notes
+	// Formulaire de création/modification des notes
 ?>
 	<div class="cadre-formulaire">
-	<form id="formulaire" method="post" action="gestion_notes.php">
-		<input type="hidden" name="id" value="<?php echo $id ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
-		<div class="form-row">
-			<div class="form-group col-md-3">
-				<label for="note">Note :</label>
-				<select id="note" name="note">
-					<option value="0" selected>0 &star;&star;&star;&star;&star;</option>
-					<option value="1" <?php echo (isset($note)&&$note=='1')?'selected':'' ?>>1 &starf;&star;&star;&star;&star;</option>
-					<option value="2" <?php echo (isset($note)&&$note=='2')?'selected':'' ?>>2 &starf;&starf;&star;&star;&star;</option>
-					<option value="3" <?php echo (isset($note)&&$note=='3')?'selected':'' ?>>3 &starf;&starf;&starf;&star;&star;</option>
-					<option value="4" <?php echo (isset($note)&&$note=='4')?'selected':'' ?>>4 &starf;&starf;&starf;&starf;&star;</option>
-					<option value="5" <?php echo (isset($note)&&$note=='5')?'selected':'' ?>>5 &starf;&starf;&starf;&starf;&starf;</option>
-				</select>
+		<form id="formulaire" method="post" action="gestion_notes.php">
+			<input type="hidden" name="id" value="<?php echo $id ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
+			<div class="form-row">
+				<div class="form-group col-md-3">
+					<label for="note">Note :</label>
+					<select id="note" name="note">
+						<option value="0" <?php echo (isset($note)&&$note=='0')?'selected':'' ?>>0 &star;&star;&star;&star;&star;</option>
+						<option value="1" <?php echo (isset($note)&&$note=='1')?'selected':'' ?>>1 &starf;&star;&star;&star;&star;</option>
+						<option value="2" <?php echo (isset($note)&&$note=='2')?'selected':'' ?>>2 &starf;&starf;&star;&star;&star;</option>
+						<option value="3" <?php echo (isset($note)&&$note=='3')?'selected':'' ?>>3 &starf;&starf;&starf;&star;&star;</option>
+						<option value="4" <?php echo (isset($note)&&$note=='4')?'selected':'' ?>>4 &starf;&starf;&starf;&starf;&star;</option>
+						<option value="5" <?php echo (isset($note)&&$note=='5')?'selected':'' ?>>5 &starf;&starf;&starf;&starf;&starf;</option>
+					</select>
+				</div>
 			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-md-12">
-				<label for="avis">Avis :</label>
-				<textarea style="height:20vh" type="text" name="avis" id="avis" class="form-control"><?php echo $avis ?></textarea>
+			<div class="form-row">
+				<div class="form-group col-md-12">
+					<label for="avis">Avis :</label>
+					<textarea style="height:20vh" name="avis" id="avis" class="form-control"><?php echo $avis ?></textarea>
+				</div>
 			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-md-3">
-				<label for="auteur">Auteur de l'avis :</label>
-				<input type="text" name="cible" id="cible" class="form-control" value="<?php echo $auteur??'' ?>">
+			<div class="form-row">
+				<div class="form-group col-md-3">
+					<label for="auteur">Auteur de l'avis :</label>
+					<input type="text" name="auteur" id="auteur" class="form-control" value="<?php echo $auteur??'' ?>">
+				</div>
+				<div class="form-group col-md-3">
+					<label for="cible">Membre concerné :</label>
+					<input type="text" name="cible" id="cible" class="form-control" value="<?php echo $cible??'' ?>">
+				</div>
+				<div class="form-group col-md-6">
+					<label for="date_enregistrement">Date enregistrement :</label>
+					<input type="text" name="date_enregistrement" id="date_enregistrement" class="form-control" value="<?php echo $date_enregistrement??'' ?>">
+				</div>
 			</div>
-			<div class="form-group col-md-3">
-				<label for="auteur">Membre concerné :</label>
-				<input type="text" name="auteur" id="auteur" class="form-control" value="<?php echo $cible??'' ?>">
+			<div class="form-row">
+				<div class="form-group col-md-4">
+				</div>
+				<div class="form-group col-md-6">
+					<button type="submit" class="btn btn-primary">&nbsp; Enregistrer &nbsp;</button>
+				</div>
 			</div>
-			<div class="form-group col-md-6">
-				<label for="auteur">Date enregistrement :</label>
-				<input type="text" name="date_enregistrement" id="date_enregistrement" class="form-control" value="<?php echo $date_enregistrement??'' ?>">
-			</div>
-		</div>
-		<div class="form-row">
-			<div class="form-group col-md-4">
-			</div>
-			<div class="form-group col-md-6">
-				<button type="submit" class="btn btn-primary">&nbsp; Enregistrer &nbsp;</button>
-			</div>
-		</div>
-	</form>
+		</form>
+	</div>
 <?php
 
 	}
