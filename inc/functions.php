@@ -60,6 +60,7 @@ function validerMembre ($donnees, $controlerMdp=true)
 	return $retour;
 	}
 
+// Une fonction qui vérifie qu'une chaîne de caractère représente un nombre à virgule flottante, en fonction de la locale
 function isFloat($value)
 	{
 	$value = trim ($value);
@@ -69,6 +70,7 @@ function isFloat($value)
 	return (strval(floatval($value)) == $value);
 	}
 
+// Les onglets permettant à l'admin de naviger sur les pages des différentes tables
 function navigationAdmin ($titre)
 	{
 	if (estAdmin())
@@ -88,6 +90,19 @@ function navigationAdmin ($titre)
 		echo '	<li><a class="nav-link'.($titre=='Statistiques'?' active':'').'" href="'.RACINE_SITE.'admin/statistiques.php">Statistiques</a></li>';
 		echo '</ul>';
 		}
+	}
+
+// La pagination (BootStrap) des tableaux
+function pagination ($page, $nombrePages)
+	{
+	echo '<nav aria-label="Page navigation example">';
+	echo '<ul class="pagination">';
+	echo '<li'.(($page==0)?'':' class="page-item"').'><a class="page-link" id="page_'.($page-1).'" onclick="return false" href="#">Précédente</a></li>';
+	for ($i=0; $i<$nombrePages; $i++)
+		echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+	echo '<li'.(($page==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" id="page_'.($page+1).'" onclick="return false" href="#">Suivante</a></li>';
+	echo '</ul>';
+	echo '</nav>';
 	}
 
 // Convertir une note en suite d'étoiles FontAwesome

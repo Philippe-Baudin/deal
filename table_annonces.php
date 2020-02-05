@@ -4,7 +4,7 @@ if (!estAdmin())
 	{
 	exit ();
 	}
-$page = ($_POST['page'] ?? 1) -1;
+$page = (int)($_POST['page'] ?? 0);
 $tri  = $_POST['tri'] ?? $_SESSION['tri'] ?? 'date_enregistrement';
 $sens = $_POST['sens'] ?? $_SESSION['sens'] ?? 'ASC';
 $_SESSION['tri'] = $tri;

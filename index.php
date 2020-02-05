@@ -13,7 +13,7 @@ if (!isset($_SESSION['filtre']))              $_SESSION['filtre'] = array();
 if (!isset($_SESSION['filtre']['categorie'])) $_SESSION['filtre']['categorie'] = '0';
 if (!isset($_SESSION['filtre']['ville']))     $_SESSION['filtre']['ville']     = '0';
 if (!isset($_SESSION['filtre']['membre']))    $_SESSION['filtre']['membre']    = '0';
-if (!isset($_SESSION['filtre']['prix']))      $_SESSION['filtre']['prix']      = '10000';
+if (!isset($_SESSION['filtre']['prix']))      $_SESSION['filtre']['prix']      = '7';
 if (!isset($_SESSION['triAccueil']))          $_SESSION['triAccueil']          = '0';
 if (!isset($_SESSION['pageAccueil']))         $_SESSION['pageAccueil']         = '0';
 
@@ -227,7 +227,7 @@ require_once 'inc/header.php';
 			if (prix === undefined)
 				{
 				prix = Math.pow(10,rangePrix.val());
-				prix = Math.round (prix*100)/100;
+				prix = Math.round (prix);
 				}
 			if (rangePrix.val() == 7)
 				affichagePrix.html('');

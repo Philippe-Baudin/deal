@@ -74,6 +74,7 @@ if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'o
 	else
 		$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression du commentaire.</div>';
 	}
+
 // Modification d'un commentaire
 else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'est qu'on a cliqué sur "modification" dans le tableau ci-dessous
 	{
@@ -93,35 +94,8 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 $resultat = executerRequete ("SELECT c.id id, c.commentaire commentaire, m.pseudo pseudo, a.id annonce, c.date_enregistrement date_enregistrement
                               FROM commentaire c, membre m, annonce a
                               WHERE c.membre_id=m.id AND c.annonce_id=a.id");
-$contenu .='<div class="table-responsive">';
-$contenu .=   '<table class="table">';
-$contenu .=      '<thead class="thead-dark">';
-$contenu .=          '<tr>';
-$contenu .=              '<th>Id</th>';
-$contenu .=              '<th>Membre</th>';
-$contenu .=              '<th>Annonce</th>';
-$contenu .=              '<th>Commentaire</th>';
-$contenu .=              '<th>Date</th>';
-$contenu .=              '<th>Action</th>';
-$contenu .=          '</tr>';
-$contenu .=      '</thead>';
-while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retournée par la requête
-	{
-	extract ($ligne);
-	$contenu .= '<tr>';
-	$contenu .=     '<th scope="row">' . $id . '</th>';
-	$contenu .=     '<td>' . $pseudo . '</td>';
-	$contenu .=     '<td>' . $annonce . '</td>';
-	$contenu .=     '<td>' . $commentaire . '</td>';
-	$contenu .=     '<td>' . $date_enregistrement . '</td>';
-	                    // Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
-	$contenu .=     '<td>';
-	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="lien-noir">'.MODIFIER.'</a>'."\n";
-	$contenu .=         '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes-vous certain de vouloir supprimer ce commentaire ?\')" class="lien-noir">'.POUBELLE.'</a>';
-	$contenu .=     '</td>';
-	$contenu .= '</tr>';
-	}
-$contenu .=   '</table>';
+$contenu .='<div class="table-responsive" id="tableau">';
+// ici affichage du tableau, retour de requête AJAX
 $contenu .='</div>';
 $id = 0;
 $titre = '';
@@ -140,8 +114,8 @@ if ($afficherFormulaire)
 
 	// Formulaire de création/modification des commentaires
 ?>
-	<div class="cadre-formulaire">
-		<form id="formulaire" method="post" action="gestion_commentaires.php">
+	<div class="cadre-formulaire" id="formulaire">
+		<form method="post" action="gestion_commentaires.php">
 			<input type="hidden" name="id" value="<?php echo $id??0 ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
 			<div class="form-row">
 				<div class="form-group col-md-12">
@@ -174,5 +148,53 @@ if ($afficherFormulaire)
 	</div>
 <?php
 	}
+?>
+<script>
+	$(function(){ // document ready
 
+		// Le tri et le numéro de page
+		<?php
+			echo 'let tri  = "'.($_SESSION["triCommentaire"]??0).'";';
+			echo 'let sens = "'.($_SESSION["sensCommentaire"]??0).'";';
+			echo 'let page = "'.($_SESSION["pageCommentaire"]??0).'";';
+		?>
+
+		// réception et traitement de la réponse à la requête AJAX
+		function reponse (contenu)
+			{
+			$('#tableau').html(contenu);
+
+			$('.page-item').on('click', 'a', function(e)
+				{
+				page = e.target.id.substr(5, 1);
+				requeteAjax ();
+				});
+			}
+
+		// Lancement de la requête AJAX
+		function requeteAjax ()
+			{
+			// Emission de la requête AJAX
+			$.post('table_commentaires.php', { triCommentaire  : tri,
+			                                   sensCommentaire : sens,
+			                                   pageCommentaire : page,
+			                                 }, reponse, 'html');
+			}
+
+	    // trier si on clique sur une entête du tableau
+		$('#tableau').on('click', 'th.tri', function(e){
+			console.log('avant tri=',tri,'e.target.id=',e.target.id,'sens=',sens)
+			if (tri == e.target.id) sens = ((sens=='ASC')?'DESC':'ASC');
+			else { tri = e.target.id; sens='ASC'; }
+			console.log('apres tri=',tri,'e.target.id=',e.target.id,'sens=',sens)
+			requeteAjax();
+		});
+
+		// A l'affichage de la page, lancer une première fois la requête AJAX
+		requeteAjax ();
+
+	}); // document ready
+</script>
+
+<?php
 require_once '../inc/footer.php';

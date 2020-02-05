@@ -83,11 +83,11 @@ switch ($triAccueil)
 	default : $clauseOrderBy = ' ORDER BY a.date_enregistrement DESC'; break;
 	}
 
-// Compter les annonces séleectionnées
+// Compter les annonces sélectionnées
 $resultat = executerRequete ($requeteDecompte.$clauseWhere, $marqueurs);
 $nombreAnnonces = $resultat ? ($resultat->fetch(PDO::FETCH_NUM)[0]) : 0;
 
-// En déduire les annonces à produire, en fonction du numéro de page
+// En déduire les annonces à afficher, en fonction du numéro de page
 if ($nombreAnnonces > TAILLE_PAGE_ACCUEIL)
 	{
 	$annonceDebut = TAILLE_PAGE_ACCUEIL*$pageAccueil;
@@ -156,16 +156,10 @@ if (isset($limite))
 	{
 	echo '<nav aria-label="Page navigation example">';
 	echo '<ul class="pagination">';
-	echo '<li class="page-item"><a class="page-link" '.(($pageAccueil==0)?'':(' id="page_'.($pageAccueil-1).'" onclick="return false" href="#"')).'>Précédente</a></li>';
+	echo '<li'.(($pageAccueil==0)?'':' class="page-item"').'><a class="page-link" id="page_'.($pageAccueil-1).'" onclick="return false" href="#">Précédente</a></li>';
 	for ($i=0; $i<$nombrePages; $i++)
 		echo '<li class="page-item'.(($i==$pageAccueil)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
-	echo '<li class="page-item"><a class="page-link"'.(($pageAccueil==$nombrePages)?'':(' id="page_'.($pageAccueil-1).' onclick="return false" href="#"')).'>Suivante</a></li>';
-	/*
-	echo '<li class="page-item"><a class="page-link" '.(($pageAccueil==0)?'':(' id="page_'.($pageAccueil-1).'" ')).'>Précédente</a></li>';
-	for ($i=0; $i<$nombrePages; $i++)
-		echo '<li class="page-item'.(($i==$pageAccueil)?' active':'').'"><a class="page-link" id="page_'.$i.'" >'.($i+1).'</a></li>';
-	echo '<li class="page-item"><a class="page-link"'.(($pageAccueil==$nombrePages)?'':(' id="page_'.($pageAccueil-1).'" ')).'>Suivante</a></li>';
-	*/
+	echo '<li'.(($pageAccueil==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" id="page_'.($pageAccueil+1).'" onclick="return false" href="#">Suivante</a></li>';
 	echo '</ul>';
 	echo '</nav>';
 	}

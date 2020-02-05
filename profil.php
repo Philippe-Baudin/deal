@@ -79,7 +79,7 @@ if ($requeteCompteAnnonces->fetch (PDO::FETCH_NUM)[0] != '0')
 		$date = '';
 		if ($resultat->rowCount() == 1)
 			$date = $resultat->fetch(PDO::FETCH_NUM)[0];
-		$commentaires .= '<div class="cadre-formulaire" id="suite_'.$annonce['id'].'">';
+		$commentaires .= '<div id="suite_'.$annonce['id'].'">';
 		$commentaires .= '<script>suiteCommentaires('.$annonce['id'].($date?(',\''.$date.'\''):'').')</script>';
 		$commentaires .= '</div>';
 		$commentaires .= '<hr>';
@@ -112,28 +112,32 @@ require_once 'inc/header.php';
 echo $contenu;
 
 // Afficher le profil
-echo '<div class="row" style="width:100%;text-align:center;">';
-echo     '<div class="col-sm-12">';
-echo         '<h1 class="mt-4">Profil</h1>';
-echo     '</div>';
-echo '</div>';
-echo '<div class="row">';
-echo     '<div class="col-sm-12">';
-echo         '<hr>';
-echo     '</div>';
-echo '</div>';
-echo '<div class="row">';
-echo     '<div class="col-sm-4">';
-echo '<div class="row">';
-echo     '&nbsp;';
-echo '</div>';
+?>
 
+<div class="row" style="width:100%;text-align:center;">
+	<div class="col-sm-12">
+		<h1 class="mt-4">Profil</h1>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<hr>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-4">
+		<div class="row">
+			&nbsp;
+		</div>
+
+<?php
 extract ($_SESSION['membre']);
-echo         '<h3 style="text-align:center;">'.$pseudo.'</h3><br>';
+echo         '<h3 style="text-align:center;">'.$pseudo.'</h3>';
+echo         '<br>';
 echo         '<div style="padding:10px;" class="cadre-formulaire">';
-echo         '<p>'.$civilite.' '.$prenom.' '.$nom.'</p>';
-echo         '<p><span style="font-size:1.4rem;">&#9742;</span> &nbsp; '.$telephone.'</p>';
-echo         '<p><span style="font-size:1.4rem;"><i class="far fa-envelope"></i></span> &nbsp; '.$email.'</p>';
+echo             '<p>'.$civilite.' '.$prenom.' '.$nom.'</p>';
+echo             '<p><span style="font-size:1.4rem;">&#9742;</span> &nbsp; '.$telephone.'</p>';
+echo             '<p><span style="font-size:1.4rem;"><i class="far fa-envelope"></i></span> &nbsp; '.$email.'</p>';
 echo         '</div>';
 if (estAdmin())
 	echo     '<br><p style="text-align:center;">Vous êtes un administrateur.</p>';
@@ -187,7 +191,7 @@ echo    '</div>'; // "col-sm-4"
 					<div class="form-group col-md-5">
 					</div>
 					<div class="form-group col-md-6">
-					<button type="submit" class="btn btn-primary">Enregistrer</button>
+						<button type="submit" class="btn btn-primary">Enregistrer</button>
 					</div>
 				</div>
 			</form>

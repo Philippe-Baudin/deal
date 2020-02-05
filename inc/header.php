@@ -8,12 +8,13 @@
 		src="https://kit.fontawesome.com/0937b307e2.js"
 		crossorigin="anonymous">
 	</script>
-	<!-- CDN Bootstrap CSS -->
+	<!-- JQuery -->
 	<script
 		src="https://code.jquery.com/jquery-3.4.1.min.js"
 		integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
 		crossorigin="anonymous">
 	</script>
+	<link href="<?php echo RACINE_SITE ?>js/jquery-ui.css" rel="stylesheet">
 	<!-- AJAX -->
 	<script
 		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
@@ -33,6 +34,7 @@
 		crossorigin="anonymous"
 	>
 	<link rel="stylesheet" href="<?php echo RACINE_SITE ?>css/style.css">
+	<link rel="stylesheet" href="<?php echo RACINE_SITE ?>css/jquery-ui.min.css">
 
 	<!--<link rel="stylesheet" href="<?php echo RACINE_SITE ?>css/style.css">-->
 </head>

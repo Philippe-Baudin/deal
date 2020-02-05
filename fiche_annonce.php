@@ -190,11 +190,11 @@ if (estConnecte())
 		{
 		// Fenêtre modale pour refuser qu'un membre se note lui-même
 		?>
-		<div class="modal fade" id="modaleRefusAvis" tabindex="-1" role="dialog" aria-labelledby="modaleRefusAvisTitle" aria-hidden="true">
-			<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+		<div class="modal fade" id="modaleAvis" tabindex="-1" role="dialog" aria-labelledby="modaleAvisTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="modaleRefusAvisTitle">Vous ne pouvez pas vous noter vous-même !</h5>
+						<h5 class="modal-title" id="modaleAvisTitle">Vous ne pouvez pas vous noter vous-même !</h5>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>

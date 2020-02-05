@@ -8,7 +8,7 @@ require_once 'inc/init.php';
 
 $afficherFormulaire = false;
 $afficherTableau = false;
-$nombrePages = 1;
+$nombrePages = 0;
 $_SESSION['page courante'] = 'gestion_annonce.php';
 $tri = $_SESSION['tri'] ?? 'date_enregistrement';
 $sens = $_SESSION['sens'] ?? 'ASC';
@@ -198,15 +198,15 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 	}
 if (isset ($_GET['page']))
 	{
-	$numeroPage = $_GET['page']*1;
-	if ($numeroPage > $nombrePages)
-		$numeroPage = $nombrePages;
+	$numeroPage = (int)$_GET['page'];
+	if ($numeroPage >= $nombrePages)
+		$numeroPage = $nombrePages-1;
 	else if ($numeroPage <= 0)
-		$numeroPage = 1;
+		$numeroPage = 0;
 	}
 else
 	{
-	$numeroPage = 1;
+	$numeroPage = 0;
 	}
 $resultat = executerRequete ("SELECT titre FROM categorie");
 $listeCategories = $resultat->fetchAll (PDO::FETCH_NUM);
@@ -258,10 +258,16 @@ if ($afficherTableau)
 		{
 		echo '<nav aria-label="Page navigation example">';
 		echo '<ul class="pagination">';
-		echo '<li class="page-item"><a class="page-link"'.(($numeroPage==1)?'':(' href="?page='.($numeroPage-1).'"')).'>Précédente</a></li>';
-		for ($i=1; $i<=$nombrePages; $i++)
-			echo '<li class="page-item'.(($i==$numeroPage)?' active':'').'"><a class="page-link" href="?page='.$i.'">'.$i.'</a></li>';
-		echo '<li class="page-item"><a class="page-link"'.(($numeroPage==$nombrePages)?'':(' href="?page='.($numeroPage+1))).'">Suivante</a></li>';
+		if ($numeroPage<=0)
+			echo '<li><a class="page-link" onclick="return false" href="">Précédente</a></li>';
+		else
+			echo '<li class="page-item"><a class="page-link" href="?page='.($numeroPage-1).'">Précédente</a></li>';
+		for ($i=0; $i<$nombrePages; $i++)
+			echo '<li class="page-item'.(($i==$numeroPage)?' active':'').'"><a class="page-link" href="?page='.$i.'">'.($i+1).'</a></li>';
+		if (($numeroPage>=$nombrePages-1))
+			echo '<li><a class="page-link" onclick="return false;" href="">Suivante</a></li>';
+		else
+			echo '<li class="page-item"><a class="page-link" href="?page='.($numeroPage+1).'">Suivante</a></li>';
 		echo '</ul>';
 		echo '</nav>';
 		} // fin if ($nombrePages > 1)
@@ -399,36 +405,41 @@ if ($afficherFormulaire)
 		let selectTri = $('select.tri');
 		let selectSens = $('select.sens')
 
-	    // par défaut, tri selon la valeur trouvée dans la session
-		$.post('table_annonces.php', {tri : tri, sens : sens, page : page}, reponse, 'html');
+	    // lancer la requete AJAX pour l'affichage initial
+	    function requeteAjax()
+	    	{
+			$.post('table_annonces.php', {tri : tri, sens : sens, page : page}, reponse, 'html');
+			}
 
 	    // fonction de réponse à la requête ajax
 		function reponse (retour)
 			{
 			$('#tableau').html(retour);
+			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire"' ?>
 			}
 
 		// trier si on clique sur une option du select
 		$('select.tri option').click(e=>{
 			tri = e.target.value;
-			$.post('table_annonces.php', {tri : e.target.value, sens : sens, page : page}, reponse, 'html');
+			requeteAjax();;
 		});
 
 		// trier si on clique sur une option du select
 		$('select.sens option').click(e=>{
 			sens = e.target.value;
-			$.post('table_annonces.php', {tri : tri, sens : e.target.value, page : page}, reponse, 'html');
+			requeteAjax();;
 		});
 
 	    // trier si on clique sur une entête du tableau
 		$('#tableau').on('click', 'th.tri', function(e){
 			if (tri == e.target.id) sens = ((sens=='ASC')?'DESC':'ASC');
 			else tri = e.target.id;
-			$.post('table_annonces.php', {tri : tri, sens : sens, page : page}, reponse, 'html');
+			requeteAjax();;
 			selectTri.val(tri);
 			selectSens.val(sens);
 		});
 
+		requeteAjax();
 	}); // document ready
 </script>
 

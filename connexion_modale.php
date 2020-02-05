@@ -19,9 +19,9 @@ if ($_POST && isset ($_POST['pseudo']) && isset ($_POST['mdp']) && !isset($_POST
 			$membre = $resultat->fetch (PDO::FETCH_ASSOC);
 			if (password_verify($_POST['mdp'], $membre['mdp'])) // On est obligé d'utiliser password_verify() : password_hash() retourne une clé différente à chaque appel (salage)
 				{
+				$_SESSION = array();
 				$_SESSION['membre'] = $membre; // on met l'array $membre dans la session
 				$_SESSION['tri'] = 'date_enregistrement';
-				header ('location:'); // pseudo et mdp étant corrects, on redirige l'internaute vers la page profil
 				}
 			else // mauvais mot de passe
 				{
