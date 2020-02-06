@@ -164,7 +164,7 @@ echo    '</div>'; // "col-sm-4"
 					</div>
 					<div class="form-group col-md-6">
 						<label for="mdp">Mot de passe (inchangé si le champ reste vide) :</label>
-						<input type="password" name="mdp" id="mdp" class="form-control">
+						<input type="password" name="mdp" id="mdp" class="form-control" value="">
 					</div>
 				</div>
 				<div class="form-row">

@@ -171,7 +171,7 @@ $nombrePages = ceil ($requete->fetch(PDO::FETCH_NUM)[0]/TAILLE_PAGE_ANNONCE);
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
 	{
 	// Récupérer l'URL de la photo et supprimer le fichier
-	$resultat = executerRequete ("SELECT photo FROM annonce WHERE annonce_id = :id", array (':id' => $_GET['suppression']));
+	$resultat = executerRequete ("SELECT photo FROM annonce WHERE id = :id", array (':id' => $_GET['suppression']));
 	if ($resultat && $resultat->rowCount()==1)
 		{
 		$photo = $resultat->fetch(PDO::FETCH_NUM)[0];

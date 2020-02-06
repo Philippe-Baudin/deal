@@ -78,14 +78,5 @@ echo   '</table>';
 
 // Pagination
 if (isset($limite))
-	{
-	echo '<nav aria-label="Page navigation example">';
-	echo '<ul class="pagination">';
-	echo '<li'.(($page==0)?'':' class="page-item"').'><a class="page-link" id="page_'.($page-1).'" onclick="return false" href="#">Précédente</a></li>';
-	for ($i=0; $i<$nombrePages; $i++)
-		echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
-	echo '<li'.(($page==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" id="page_'.($page+1).'" onclick="return false" href="#">Suivante</a></li>';
-	echo '</ul>';
-	echo '</nav>';
-	}
+	pagination ($page, $nombrePages);
 

@@ -33,8 +33,8 @@
 		integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
 		crossorigin="anonymous"
 	>
-	<link rel="stylesheet" href="<?php echo RACINE_SITE ?>css/style.css">
 	<link rel="stylesheet" href="<?php echo RACINE_SITE ?>css/jquery-ui.min.css">
+	<link rel="stylesheet" href="<?php echo RACINE_SITE ?>css/style.css">
 
 	<!--<link rel="stylesheet" href="<?php echo RACINE_SITE ?>css/style.css">-->
 </head>
@@ -44,7 +44,7 @@
 	// Deconnexion de l'internaute
 	if (isset ($_GET['action']) && $_GET['action'] == 'deconnexion')
 		{
-		unset ($_SESSION['membre']); // supprime la partie 'membre' de la session (sans toucher à un éventuel panier)
+		$_SESSION = array ();
 		header ('location:'.RACINE_SITE.'index.php');
 		exit ();
 		}

@@ -7,12 +7,7 @@ if (!estAdmin())
 // Les consignes envoyées par la requête AJAX
 $tri   = $_POST['triMembre']  ?? '0';
 $sens  = $_POST['sensMembre'] ?? '0';
-$page = (int)($_POST['page'] ?? 0);
-
-// Mémoriser les consignes dans la session pour qu'elles survivent à de futurs changement de page
-$_SESSION['triMembre']   = $tri;
-$_SESSION['sensMembre']  = $sens;
-$_SESSION['pageMembre']  = $page;
+$page = (int)($_POST['pageMembre'] ?? 0);
 
 // Forcer le critère de tri
 if (false === array_search ($tri, array (  "id",
@@ -28,6 +23,11 @@ if (false === array_search ($tri, array (  "id",
 
 // Forcer le sens du tri
 if ($sens != 'DESC') $sens = 'ASC';
+
+// Mémoriser les consignes dans la session pour qu'elles survivent à de futurs changement de page
+$_SESSION['triMembre']   = $tri;
+$_SESSION['sensMembre']  = $sens;
+$_SESSION['pageMembre']  = $page;
 
 // Compter les membres, pour la pagination
 $resultat = executerRequete ("SELECT COUNT(*) FROM membre");
@@ -97,9 +97,5 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
 echo   '</table>';
 
 // Pagination
-/*
 if (isset($limite))
-	{
 	pagination ($page, $nombrePages);
-	}
-*/

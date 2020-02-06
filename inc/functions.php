@@ -97,13 +97,47 @@ function pagination ($page, $nombrePages)
 	{
 	echo '<nav aria-label="Page navigation example">';
 	echo '<ul class="pagination">';
-	echo '<li'.(($page==0)?'':' class="page-item"').'><a class="page-link" id="page_'.($page-1).'" onclick="return false" href="#">Précédente</a></li>';
-	for ($i=0; $i<$nombrePages; $i++)
-		echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
-	echo '<li'.(($page==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" id="page_'.($page+1).'" onclick="return false" href="#">Suivante</a></li>';
+	echo '<li'.(($page==0)?'':' class="page-item"').'><a class="page-link" id="precedent_'.($page-1).'" onclick="return false" href="#">Précédente</a></li>';
+	if ($nombrePages > 10)
+		{
+		if ($page < 5)
+			{
+			for ($i=0; $i<=$page+1; $i++)
+				echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			echo '<li class="page-item"> &nbsp; ... &nbsp; </li>';
+			for ($i=$nombrePages-2; $i<$nombrePages; $i++)
+				echo '<li class="page-item"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			}
+		else if ($page < $nombrePages-5)
+			{
+			for ($i=0; $i<2; $i++)
+				echo '<li class="page-item"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			echo '<li class="page-item"> &nbsp; ... &nbsp; </li>';
+			for ($i=$page-1; $i<=$page+1; $i++)
+				echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			echo '<li class="page-item"> &nbsp; ... &nbsp; </li>';
+			for ($i=$nombrePages-2; $i<$nombrePages; $i++)
+				echo '<li class="page-item"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			}
+		else
+			{
+			for ($i=0; $i<2; $i++)
+				echo '<li class="page-item"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			echo '<li class="page-item"> &nbsp; ... &nbsp; </li>';
+			for ($i=$page-2; $i<$nombrePages; $i++)
+				echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			}
+		}
+	else
+		{
+		for ($i=0; $i<$nombrePages; $i++)
+			echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+		}
+	echo '<li'.(($page==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" id="suivant_'.($page+1).'" onclick="return false" href="#">Suivante</a></li>';
 	echo '</ul>';
 	echo '</nav>';
 	}
+
 
 // Convertir une note en suite d'étoiles FontAwesome
 function noteEnEtoiles ($note)

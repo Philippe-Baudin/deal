@@ -7,7 +7,6 @@
 require_once '../inc/init.php';
 
 $afficherFormulaire = false;
-$nombrePages = 0;
 
 // Vérification administrateur
 if (!estAdmin())
@@ -17,19 +16,13 @@ if (!estAdmin())
 	exit ();
 	}
 
-// Compter les membres, pour la pagination
-$resultat = executerRequete ("SELECT COUNT(*) FROM membre");
-$nombrePages = ceil ($resultat->fetch(PDO::FETCH_NUM)[0]/TAILLE_PAGE_MEMBRE);
-
-
-
 // Compter les annonces de chaque membre
 $nombreAnnonces = array ();
 $resultat = executerRequete ("SELECT membre_id, COUNT(id) nb from annonce group by membre_id");
 while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
 	$nombreAnnonces[$ligne['membre_id']] = $ligne['nb'];
 
-// Modification d'un membre
+// Traitement de la modification d'un membre
 if (!empty($_POST))
 	{
 	$contenu = validerMembre($_POST, !empty($_POST['mdp']));
@@ -94,59 +87,10 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 		$membreCourant = $resultat->fetch (PDO::FETCH_ASSOC);
 		}
 	}
-if (isset ($_GET['page']))
-	{
-	$numeroPage = (int)$_GET['page'];
-	if ($numeroPage >= $nombrePages)
-		$numeroPage = $nombrePages-1;
-	else if ($numeroPage <= 0)
-		$numeroPage = 0;
-	}
-else
-	{
-	$numeroPage = 0;
-	}
-
 
 // Affichage du tableau des membres, renseigné en réponse à une requête AJAX pour être trié et paginé
 $contenu .= '<div class="table-responsive" id="tableau">';
 $contenu .= '</div>';
-// Pagination
-if ($nombrePages > 1)
-	{
-	$contenu .=  '<nav aria-label="Page navigation example">';
-	$contenu .=  '<ul class="pagination">';
-	if ($numeroPage<=0)
-		$contenu .=  '<li><a class="page-link" onclick="return false;" href="">Précédente</a></li>';
-	else
-		$contenu .=  '<li class="page-item"><a class="page-link" href="?page='.($numeroPage-1).'">Précédente</a></li>';
-	for ($i=0; $i<$nombrePages; $i++)
-		$contenu .=  '<li class="page-item'.(($i==$numeroPage)?' active':'').'"><a class="page-link" href="?page='.$i.'">'.($i+1).'</a></li>';
-	if (($numeroPage>=$nombrePages-1))
-		$contenu .=  '<li><a class="page-link" onclick="return false;" href="">Suivante</a></li>';
-	else
-		$contenu .=  '<li class="page-item"><a class="page-link" href="?page='.($numeroPage+1).'">Suivante</a></li>';
-	$contenu .=  '</ul>';
-	$contenu .=  '</nav>';
-	} // fin if ($nombrePages > 1)
-
-//if ($nombrePages > 1)
-//	{
-//	$contenu .= '<nav aria-label="Page navigation example">';
-//	$contenu .= '<ul class="pagination">';
-//	$contenu .=  '<li'.(($numeroPage==0)?'':' class="page-item"').'><a class="page-link" id="page_'.($numeroPage-1).'" onclick="return false" href="#">Précédente</a></li>';
-//	for ($i=0; $i<$nombrePages; $i++)
-//		$contenu .=  '<li class="page-item'.(($i==$numeroPage)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
-//	$contenu .=  '<li'.(($numeroPage==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" id="page_'.($numeroPage+1).'" onclick="return false" href="#">Suivante</a></li>';
-///*
-//	$contenu .= '<li'.(($numeroPage==0)?'':' class="page-item"').'><a class="page-link" href="?page='.($numeroPage-1).'"">Précédente</a></li>';
-//	for ($i=0; $i<$nombrePages; $i++)
-//		$contenu .= '<li class="page-item'.(($i==$numeroPage)?' active':'').'"><a class="page-link" href="?page='.$i.'">'.($i+1).'</a></li>';
-//	$contenu .= '<li'.(($numeroPage==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" href="?page='.($numeroPage+1).'">Suivante</a></li>';
-//*/	
-//	$contenu .= '</ul>';
-//	$contenu .= '</nav>';
-//	} // fin if ($nombrePages > 1)
 
 // Header standard
 require_once '../inc/header.php';
@@ -223,7 +167,16 @@ if ($afficherFormulaire)
 					</div>
 				<?php endif ?>
 			</div>
-			<button type="submit" class="btn btn-primary">Enregistrer</button>
+			<div class="form-row">
+				<div class="form-group col-md-2">
+				</div>
+				<div class="form-group col-md-2">
+					<button type="submit" class="btn btn-primary">&nbsp; Enregistrer &nbsp;</button>
+				</div>
+				<div class="form-group col-md">
+					<a href="<?php echo RACINE_SITE.'admin/gestion_membres.php?page='.$_SESSION["pageMembre"]??0?>" class="btn btn-secondary">&nbsp; Annuler &nbsp;</a>
+				</div>
+			</div>
 		</form>
 	</div>
 	<?php
@@ -269,7 +222,7 @@ if ($afficherFormulaire)
 		<?php
 			echo 'let tri  = "'.($_SESSION["triMembre"]??0).'";';
 			echo 'let sens = "'.($_SESSION["sensMembre"]??0).'";';
-			echo 'let page = "'.$numeroPage.'";';
+			echo 'let page = "'.($_SESSION["pageCommentaire"]??0).'";';
 		?>
 
 		// réception et traitement de la réponse à la requête AJAX
@@ -281,7 +234,6 @@ if ($afficherFormulaire)
 			// On ne peut lancer ce listener qu'après avoir affiché le tableau
 			$('.page-item').on('click', 'a', function(e)
 				{
-				console.log (e.target.id);
 				page = e.target.id.substr(5, 1);
 				requeteAjax ();
 				});

@@ -72,9 +72,6 @@ $resultat = executerRequete ("SELECT annonce.id id_annonce,
 	<tbody>
 		<?php
 
-		// les pages sont numérotées de 0 à n-1 dans la requête et de 1 à n dans le tableau de résultats
-		$page ++;
-
 		// pour chaque ligne retournée par la requête, une ligne de tableau
 		define ('NOMBRE_CARACTERES_MAX', 12);
 		while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
