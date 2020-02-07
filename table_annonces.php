@@ -7,8 +7,6 @@ if (!estAdmin())
 $page = (int)($_POST['page'] ?? 0);
 $tri  = $_POST['tri'] ?? $_SESSION['tri'] ?? 'date_enregistrement';
 $sens = $_POST['sens'] ?? $_SESSION['sens'] ?? 'ASC';
-$_SESSION['tri'] = $tri;
-$_SESSION['sens'] = $sens;
 
 // Forcer le critère de tri
 if (false === array_search ($tri, array (  "id_annonce",
@@ -29,6 +27,23 @@ if (false === array_search ($tri, array (  "id_annonce",
 // Forcer le sens du tri
 if ($sens != 'DESC') $sens = 'ASC';
 
+// Mémoriser les consignes dans la session pour qu'elles survivent à de futurs changement de page
+$_SESSION['tri'] = $tri;
+$_SESSION['sens'] = $sens;
+$_SESSION['page'] = $page;
+
+// Compter les annonces, pour la pagination
+$resultat = executerRequete ("SELECT COUNT(*) FROM annonce");
+$nombreAnnonces = $resultat ? ($resultat->fetch(PDO::FETCH_NUM)[0]) : 0;
+
+// En déduire les notes à afficher, en fonction du numéro de page
+if ($nombreAnnonces > TAILLE_PAGE_ANNONCE)
+	{
+	$annonceDebut = TAILLE_PAGE_ANNONCE*$page;
+	$limite = ' LIMIT '.$annonceDebut.','.TAILLE_PAGE_ANNONCE;
+	$nombrePages = ceil ($nombreAnnonces/TAILLE_PAGE_ANNONCE);
+	}
+
 // Requête donnant les éléments à afficher dans le tableau
 $resultat = executerRequete ("SELECT annonce.id id_annonce,
                                      annonce.titre titre,
@@ -46,34 +61,33 @@ $resultat = executerRequete ("SELECT annonce.id id_annonce,
                               FROM annonce
                               INNER JOIN categorie ON annonce.categorie_id=categorie.id
                               LEFT JOIN membre ON annonce.membre_id=membre.id
-                              ORDER BY ".$tri." ".$sens." LIMIT ".(TAILLE_PAGE_ANNONCE*$page).','.TAILLE_PAGE_ANNONCE);
+                              ORDER BY $tri $sens".($limite??''));
+
 
 // Affichage du tableau
+$marqueurTri = ($sens=='ASC') ? '&nbsp;&or;' : '&nbsp;&#94;'; 
 ?>
 <table class="table">
 	<thead class="thead-dark">
 		<tr>
-			<th scope="col" class="tri" id="id_annonce"         >Id</th>
-			<th scope="col" class="tri" id="titre"              >Titre</th>
-			<th scope="col" class="tri" id="description_courte" >Description courte</th>
-			<th scope="col" class="tri" id="description_longue" >Description longue</th>
-			<th scope="col" class="tri" id="prix"               >Prix</th>
-			<th scope="col" class="tri" id="photo"              >Photo</th>
-			<th scope="col" class="tri" id="pays"               >Pays</th>
-			<th scope="col" class="tri" id="ville"              >Ville</th>
-			<th scope="col" class="tri" id="adresse"            >Adresse</th>
-			<th scope="col" class="tri" id="code_postal"        >CP</th>
-			<th scope="col" class="tri" id="pseudo"             >Membre</th>
-			<th scope="col" class="tri" id="categorie"          >Catégorie</th>
-			<th scope="col" class="tri" id="date_enregistrement">Date</th>
+			<th scope="col" class="tri" id="id_annonce"         >Id<?php                 if ($tri=='id_annonce')         echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="titre"              >Titre<?php              if ($tri=='titre')              echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="description_courte" >Description courte<?php if ($tri=='description_courte') echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="description_longue" >Description longue<?php if ($tri=='description_longue') echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="prix"               >Prix<?php               if ($tri=='prix')               echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="photo"              >Photo<?php              if ($tri=='photo')              echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="pays"               >Pays<?php               if ($tri=='pays')               echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="ville"              >Ville<?php              if ($tri=='ville')              echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="adresse"            >Adresse<?php            if ($tri=='adresse')            echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="code_postal"        >CP<?php                 if ($tri=='code_postal')        echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="pseudo"             >Membre<?php             if ($tri=='pseudo')             echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="categorie"          >Catégorie<?php          if ($tri=='categorie')          echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="date_enregistrement">Date<?php               if ($tri=='date_enregistrement')echo $marqueurTri?></th>
 			<th scope="col">Action</th>
 		</tr>
 	</thead>
 	<tbody>
 		<?php
-
-		// les pages sont numérotées de 0 à n-1 dans la requête et de 1 à n dans le tableau de résultats
-		$page ++;
 
 		// pour chaque ligne retournée par la requête, une ligne de tableau
 		define ('NOMBRE_CARACTERES_MAX', 12);
@@ -100,10 +114,14 @@ $resultat = executerRequete ("SELECT annonce.id id_annonce,
 			echo '    <td>';
 			echo '        <a href="fiche_annonce.php?id='.$ligne['id_annonce'].'" class="lien-noir">'.LOUPE.'</a>';
 			echo '        <a href="?modification='.$ligne['id_annonce'].'&page='.$page.'#formulaire"  class="lien-noir">'.MODIFIER.'</a>';
-			echo '        <a href="?suppression='.$ligne['id_annonce'].'&page='.$page.'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer cette annonce ?\')" class="lien-noir">'.POUBELLE.'</a>';
+			echo '        <a href="?suppression='.$ligne['id_annonce'].'&page='.$page.'" onclick="return confirm(\'&Ecirc;tes-vous certain de vouloir supprimer cette annonce ?\')" class="lien-noir">'.POUBELLE.'</a>';
 			echo '    </td>';
 			echo '</tr>';
 			}
 		?>
 	</tbody>
 </table>
+<?php
+// Pagination
+if (isset($limite))
+	pagination ($page, $nombrePages);

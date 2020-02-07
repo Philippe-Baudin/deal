@@ -7,12 +7,7 @@ if (!estAdmin())
 // Les consignes envoyées par la requête AJAX
 $tri   = $_POST['triMembre']  ?? '0';
 $sens  = $_POST['sensMembre'] ?? '0';
-$page = (int)($_POST['page'] ?? 0);
-
-// Mémoriser les consignes dans la session pour qu'elles survivent à de futurs changement de page
-$_SESSION['triMembre']   = $tri;
-$_SESSION['sensMembre']  = $sens;
-$_SESSION['pageMembre']  = $page;
+$page = (int)($_POST['pageMembre'] ?? '0');
 
 // Forcer le critère de tri
 if (false === array_search ($tri, array (  "id",
@@ -28,6 +23,11 @@ if (false === array_search ($tri, array (  "id",
 
 // Forcer le sens du tri
 if ($sens != 'DESC') $sens = 'ASC';
+
+// Mémoriser les consignes dans la session pour qu'elles survivent à de futurs changement de page
+$_SESSION['triMembre']   = $tri;
+$_SESSION['sensMembre']  = $sens;
+$_SESSION['pageMembre']  = $page;
 
 // Compter les membres, pour la pagination
 $resultat = executerRequete ("SELECT COUNT(*) FROM membre");
@@ -45,19 +45,20 @@ if ($nombreMembres > TAILLE_PAGE_MEMBRE)
 $resultat = executerRequete ("SELECT * FROM membre ORDER BY $tri $sens".($limite??''));
 
 // Affichage du tableau des membres
+$marqueurTri = ($sens=='ASC') ? '&nbsp;&or;' : '&nbsp;&#94;'; 
 ?>
 <table class="table">
 	<thead class="thead-dark">
 		<tr>
-			<th scope="col" class="tri" id="id">Id</th>
-			<th scope="col" class="tri" id="pseudo">Pseudo</th>
-			<th scope="col" class="tri" id="civilite">Civilité</th>
-			<th scope="col" class="tri" id="nom">Nom</th>
-			<th scope="col" class="tri" id="prenom">Prénom</th>
-			<th scope="col" class="tri" id="email">email</th>
-			<th scope="col" class="tri" id="telephone">Téléphone</th>
-			<th scope="col" class="tri" id="role">Statut</th>
-			<th scope="col" class="tri" id="date_enregistrement">Date d'enregistrement</th>
+			<th scope="col" class="tri" id="id">Id<?php if($tri=='id')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="pseudo">Pseudo<?php if($tri=='pseudo')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="civilite">Civilité<?php if($tri=='civilite')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="nom">Nom<?php if($tri=='nom')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="prenom">Prénom<?php if($tri=='prenom')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="email">email<?php if($tri=='email')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="telephone">Téléphone<?php if($tri=='telephone')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="role">Statut<?php if($tri=='role')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="date_enregistrement">Date d'enregistrement<?php if($tri=='date_enregistrement')echo $marqueurTri?></th>
 			<th scope="col">Action</th>
 		</tr>
 	</thead>
@@ -97,9 +98,5 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
 echo   '</table>';
 
 // Pagination
-/*
 if (isset($limite))
-	{
 	pagination ($page, $nombrePages);
-	}
-*/

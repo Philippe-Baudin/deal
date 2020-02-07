@@ -27,29 +27,23 @@ function validerMembre ($donnees, $controlerMdp=true)
 	$retour = '';
 
 	// Il faut valider chacun des champs du formulaire
-	if (!isset($donnees['pseudo']) || strlen ($donnees['pseudo']) < 4 || strlen ($donnees['pseudo']) > 20)
-		$retour .= '<div class="alert alert-danger">Le pseudo doit être compris entre 4 et 20 caractères.</div>';
-		//XXX ajouter test sur les caractères (regex)
+	if (!isset($donnees['pseudo']) || !preg_match ('/^[-_a-zA-Z0-9ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝÞàáâãäåæçèéêëìíîïðñòóôõöùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ]{4,45}$/u', $donnees['pseudo']))
+		$retour .= '<div class="alert alert-danger">le pseudo est invalide.</div>';
 
 	if ($controlerMdp)
 		{
 		if (!isset($donnees['mdp']) || strlen ($donnees['mdp']) < 8 || strlen ($donnees['mdp']) > 50)
 			$retour .= '<div class="alert alert-danger">Le mot de passe doit être compris entre 8 et 50 caractères.</div>';
-			//XXX ajouter test sur les caractères (regex)
 		}
 
-	if (!isset($donnees['nom']) || strlen ($donnees['nom']) < 2 || strlen ($donnees['nom']) > 45)
-		$retour .= '<div class="alert alert-danger">Le nom doit être compris entre 2 et 45 caractères.</div>';
+	if (!isset($donnees['nom']) || !preg_match ('/^[-a-zA-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝÞàáâãäåæçèéêëìíîïðñòóôõöùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ]{4,45}$/u', $donnees['nom']))
+		$retour .= '<div class="alert alert-danger">Le nom est trop bizarre ...</div>';
 
-	if (!isset($donnees['prenom']) || strlen ($donnees['prenom']) < 2 || strlen ($donnees['prenom']) > 45)
-		$retour .= '<div class="alert alert-danger">Le prénom doit être compris entre 2 et 45 caractères.</div>';
+	if (!isset($donnees['nom']) || !preg_match ('/^[-a-zA-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝÞàáâãäåæçèéêëìíîïðñòóôõöùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ]{4,45}$/u', $donnees['nom']))
+		$retour .= '<div class="alert alert-danger">Le prénom est invalide.</div>';
 
 	if (!isset($donnees['telephone']) || !preg_match ('#^[0-9]{10}$#', $donnees['telephone'])) // epression régulière linux-like
 		$retour .= '<div class="alert alert-danger">Le numero de telephone est invalide.</div>';
-		//XXX permettre la saisie du tel comme 01 23 45 67 89
-		// preg_match retourne 1 si la chaine proposée matche l'expression régulière, 0 sinon
-		// l'expression est une string et est encadrée par des # (avec JavaScript, elle est encadrée par des / sans être une string)
-		// on n'échappe pas les {}
 
 	if (!isset($donnees['email']) || !filter_var($donnees['email'], FILTER_VALIDATE_EMAIL))
 		$retour .= '<div class="alert alert-danger">L\'email est invalide</div>';
@@ -82,12 +76,12 @@ function navigationAdmin ($titre)
 			echo '<h1 class="mt-4">Gestion des '.$titre.'</h1>';
 		echo '</div>';
 		echo '<ul class="nav nav-tabs"> <!-- onglets -->';
-		echo '	<li><a class="nav-link'.($titre=='Annonces'?' active':'').'" href="'.RACINE_SITE.'gestion_annonces.php">Annonces</a></li>';
-		echo '	<li><a class="nav-link'.($titre=='Catégories'?' active':'').'" href="'.RACINE_SITE.'admin/gestion_categories.php">Catégories</a></li>';
-		echo '	<li><a class="nav-link'.($titre=='Membres'?' active':'').'" href="'.RACINE_SITE.'admin/gestion_membres.php">Membres</a></li>';
-		echo '	<li><a class="nav-link'.($titre=='Commentaires'?' active':'').'" href="'.RACINE_SITE.'admin/gestion_commentaires.php">Commentaires</a></li>';
-		echo '	<li><a class="nav-link'.($titre=='Notes'?' active':'').'" href="'.RACINE_SITE.'admin/gestion_notes.php">Notes</a></li>';
-		echo '	<li><a class="nav-link'.($titre=='Statistiques'?' active':'').'" href="'.RACINE_SITE.'admin/statistiques.php">Statistiques</a></li>';
+		echo '	<li><a class="nav-link'.($titre=='Annonces'?' active" onclick="return false':'').'" href="'.RACINE_SITE.'gestion_annonces.php">Annonces</a></li>';
+		echo '	<li><a class="nav-link'.($titre=='Catégories'?' active" onclick="return false':'').'" href="'.RACINE_SITE.'admin/gestion_categories.php">Catégories</a></li>';
+		echo '	<li><a class="nav-link'.($titre=='Membres'?' active" onclick="return false':'').'" href="'.RACINE_SITE.'admin/gestion_membres.php">Membres</a></li>';
+		echo '	<li><a class="nav-link'.($titre=='Commentaires'?' active" onclick="return false':'').'" href="'.RACINE_SITE.'admin/gestion_commentaires.php">Commentaires</a></li>';
+		echo '	<li><a class="nav-link'.($titre=='Notes'?' active" onclick="return false':'').'" href="'.RACINE_SITE.'admin/gestion_notes.php">Notes</a></li>';
+		echo '	<li><a class="nav-link'.($titre=='Statistiques'?' active" onclick="return false':'').'" href="'.RACINE_SITE.'admin/statistiques.php">Statistiques</a></li>';
 		echo '</ul>';
 		}
 	}
@@ -97,13 +91,47 @@ function pagination ($page, $nombrePages)
 	{
 	echo '<nav aria-label="Page navigation example">';
 	echo '<ul class="pagination">';
-	echo '<li'.(($page==0)?'':' class="page-item"').'><a class="page-link" id="page_'.($page-1).'" onclick="return false" href="#">Précédente</a></li>';
-	for ($i=0; $i<$nombrePages; $i++)
-		echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
-	echo '<li'.(($page==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" id="page_'.($page+1).'" onclick="return false" href="#">Suivante</a></li>';
+	echo '<li'.(($page==0)?'':' class="page-item"').'><a class="page-link" id="precedent_'.($page-1).'" onclick="return false" href="#">Précédente</a></li>';
+	if ($nombrePages > 10)
+		{
+		if ($page < 5)
+			{
+			for ($i=0; $i<=$page+1; $i++)
+				echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			echo '<li class="page-item"> &nbsp; ... &nbsp; </li>';
+			for ($i=$nombrePages-2; $i<$nombrePages; $i++)
+				echo '<li class="page-item"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			}
+		else if ($page < $nombrePages-5)
+			{
+			for ($i=0; $i<2; $i++)
+				echo '<li class="page-item"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			echo '<li class="page-item"> &nbsp; ... &nbsp; </li>';
+			for ($i=$page-1; $i<=$page+1; $i++)
+				echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			echo '<li class="page-item"> &nbsp; ... &nbsp; </li>';
+			for ($i=$nombrePages-2; $i<$nombrePages; $i++)
+				echo '<li class="page-item"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			}
+		else
+			{
+			for ($i=0; $i<2; $i++)
+				echo '<li class="page-item"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			echo '<li class="page-item"> &nbsp; ... &nbsp; </li>';
+			for ($i=$page-2; $i<$nombrePages; $i++)
+				echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+			}
+		}
+	else
+		{
+		for ($i=0; $i<$nombrePages; $i++)
+			echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
+		}
+	echo '<li'.(($page==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" id="suivant_'.($page+1).'" onclick="return false" href="#">Suivante</a></li>';
 	echo '</ul>';
 	echo '</nav>';
 	}
+
 
 // Convertir une note en suite d'étoiles FontAwesome
 function noteEnEtoiles ($note)

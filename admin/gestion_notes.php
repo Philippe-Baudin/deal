@@ -7,6 +7,7 @@
 require_once '../inc/init.php';
 
 $afficherFormulaire = false;
+
 // Vérification administrateur
 if (!estAdmin())
 	{
@@ -15,7 +16,7 @@ if (!estAdmin())
 	exit ();
 	}
 
-// Modification d'une note
+// Traitement de la modification d'une note
 if (!empty($_POST))
 	{
 	extract ($_POST);
@@ -72,7 +73,8 @@ if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'o
 	else
 		$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression de la note.</div>';
 	}
-// Modification d'une note
+
+// Demande de modification d'une note
 else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'est qu'on a cliqué sur "modification" dans le tableau ci-dessous
 	{
 	$resultat = executerRequete ("SELECT n.id id, note, avis, m1.pseudo auteur, m2.pseudo cible, n.date_enregistrement date_enregistrement
@@ -88,44 +90,8 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 	}
 
 // Affichage du tableau des notes : 
-$resultat = executerRequete ("SELECT n.id id, note, avis, m1.pseudo auteur, m2.pseudo cible, n.date_enregistrement date_enregistrement
-                              FROM note n, membre m1, membre m2
-                              WHERE m1.id = membre_id1 and m2.id = membre_id2");
-$contenu .='<div class="table-responsive">';
-$contenu .=   '<table class="table">';
-$contenu .=      '<thead class="thead-dark">';
-$contenu .=          '<tr>';
-$contenu .=              '<th>Id</th>';
-$contenu .=              '<th>Note</th>';
-$contenu .=              '<th>Avis</th>';
-$contenu .=              '<th>Auteur</th>';
-$contenu .=              '<th>Membre</th>';
-$contenu .=              '<th>Date</th>';
-$contenu .=              '<th>Action</th>';
-$contenu .=          '</tr>';
-$contenu .=      '</thead>';
-while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retournée par la requête
-	{
-	extract ($ligne);
-	$contenu .= '<tr>';
-	$contenu .=     '<th scope="row">' . $id . '</th>';
-	$contenu .=     '<td>' . noteEnEtoiles($note) . '</td>';
-	$contenu .=     '<td>' . $avis . '</td>';
-	$contenu .=     '<td>' . $auteur . '</td>';
-	$contenu .=     '<td>' . $cible . '</td>';
-	$contenu .=     '<td>' . $date_enregistrement . '</td>';
-	// Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
-	$contenu .=     '<td>';
-	$contenu .=         '<a href="?modification='.$ligne['id'].'#formulaire" class="lien-noir">'.MODIFIER.'</a>'."\n";
-	$contenu .=         '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes Vous certain de vouloir supprimer cette note ?\')" class="lien-noir">'.POUBELLE.'</a>';
-	$contenu .=     '</td>';
-	$contenu .= '</tr>';
-	}
-$contenu .=   '</table>';
+$contenu .='<div class="table-responsive" id="tableau">';
 $contenu .='</div>';
-$id = 0;
-$titre = '';
-$mots_cles = '';
 
 
 require_once '../inc/header.php';
@@ -185,8 +151,50 @@ if ($afficherFormulaire)
 			</div>
 		</form>
 	</div>
+	<?php
+	} // fin du if ($afficherFormulaire)
+	?>	
+<script>
+	$(function(){ // document ready
+
+		// Le tri et le numéro de page
+		<?php
+			echo 'let tri  = "'.($_SESSION["triNote"]??0).'";';
+			echo 'let sens = "'.($_SESSION["sensNote"]??0).'";';
+			echo 'let page = "'.($_SESSION["pageNote"]??0).'";';
+		?>
+
+		// réception et traitement de la réponse à la requête AJAX
+		function reponse (contenu)
+			{
+			$('#tableau').html(contenu);
+			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire"' ?>
+
+			$('.page-item').on('click', 'a', function(e)
+				{
+				page = e.target.id.replace(/[^0-9]/g, '');
+				requeteAjax ();
+				});
+			}
+
+		// Lancement de la requête AJAX
+		function requeteAjax ()
+			{
+			// Emission de la requête AJAX
+			$.post('table_notes.php', { triNote  : tri, sensNote : sens, pageNote : page,}, reponse, 'html');
+			}
+
+	    // trier si on clique sur une entête du tableau
+		$('#tableau').on('click', 'th.tri', function(e){
+			if (tri == e.target.id) sens = ((sens=='ASC')?'DESC':'ASC');
+			else { tri = e.target.id; sens='ASC'; }
+			requeteAjax();
+		});
+
+		// A l'affichage de la page, lancer une première fois la requête AJAX
+		requeteAjax ();
+
+	}); // document ready
+</script>
 <?php
-
-	}
-
 require_once '../inc/footer.php';

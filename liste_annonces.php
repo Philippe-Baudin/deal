@@ -7,7 +7,6 @@ require_once 'inc/init.php';
 
 if (empty($_POST))
 	exit ();
-
 //echo 'avant : '; print_r ($$requeteDecompte = "SELECT COUNT(id) FROM annonce";
 // Les consignes envoyées par la requête AJAX
 $filtreCategorie = $_POST['filtreCategorie'] ?? '0';
@@ -66,10 +65,10 @@ if ($filtreMembre)
 	$clauseWhere .= ' AND pseudo = :pseudo';
 	$marqueurs [':pseudo'] = $filtreMembre;
 	}
-if ($filtrePrix && $filtrePrix < 1e7)
+if ($filtrePrix && $filtrePrix < 7)
 	{
 	$clauseWhere .= ' AND prix <= :prix';
-	$marqueurs [':prix'] = $filtrePrix;
+	$marqueurs [':prix'] = pow (10, $filtrePrix);
 	}
 
 // la clause ORDER BY
@@ -153,14 +152,4 @@ while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 
 // Pagination
 if (isset($limite))
-	{
-	echo '<nav aria-label="Page navigation example">';
-	echo '<ul class="pagination">';
-	echo '<li'.(($pageAccueil==0)?'':' class="page-item"').'><a class="page-link" id="page_'.($pageAccueil-1).'" onclick="return false" href="#">Précédente</a></li>';
-	for ($i=0; $i<$nombrePages; $i++)
-		echo '<li class="page-item'.(($i==$pageAccueil)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
-	echo '<li'.(($pageAccueil==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" id="page_'.($pageAccueil+1).'" onclick="return false" href="#">Suivante</a></li>';
-	echo '</ul>';
-	echo '</nav>';
-	}
-
+	pagination ($pageAccueil, $nombrePages);

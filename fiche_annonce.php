@@ -5,7 +5,7 @@
 // avec des liens pour contacter l'auteur et ajouter commentaires ou avis
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once 'inc/init.php';
-$ficheAnnonce = true;
+$pageCourante = 'fiche_annonce.php';
 
 // Impossible d'afficher cette page sans id d'annonce : retour à l'accueil
 if (!isset($_GET['id']))

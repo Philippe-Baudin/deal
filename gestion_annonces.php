@@ -8,12 +8,6 @@ require_once 'inc/init.php';
 
 $afficherFormulaire = false;
 $afficherTableau = false;
-$nombrePages = 0;
-$_SESSION['page courante'] = 'gestion_annonce.php';
-$tri = $_SESSION['tri'] ?? 'date_enregistrement';
-$sens = $_SESSION['sens'] ?? 'ASC';
-$_SESSION['tri'] = $tri;
-$_SESSION['sens'] = $sens;
 
 
 // Droits d'accès
@@ -138,7 +132,8 @@ if (!empty($_POST))
 			if (!empty ($_FILES['photo']['name'])) // si on a un nom de fichier, c'est qu'on est en train de le télécharger
 				{
 				$extension = substr ($_FILES['photo']['name'], -4);
-				if (strcasecmp($extension, '.gif') && strcasecmp($extension, '.jpg') && strcasecmp($extension, '.png') && strcasecmp($extension, '.bmp'))
+ 				$extension2 = substr ($_FILES['photo']['name'], -5);
+  				if (strcasecmp($extension, '.gif') && strcasecmp($extension, '.jpg') && strcasecmp($extension, '.png') && strcasecmp($extension, '.bmp') && strcasecmp($extension2, '.jpeg'))
 					$contenu .= '<div class="alert alert-danger">Fichier photo invalide</div>';
 				else
 					{
@@ -163,15 +158,11 @@ if (!empty($_POST))
 	$annonceCourante = $_POST;
 	} // if (!empty($_POST))
 
-// Compter les annonces, pour la pagination
-$requete = executerRequete ("SELECT COUNT(id) FROM annonce;");
-$nombrePages = ceil ($requete->fetch(PDO::FETCH_NUM)[0]/TAILLE_PAGE_ANNONCE);
-
 // Suppression d'une annonce
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
 	{
 	// Récupérer l'URL de la photo et supprimer le fichier
-	$resultat = executerRequete ("SELECT photo FROM annonce WHERE annonce_id = :id", array (':id' => $_GET['suppression']));
+	$resultat = executerRequete ("SELECT photo FROM annonce WHERE id = :id", array (':id' => $_GET['suppression']));
 	if ($resultat && $resultat->rowCount()==1)
 		{
 		$photo = $resultat->fetch(PDO::FETCH_NUM)[0];
@@ -195,18 +186,6 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 		$afficherFormulaire = true;
 		$annonceCourante = $resultat->fetch (PDO::FETCH_ASSOC);
 		}
-	}
-if (isset ($_GET['page']))
-	{
-	$numeroPage = (int)$_GET['page'];
-	if ($numeroPage >= $nombrePages)
-		$numeroPage = $nombrePages-1;
-	else if ($numeroPage <= 0)
-		$numeroPage = 0;
-	}
-else
-	{
-	$numeroPage = 0;
 	}
 $resultat = executerRequete ("SELECT titre FROM categorie");
 $listeCategories = $resultat->fetchAll (PDO::FETCH_NUM);
@@ -253,8 +232,7 @@ if ($afficherTableau)
 	//       Emplacement du tableau, qui sera rempli via AJAX en fonction du tri choisi ci-dessus -->
 	echo '</div>';
 
-	// Pagination
-	if ($nombrePages > 1)
+	/*
 		{
 		echo '<nav aria-label="Page navigation example">';
 		echo '<ul class="pagination">';
@@ -271,6 +249,7 @@ if ($afficherTableau)
 		echo '</ul>';
 		echo '</nav>';
 		} // fin if ($nombrePages > 1)
+		*/
 	} // fin if ($afficherTableau)
 
 
@@ -396,9 +375,9 @@ if ($afficherFormulaire)
 	    // Le pilotage est fait par une requête AJAX post.
 
 		<?php
-			echo 'let tri  = "'.$_SESSION['tri'].'";';
-			echo 'let sens = "'.$_SESSION['sens'].'";';
-			echo 'let page = "'.$numeroPage.'";';
+			echo 'let tri  = "'.($_SESSION["tri"]??0).'";';
+			echo 'let sens = "'.($_SESSION["sens"]??0).'";';
+			echo 'let page = "'.($_SESSION["page"]??0).'";';
 		?>
 
 		// éviter de faire plusieurs fois les JQuery
@@ -416,6 +395,11 @@ if ($afficherFormulaire)
 			{
 			$('#tableau').html(retour);
 			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire"' ?>
+			$('.page-item').on('click', 'a', function(e)
+				{
+				page = e.target.id.replace(/[^0-9]/g, '');
+				requeteAjax ();
+				});
 			}
 
 		// trier si on clique sur une option du select

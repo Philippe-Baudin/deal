@@ -1,6 +1,7 @@
 <?php
 require_once 'inc/init.php';
 $message = '';
+erreur de syntaxe
 
 // Deconnexion de l'internaute
 //debug ($_GET);

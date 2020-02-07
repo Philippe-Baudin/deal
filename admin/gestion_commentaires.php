@@ -7,6 +7,7 @@
 require_once '../inc/init.php';
 
 $afficherFormulaire = false;
+
 // Vérification administrateur
 if (!estAdmin())
 	{
@@ -15,7 +16,7 @@ if (!estAdmin())
 	exit ();
 	}
 
-// Modification d'un commentaire
+// Traitement de la modification d'un commentaire
 if (!empty($_POST))
 	{
 	extract ($_POST);
@@ -75,7 +76,7 @@ if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'o
 		$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression du commentaire.</div>';
 	}
 
-// Modification d'un commentaire
+// Demande de modification d'un commentaire
 else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'est qu'on a cliqué sur "modification" dans le tableau ci-dessous
 	{
 	$resultat = executerRequete ("SELECT c.id id, commentaire, m.pseudo pseudo, annonce_id annonce, c.date_enregistrement date_enregistrement
@@ -91,23 +92,21 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 	}
 
 // Affichage du tableau des commentaires : 
-$resultat = executerRequete ("SELECT c.id id, c.commentaire commentaire, m.pseudo pseudo, a.id annonce, c.date_enregistrement date_enregistrement
-                              FROM commentaire c, membre m, annonce a
-                              WHERE c.membre_id=m.id AND c.annonce_id=a.id");
 $contenu .='<div class="table-responsive" id="tableau">';
-// ici affichage du tableau, retour de requête AJAX
 $contenu .='</div>';
+/*
 $id = 0;
 $titre = '';
 $mots_cles = '';
-
-
+*/
+// Header standard
 require_once '../inc/header.php';
 
 // Navigation entre les pages d'administration
 navigationAdmin ('Commentaires');
 
 echo $contenu; // pour afficher notamment le tableau des commentaires
+
 if ($afficherFormulaire)
 	{
 	isset ($commentaireCourant) && extract ($commentaireCourant);
@@ -138,17 +137,20 @@ if ($afficherFormulaire)
 				</div>
 			</div>
 			<div class="form-row">
-				<div class="form-group col-md-4">
+				<div class="form-group col-md-2">
 				</div>
-				<div class="form-group col-md-6">
+				<div class="form-group col-md-2">
 					<button type="submit" class="btn btn-primary">&nbsp; Enregistrer &nbsp;</button>
+				</div>
+				<div class="form-group col-md">
+					<a href="<?php echo RACINE_SITE.'admin/gestion_commentaires.php?page='.$_SESSION["pageCommentaire"]??0?>" class="btn btn-secondary">&nbsp; Annuler &nbsp;</a>
 				</div>
 			</div>
 		</form>
 	</div>
-<?php
-	}
-?>
+	<?php
+	} // fin du if ($afficherFormulaire)
+	?>
 <script>
 	$(function(){ // document ready
 
@@ -163,10 +165,11 @@ if ($afficherFormulaire)
 		function reponse (contenu)
 			{
 			$('#tableau').html(contenu);
+			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire"' ?>
 
 			$('.page-item').on('click', 'a', function(e)
 				{
-				page = e.target.id.substr(5, 1);
+				page = e.target.id.replace(/[^0-9]/g, '');
 				requeteAjax ();
 				});
 			}
@@ -183,10 +186,8 @@ if ($afficherFormulaire)
 
 	    // trier si on clique sur une entête du tableau
 		$('#tableau').on('click', 'th.tri', function(e){
-			console.log('avant tri=',tri,'e.target.id=',e.target.id,'sens=',sens)
 			if (tri == e.target.id) sens = ((sens=='ASC')?'DESC':'ASC');
 			else { tri = e.target.id; sens='ASC'; }
-			console.log('apres tri=',tri,'e.target.id=',e.target.id,'sens=',sens)
 			requeteAjax();
 		});
 

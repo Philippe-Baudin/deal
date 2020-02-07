@@ -5,7 +5,7 @@
 // délégation de l'affichage de la liste à "liste_annonces.php" via des requêtes ajax
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 require_once 'inc/init.php';
-$_SESSION['page courante'] = 'index.php';
+$pageCourante = 'index.php';
 
 // Initialiser les filtres et tri dans la session s'il n'y figurent pas encore
 // ---------------------------------------------------------------------------
@@ -16,7 +16,6 @@ if (!isset($_SESSION['filtre']['membre']))    $_SESSION['filtre']['membre']    =
 if (!isset($_SESSION['filtre']['prix']))      $_SESSION['filtre']['prix']      = '7';
 if (!isset($_SESSION['triAccueil']))          $_SESSION['triAccueil']          = '0';
 if (!isset($_SESSION['pageAccueil']))         $_SESSION['pageAccueil']         = '0';
-
 
 // ---------------------------------------------------------------
 // SQL
@@ -167,35 +166,36 @@ require_once 'inc/header.php';
 			echo 'let pageAccueil     = "'.$_SESSION['pageAccueil'].'";';
 		?>
 
+		// réception et traitement de la réponse à la requête AJAX
+		function reponse (contenu)
+			{
+			nombreAnnonces = contenu.substring(0, 20).replace(/[^0-9]/g, '');
+			switch (nombreAnnonces)
+				{
+				case '0'  : htmlNombreAnnonces = 'Aucune annonce ne correspond à votre sélection.'; break;
+				case '1'  : htmlNombreAnnonces = '1 annonce correspond à votre sélection.'; break;
+				default   : htmlNombreAnnonces = ''+nombreAnnonces+' annonces correspondent à votre sélection.'; break;
+				}
+			$('#nombre-annonces').html(htmlNombreAnnonces);
+			$('#liste-annonces').html(contenu);
+
+			$('.page-item').on('click', 'a', function(e)
+				{
+				pageAccueil = e.target.id.replace(/[^0-9]/g, '');
+				requeteAjax ();
+				});
+			}
+
 		function requeteAjax ()
 			{
-			// réception et traitement de la réponse à la requête AJAX
-			function reponse (contenu)
-				{
-				nombreAnnonces = contenu.substring(0, 20).replace(/[^0-9]/g, '');
-				switch (nombreAnnonces)
-					{
-					case '0'  : htmlNombreAnnonces = 'Aucune annonce ne correspond à votre sélection.'; break;
-					case '1'  : htmlNombreAnnonces = '1 annonce correspond à votre sélection.'; break;
-					default   : htmlNombreAnnonces = ''+nombreAnnonces+' annonces correspondent à votre sélection.'; break;
-					}
-				$('#nombre-annonces').html(htmlNombreAnnonces);
-				$('#liste-annonces').html(contenu);
-
-				$('.page-item').on('click', 'a', function(e){
-					pageAccueil = e.target.id.substr(5, 1);
-					requeteAjax ();
-				});
-
-				}
-
 			// Emission de la requête AJAX
+			console.log ('filtrePrix=',filtrePrix);
 			$.post('liste_annonces.php', { filtreCategorie : filtreCategorie,
 			                               filtreVille     : filtreVille,
 			                               filtreMembre    : filtreMembre,
 			                               filtrePrix      : filtrePrix,
 			                               triAccueil      : triAccueil,
-			                               pageAccueil     : pageAccueil,
+			                               pageAccueil     : pageAccueil
 			                             }, reponse, 'html');
 			}
 
@@ -226,6 +226,7 @@ require_once 'inc/header.php';
 		function afficherPrix(prix){
 			if (prix === undefined)
 				{
+				filtrePrix = prix = rangePrix.val();
 				prix = Math.pow(10,rangePrix.val());
 				prix = Math.round (prix);
 				}
@@ -233,7 +234,6 @@ require_once 'inc/header.php';
 				affichagePrix.html('');
 			else
 				affichagePrix.html('Prix maximum : '+prix+' €');
-			return prix;
 		}
 
 		// Quand on déplace le slider, faire bouger l'affichage de la souris sans lancer la requête AJAX
@@ -243,14 +243,14 @@ require_once 'inc/header.php';
 
 		// Quand on lache le slider, lancer la requête AJAX
 		rangePrix.on('change', function(){
-			filtrePrix = afficherPrix ();
+			afficherPrix ();
 			pageAccueil = 0;
 			requeteAjax ();
 		});
 
 		// A l'affichage de la page, afficher le prix maxi et lancer la requête AJAX pour afficher la sélection d'anonces courante
-		rangePrix.val(Math.log(afficherPrix(filtrePrix))/Math.LN10);
 		afficherPrix ();
+		rangePrix.val(filtrePrix);
 		requeteAjax ();
 
 	}); // document ready

@@ -45,16 +45,17 @@ $resultat = executerRequete ("SELECT c.id id, c.commentaire commentaire, m.pseud
 
 
 // Affichage du tableau des commentaires
+$marqueurTri = ($sens=='ASC') ? '&nbsp;&or;' : '&nbsp;&#94;'; 
 ?>
 <table class="table">
 	<thead class="thead-dark">
 		<tr>
-			<th scope="col" class="tri" id="id">Id</th>
-			<th scope="col" class="tri" id="pseudo">Membre</th>
-			<th scope="col" class="tri" id="annonce">Annonce</th>
-			<th scope="col" class="tri" id="commentaire">Commentaire</th>
-			<th scope="col" class="tri" id="date_enregistrement">Date</th>
-			<th scope="col"">Action</th>
+			<th scope="col" class="tri" id="id">Id<?php if($tri=='id')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="pseudo">Membre<?php if($tri=='pseudo')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="annonce">Annonce<?php if($tri=='annonce')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="commentaire">Commentaire<?php if($tri=='commentaire')echo $marqueurTri?></th>
+			<th scope="col" class="tri" id="date_enregistrement">Date<?php if($tri=='date_enregistrement')echo $marqueurTri?></th>
+			<th scope="col">Action</th>
 		</tr>
 	</thead>
 <?php
@@ -78,14 +79,5 @@ echo   '</table>';
 
 // Pagination
 if (isset($limite))
-	{
-	echo '<nav aria-label="Page navigation example">';
-	echo '<ul class="pagination">';
-	echo '<li'.(($page==0)?'':' class="page-item"').'><a class="page-link" id="page_'.($page-1).'" onclick="return false" href="#">Précédente</a></li>';
-	for ($i=0; $i<$nombrePages; $i++)
-		echo '<li class="page-item'.(($i==$page)?' active':'').'"><a class="page-link" id="page_'.$i.'" onclick="return false" href="#">'.($i+1).'</a></li>';
-	echo '<li'.(($page==$nombrePages-1)?'':' class="page-item"').'><a class="page-link" id="page_'.($page+1).'" onclick="return false" href="#">Suivante</a></li>';
-	echo '</ul>';
-	echo '</nav>';
-	}
+	pagination ($page, $nombrePages);
 

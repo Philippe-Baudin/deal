@@ -2,7 +2,6 @@
 require_once 'inc/init.php';
 $messageConnexion = '';
 
-
 // Traitement du formulaire de connexion
 if ($_POST && isset ($_POST['pseudo']) && isset ($_POST['mdp']) && !isset($_POST['nom'])) // si le formulaire a été envoyé
 	{
@@ -22,6 +21,7 @@ if ($_POST && isset ($_POST['pseudo']) && isset ($_POST['mdp']) && !isset($_POST
 				$_SESSION = array();
 				$_SESSION['membre'] = $membre; // on met l'array $membre dans la session
 				$_SESSION['tri'] = 'date_enregistrement';
+				$contenu .= '<script>window.location.href = "'.($pageCourante??'fiche_annonce.php?id=40').'"</script>';
 				}
 			else // mauvais mot de passe
 				{

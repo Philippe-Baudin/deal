@@ -2,10 +2,10 @@
 //phpinfo();
 // Connexion à la base de données
 $pdo = new PDO( 'mysql:host=localhost;dbname=deal'
-//              , 'philippe'
-//              , 'Philippe'
-              , 'root'
-              , ''
+              , 'philippe'
+              , 'Philippe'
+//              , 'root'
+//              , ''
               , array ( PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING
               	      , PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
               	      )
@@ -26,6 +26,7 @@ define('TAILLE_PAGE_ANNONCE', 6); // nombre d'annonce par page dans la page gest
 define('TAILLE_PAGE_ACCUEIL', 3); // nombre d'annonce par page dans la page index.php
 define('TAILLE_PAGE_MEMBRE', 12); // nombre d'annonce par page dans la page index.php
 define('TAILLE_PAGE_COMMENTAIRE', 12); // nombre d'annonce par page dans la page index.php
+define('TAILLE_PAGE_NOTE', 12); // nombre d'annonce par page dans la page index.php
 
 // Définition de quelques icônes FontAwesome
 define('LOUPE', '<i class="fa fa-search lien-noir" aria-hidden="true"></i>');
