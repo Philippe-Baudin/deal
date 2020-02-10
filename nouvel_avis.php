@@ -1,4 +1,5 @@
-<?php
+﻿<?php
+$repertoire='';
 require_once 'inc/init.php';
 //debug ($_POST);
 if (empty($_POST))
@@ -20,11 +21,11 @@ if (isset($_POST['avis']))
 // Calculer la moyenne des notes de l'auteur de l'annonce et l'afficher
 if (!empty($id))
 	{
-	$requete = executerRequete ("SELECT count(*) decompte, AVG(note) note
+	$resultat = executerRequete ("SELECT count(*) decompte, AVG(note) note
 	                             FROM note 
 	                             WHERE membre_id2=:auteur", array(':auteur'=>$id));
-	$resultat = $requete->fetch (PDO::FETCH_ASSOC);
-	if ($resultat['decompte']>0)
-		echo noteEnEtoiles((int)$resultat['note']);
+	$ligne = $resultat->fetch (PDO::FETCH_ASSOC);
+	if ($ligne['decompte']>0)
+		echo noteEnEtoiles((int)$ligne['note']);
 	}
 

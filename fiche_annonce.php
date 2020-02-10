@@ -4,44 +4,45 @@
 // affiche le détail d'une annonce de façon relativement esthétique,
 // avec des liens pour contacter l'auteur et ajouter commentaires ou avis
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+$repertoire='';
 require_once 'inc/init.php';
 $pageCourante = 'fiche_annonce.php';
 
 // Impossible d'afficher cette page sans id d'annonce : retour à l'accueil
 if (!isset($_GET['id']))
 	{
-	header ('location:'.RACINE_SITE.'index.php');
+//	header ('location:'.RACINE_SITE.'index.php');
 	exit ();
 	}
 
 // Aller chercher l'annonce dans la base
-$requete = executerRequete ("SELECT annonce.id id,
-                                    annonce.titre titre,
-                                    description_longue description,
-                                    prix,
-                                    photo,
-                                    pays,
-                                    ville,
-                                    adresse,
-                                    code_postal,
-                                    membre.id auteur,
-                                    civilite,
-                                    pseudo,
-                                    email,
-                                    categorie.titre categorie,
-                                    categorie.id id_categorie,
-                                    DATE_FORMAT(annonce.date_enregistrement,'%d/%m/%Y') date
-                             FROM annonce
-                             RIGHT JOIN membre ON membre_id = membre.id
-                             RIGHT JOIN categorie ON categorie_id = categorie.id
-                             WHERE annonce.id = :id", array(':id'=>$_GET['id']));
+$resultat = executerRequete ("SELECT annonce.id id,
+                                     annonce.titre titre,
+                                     description_longue description,
+                                     prix,
+                                     photo,
+                                     pays,
+                                     ville,
+                                     adresse,
+                                     code_postal,
+                                     membre.id auteur,
+                                     civilite,
+                                     pseudo,
+                                     email,
+                                     categorie.titre categorie,
+                                     categorie.id id_categorie,
+                                     DATE_FORMAT(annonce.date_enregistrement,'%d/%m/%Y') date
+                              FROM annonce
+                              RIGHT JOIN membre ON membre_id = membre.id
+                              RIGHT JOIN categorie ON categorie_id = categorie.id
+                              WHERE annonce.id = :id", array(':id'=>$_GET['id']));
 // Si l'annonce n'existe pas, retour vers l'accueil
-if (!$requete || $requete->rowCount() == 0)
+if (!$resultat || $resultat->rowCount() == 0)
 	{
 	header ('location:'.RACINE_SITE.'index.php');
 	exit ();
 	}
-extract($requete->fetch(PDO::FETCH_ASSOC));
+extract($resultat->fetch(PDO::FETCH_ASSOC));
 
 // Suggestion d'autres annonces
 /*
@@ -50,17 +51,17 @@ extract($requete->fetch(PDO::FETCH_ASSOC));
 - aléatoires
 */
 define('NOMBRE_MAXI_SUGGESTIONS', 4);
-$requete = executerRequete ("SELECT * FROM annonce WHERE categorie_id = :categorie_id AND id != :id ORDER BY RAND() LIMIT ".NOMBRE_MAXI_SUGGESTIONS,
+$resultat = executerRequete ("SELECT * FROM annonce WHERE categorie_id = :categorie_id AND id != :id ORDER BY RAND() LIMIT ".NOMBRE_MAXI_SUGGESTIONS,
                             array ('categorie_id' => $id_categorie, ':id' => $id));
-$nombreSuggestions = $requete->rowCount();
+$nombreSuggestions = $resultat->rowCount();
 if ($nombreSuggestions == 0)
 	{
-	$requete = executerRequete ("SELECT * FROM annonce WHERE id != :id ORDER BY RAND() LIMIT ".NOMBRE_MAXI_SUGGESTIONS, array (':id' => $id));
-	$nombreSuggestions = $requete->rowCount();
+	$resultat = executerRequete ("SELECT * FROM annonce WHERE id != :id ORDER BY RAND() LIMIT ".NOMBRE_MAXI_SUGGESTIONS, array (':id' => $id));
+	$nombreSuggestions = $resultat->rowCount();
 	}
 if ($nombreSuggestions > 0)
 	{
-	$suggestion = $requete->fetchAll (PDO::FETCH_ASSOC);
+	$suggestion = $resultat->fetchAll (PDO::FETCH_ASSOC);
 	}
 
 
@@ -71,8 +72,12 @@ $contenu .= '<br>';
 
 // Titre
 $contenu .= '<div class="row">';
-$contenu .=     '<div class="col-sm-9">';
+$contenu .=     '<div class="col-sm-7">';
 $contenu .=         '<h2>'.$titre.'</h2>';
+$contenu .=     '</div>';
+$contenu .=     '<div class="col-sm-2">';
+if (estAdmin())
+	$contenu .=     '<a class="btn btn-primary" href="gestion_annonces.php?modification='.$id.'#formulaire">Modifier l\'annonce</a>';
 $contenu .=     '</div>';
 $contenu .=     '<div class="col-sm">';
 $contenu .=         '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modaleContact">Contacter ' .$pseudo. '</button>';
@@ -128,7 +133,7 @@ for ($i=0; $i<$nombreSuggestions; $i++)
 	if (empty ($suggestion[$i]['photo']))
 		$contenu .= '<p>'.$suggestion[$i]['description_courte'].'</p>';
 	else
-		$contenu .= '<a href="?id='.$suggestion[$i]['id'].'"><img src="'.$suggestion[$i]['photo'].'" alt="image '.$suggestion[$i]['titre'].'" style="max-width:90%; max-height:200px"></a>';
+		$contenu .= '<a href="?id='.$suggestion[$i]['id'].'"><img src="'.$suggestion[$i]['photo'].'" alt="image '.$suggestion[$i]['titre'].'" title="'.$suggestion[$i]['description_courte'].'" style="max-width:90%; max-height:200px"></a>';
 	$contenu .= '</div>';
 	}
 
@@ -153,11 +158,15 @@ $contenu .= '<div class="col-sm">';
 $contenu .= '<a href="index.php">Retour vers les annonces</a>';
 $contenu .= '</div>';
 $contenu .= '</div>';
-?>
-<?php
+
+require_once 'inc/header.php';
+require_once 'connexion_modale.php';
+
+
 // Définition des fenêtres modales que seul un membre connecté peut activer
 if (estConnecte())
 	{
+	// Fenêtre modale de dépot d'un commentaire
 	?>
 	<div class="modal fade" id="modaleCommentaire" tabindex="-1" role="dialog" aria-labelledby="modaleCommentaireTitle" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -288,9 +297,6 @@ if (estConnecte())
 	</div>
 	<?php	
 	}
-
-require_once 'inc/header.php';
-require_once 'connexion_modale.php';
 
 echo $contenu;
 

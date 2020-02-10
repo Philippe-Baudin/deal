@@ -1,4 +1,5 @@
-<?php
+﻿<?php
+$repertoire='';
 require_once 'inc/init.php';
 if (!estAdmin())
 	{
@@ -65,7 +66,7 @@ $resultat = executerRequete ("SELECT annonce.id id_annonce,
 
 
 // Affichage du tableau
-$marqueurTri = ($sens=='ASC') ? '&nbsp;&or;' : '&nbsp;&#94;'; 
+$marqueurTri = '<span style="color:grey;">'.(($sens=='ASC') ? '&nbsp;&or;' : '&nbsp;&#94;').'</span>';
 ?>
 <table class="table">
 	<thead class="thead-dark">

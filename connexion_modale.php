@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once 'inc/init.php';
 $messageConnexion = '';
 
@@ -8,7 +8,6 @@ if ($_POST && isset ($_POST['pseudo']) && isset ($_POST['mdp']) && !isset($_POST
 	// Contrôle du formulaire
 	if (empty($_POST['pseudo']) || empty($_POST['mdp'])) // empty vérifie si c'est 0, NULL, FALSE, '' ou non défini donc ça suffit
 		$messageConnexion .= '<div class="alert alert-danger">Les identifiants sont obligatoires</div>';
-
 	// S'il n'y a pas d'erreur sur le formulaire, on vérifie l'existence du couple pseudo, mdp dans la base
 	if (empty ($messageConnexion)) // donc pas d'erreur
 		{
@@ -18,10 +17,9 @@ if ($_POST && isset ($_POST['pseudo']) && isset ($_POST['mdp']) && !isset($_POST
 			$membre = $resultat->fetch (PDO::FETCH_ASSOC);
 			if (password_verify($_POST['mdp'], $membre['mdp'])) // On est obligé d'utiliser password_verify() : password_hash() retourne une clé différente à chaque appel (salage)
 				{
-				$_SESSION = array();
 				$_SESSION['membre'] = $membre; // on met l'array $membre dans la session
 				$_SESSION['tri'] = 'date_enregistrement';
-				$contenu .= '<script>window.location.href = "'.($pageCourante??'fiche_annonce.php?id=40').'"</script>';
+				echo '<script>window.location.href = "'.$pageCourante.retablirGET(false).'"</script>';
 				}
 			else // mauvais mot de passe
 				{

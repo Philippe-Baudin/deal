@@ -4,6 +4,7 @@
 // affiche la liste des catégories avec des liens vers modification et suppression
 // ainsi qu'un formulaire de modification
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+$repertoire='../';
 require_once '../inc/init.php';
 
 // Vérification administrateur

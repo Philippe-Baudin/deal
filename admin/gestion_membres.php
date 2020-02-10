@@ -4,6 +4,7 @@
 // affiche la liste des membres avec des liens vers modification et suppression
 // ainsi qu'un formulaire de modification
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+$repertoire='../';
 require_once '../inc/init.php';
 
 $afficherFormulaire = false;
@@ -28,10 +29,10 @@ if (!empty($_POST))
 	$contenu = validerMembre($_POST, !empty($_POST['mdp']));
 	if (empty($contenu))
 		{
-		$requete = executerRequete ("SELECT * FROM membre WHERE id!=:id AND pseudo=:pseudo",array(':id'=>$_POST['id'], ':pseudo'=>$_POST['pseudo']));
-		if ($requete->rowCount() == 0)
+		$resultat = executerRequete ("SELECT * FROM membre WHERE id!=:id AND pseudo=:pseudo",array(':id'=>$_POST['id'], ':pseudo'=>$_POST['pseudo']));
+		if ($resultat->rowCount() == 0)
 			{
-			$requete = executerRequete ("UPDATE membre SET pseudo=:pseudo, civilite=:civilite, nom=:nom, prenom=:prenom, email=:email, telephone=:telephone, role=:role, date_enregistrement=NOW() WHERE id=:id",
+			$resultat = executerRequete ("UPDATE membre SET pseudo=:pseudo, civilite=:civilite, nom=:nom, prenom=:prenom, email=:email, telephone=:telephone, role=:role, date_enregistrement=NOW() WHERE id=:id",
 			                            array (  ':id'                  => $_POST['id']
 			                                  ,  ':pseudo'              => $_POST['pseudo']
 			                                  ,  ':civilite'            => $_POST['civilite']
@@ -42,10 +43,10 @@ if (!empty($_POST))
 			                                  ,  ':role'                => $_POST['role']
 			                                  )
 			                           );
-			if ($requete && !empty($_POST['mdp']))
+			if ($resultat && !empty($_POST['mdp']))
 				{
 				$mdp = password_hash ($_POST['mdp'], PASSWORD_DEFAULT);
-				$requete = executerRequete ("UPDATE membre SET mdp=:mdp, date_enregistrement=NOW() WHERE id=:id", array (':id' => $_POST['id'], ':mdp' => $mdp));
+				$resultat = executerRequete ("UPDATE membre SET mdp=:mdp, date_enregistrement=NOW() WHERE id=:id", array (':id' => $_POST['id'], ':mdp' => $mdp));
 				}
 			}
 		else
@@ -53,7 +54,7 @@ if (!empty($_POST))
 			$contenu .= '<div class="alert alert-danger">Le pseudo "'.$_POST['pseudo'].'" existe déjà.</div>';
 			}
 		}
-	if (empty($contenu) && isset($requete))
+	if (empty($contenu) && isset($resultat))
 		$contenu .= '<div class="alert alert-success">Le membre a été enregistré.</div>';
 	else
 		{

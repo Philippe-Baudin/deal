@@ -1,9 +1,10 @@
-<?php
+﻿<?php
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // index.php
 // filtre et tri de la liste des annonces à afficher
 // délégation de l'affichage de la liste à "liste_annonces.php" via des requêtes ajax
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+$repertoire='';
 require_once 'inc/init.php';
 $pageCourante = 'index.php';
 
@@ -104,7 +105,7 @@ $contenu .=         '</div><br>';
 // ----------------
 $contenu .=         '<div class="form-group">';
 $contenu .=             '<label for="range-prix">Prix :</label>';
-$contenu .=             '<input type="range" class="custom-range" min="0" max="7" step="0.1" id="range-prix">';
+$contenu .=             '<input type="range" class="custom-range" min="0" max="7" step="0.1" id="range-prix" value="'.($_SESSION['filtre']['prix']??7).'">';
 $contenu .=             '<p style="font-size:0.8rem;" id="affichage-prix"></p>';
 $contenu .=         '</div>';
 
@@ -136,7 +137,7 @@ $contenu .=                         '<option value="3"'.($_SESSION['triAccueil']
 $contenu .=                         '<option value="4"'.($_SESSION['triAccueil']==='4'?' selected':'').'>Les meilleurs vendeurs en premier</option>';
 $contenu .=                     '</select>';
 $contenu .=                 '</div>';
-$contenu .=             '</div>'; // col-sm-6
+$contenu .=             '</div>'; // col-sm-8
 $contenu .=         '</div>'; // row
 
 // Affichage des annonces sélectionnées
@@ -165,11 +166,18 @@ require_once 'inc/header.php';
 			echo 'let triAccueil      = "'.$_SESSION['triAccueil'].'";';
 			echo 'let pageAccueil     = "'.$_SESSION['pageAccueil'].'";';
 		?>
+		
+		// les différents select
+		let categorie = $('select#categorie');
+		let ville     = $('select#ville');
+		let membre    = $('select#membre');
+		let tri       = $('select#tri');
+
 
 		// réception et traitement de la réponse à la requête AJAX
 		function reponse (contenu)
 			{
-			nombreAnnonces = contenu.substring(0, 20).replace(/[^0-9]/g, '');
+			nombreAnnonces = contenu.substring(0, 20).replace(/[^.0-9]/g, '');
 			switch (nombreAnnonces)
 				{
 				case '0'  : htmlNombreAnnonces = 'Aucune annonce ne correspond à votre sélection.'; break;
@@ -189,7 +197,6 @@ require_once 'inc/header.php';
 		function requeteAjax ()
 			{
 			// Emission de la requête AJAX
-			console.log ('filtrePrix=',filtrePrix);
 			$.post('liste_annonces.php', { filtreCategorie : filtreCategorie,
 			                               filtreVille     : filtreVille,
 			                               filtreMembre    : filtreMembre,
@@ -200,23 +207,24 @@ require_once 'inc/header.php';
 			}
 
 		// listeners sur les différents select
-		$('select#categorie option').click(e=>{
-			filtreCategorie = e.target.value;
+		categorie.change(_=>{
+			filtreCategorie = categorie.val();
 			pageAccueil = 0;
 			requeteAjax ();
 		});
-		$('select#ville option').click(e=>{
-			filtreVille = e.target.value;
+		ville.change(_=>{
+			filtreVille = ville.val();
 			pageAccueil = 0;
 			requeteAjax ();
 		});
-		$('select#membre option').click(e=>{
-			filtreMembre = e.target.value;
+		membre.change(_=>{
+			filtreMembre = membre.val();
 			pageAccueil = 0;
 			requeteAjax ();
 		});
-		$('select#tri option').click(e=>{
-			triAccueil = e.target.value;
+		tri.change(_=>{
+			triAccueil = tri.val();
+			pageAccueil = 0;
 			requeteAjax ();
 		});
 
@@ -267,12 +275,6 @@ if (!empty($messageConnexion))
 	echo '<script>$(document).ready(function(){$("#modaleConnexion").modal("show");});</script>';
 
 echo $contenu;
-?>
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<!-- Un peu de javaScript, pour envoyer les requêtes AJAX correspondant aux filtres et tri.  -->
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<?php
 
 // Et le footer standard
 require_once 'inc/footer.php';

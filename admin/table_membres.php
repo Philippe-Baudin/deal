@@ -1,4 +1,5 @@
 <?php
+$repertoire='../';
 require_once '../inc/init.php';
 if (!estAdmin())
 	{
@@ -45,7 +46,7 @@ if ($nombreMembres > TAILLE_PAGE_MEMBRE)
 $resultat = executerRequete ("SELECT * FROM membre ORDER BY $tri $sens".($limite??''));
 
 // Affichage du tableau des membres
-$marqueurTri = ($sens=='ASC') ? '&nbsp;&or;' : '&nbsp;&#94;'; 
+$marqueurTri = '<span style="color:grey;">'.(($sens=='ASC') ? '&nbsp;&or;' : '&nbsp;&#94;').'</span>';
 ?>
 <table class="table">
 	<thead class="thead-dark">

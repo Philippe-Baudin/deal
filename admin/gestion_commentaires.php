@@ -4,6 +4,7 @@
 // affiche la liste des commentaires avec des liens vers modification et suppression
 // ainsi qu'un formulaire de modification
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+$repertoire='../';
 require_once '../inc/init.php';
 
 $afficherFormulaire = false;
@@ -27,9 +28,9 @@ if (!empty($_POST))
 		$contenu .= '<div class="alert alert-danger">Le pseudo du membre doit être compris entre 4 et 20 caractères.</div>';
 	else
 		{
-		$requete = executerRequete ("SELECT id FROM membre WHERE pseudo=:pseudo", array (':pseudo'=> $pseudo));
-		if ($requete->rowCount() >= 1)
-			$membre_id = $requete->fetch (PDO::FETCH_NUM)[0];
+		$resultat = executerRequete ("SELECT id FROM membre WHERE pseudo=:pseudo", array (':pseudo'=> $pseudo));
+		if ($resultat->rowCount() >= 1)
+			$membre_id = $resultat->fetch (PDO::FETCH_NUM)[0];
 		else			
 			$contenu .= '<div class="alert alert-danger">Le membre n\'existe pas.</div>';
 		}
@@ -38,8 +39,8 @@ if (!empty($_POST))
 		$contenu .= '<div class="alert alert-danger">L\'identifiant de l\'annonce doit être un nombre.</div>';
 	else
 		{
-		$requete = executerRequete ("SELECT id FROM annonce WHERE id=:id", array (':id'=> $annonce));
-		if ($requete->rowCount() < 1)
+		$resultat = executerRequete ("SELECT id FROM annonce WHERE id=:id", array (':id'=> $annonce));
+		if ($resultat->rowCount() < 1)
 			$contenu .= '<div class="alert alert-danger">Il n\'y a pas d\'annonce d\'identifiant '.$annonce.'.</div>';
 		}
 
@@ -47,13 +48,13 @@ if (!empty($_POST))
 		{
 		if (empty($date_enregistrement))
 			{
-			$requete = executerRequete ("REPLACE INTO commentaire VALUES (:id, :commentaire, :membre, :annonce, NOW())",
-			                            array (':id' => $id, ':commentaire' => $commentaire, ':membre' => $membre_id, ':annonce' => $annonce));
+			$resultat = executerRequete ("REPLACE INTO commentaire VALUES (:id, :commentaire, :membre, :annonce, NOW())",
+			                             array (':id' => $id, ':commentaire' => $commentaire, ':membre' => $membre_id, ':annonce' => $annonce));
 			}
 		else
 			{
-			$requete = executerRequete ("REPLACE INTO commentaire VALUES (:id, :commentaire, :membre, :annonce, :date_enregistrement)",
-			                            array (':id' => $id, ':commentaire' => $commentaire, ':membre' => $membre_id, ':annonce' => $annonce, ':date_enregistrement' => $date_enregistrement));
+			$resultat = executerRequete ("REPLACE INTO commentaire VALUES (:id, :commentaire, :membre, :annonce, :date_enregistrement)",
+			                             array (':id' => $id, ':commentaire' => $commentaire, ':membre' => $membre_id, ':annonce' => $annonce, ':date_enregistrement' => $date_enregistrement));
 			}
 		}
 	if (empty($contenu) && $requete)

@@ -153,6 +153,28 @@ function noteEnEtoiles ($note)
 	return $retour;
 	}
 
+function retablirGET ($deconnexion)
+	{
+	$retour = '';
+	$separateur = '?';
+	if ($deconnexion)
+		{
+		$retour .= '?action=deconnexion';
+		$separateur = '&';
+		}
+	if (!empty($_GET))
+		{
+		foreach ($_GET as $indice => $valeur)
+			{
+			if ($indice != 'action' || $indice != 'deconnexion')
+				{
+				$retour .= $separateur.$indice.'='.$valeur;
+				$separateur = '&';
+				}
+			}
+		}
+	return $retour;
+	}
 // ----------------------------------------------
 // Requete SQL :
 // ----------------------------------------------

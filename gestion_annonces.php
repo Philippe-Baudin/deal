@@ -4,6 +4,7 @@
 // affiche la liste des annonces avec des liens vers modification et suppression
 // ainsi qu'un formulaire de modification
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+$repertoire='';
 require_once 'inc/init.php';
 
 $afficherFormulaire = false;
@@ -52,7 +53,6 @@ if (!empty($_POST))
 	if (!isset ($description_longue) || strlen($description_longue) < 10)
 		$contenu .= '<div class="alert alert-danger">La description longue doit être comporter au moins 10 caractères.</div>';
 
-	$ok = false;
 	if (!isset ($prix) || !isFloat ($prix))
 		$contenu .= '<div class="alert alert-danger">Le prix doit être un nombre.</div>';
 	else
@@ -72,31 +72,25 @@ if (!empty($_POST))
 
 	if (!isset ($pseudo))
 		$pseudo = $_SESSION['membre']['pseudo'];
-	if (strlen($pseudo) < 4 || strlen ($pseudo) > 100)
-		$contenu .= '<div class="alert alert-danger">Le pseudo du membre doit être compris entre 4 et 20 caractères.</div>';
-	else
-		{
-		$requete = executerRequete ("SELECT id FROM membre WHERE pseudo=:pseudo", array (':pseudo'=> $pseudo));
-		if ($requete->rowCount() >= 1)
-			$membre_id = $requete->fetch (PDO::FETCH_NUM)[0];
-		else			
-			$contenu .= '<div class="alert alert-danger">Le membre n\'existe pas.</div>';
-		}
+	$resultat = executerRequete ("SELECT id FROM membre WHERE pseudo=:pseudo", array (':pseudo'=> $pseudo));
+	if ($resultat->rowCount() >= 1)
+		$membre_id = $resultat->fetch (PDO::FETCH_NUM)[0];
+	else			
+		$contenu .= '<div class="alert alert-danger">Le membre n\'existe pas.</div>';
 
 	if (!isset ($categorie))
 		$contenu .= '<div class="alert alert-danger">La catégorie n\'existe pas.</div>';
 	else
 		{
-		$requete = executerRequete ("SELECT id FROM categorie WHERE titre=:categorie", array (':categorie' => $categorie));
-		if ($requete->rowCount() >= 1)
-			$categorie_id = $requete->fetch (PDO::FETCH_NUM)[0];
+		$resultat = executerRequete ("SELECT id FROM categorie WHERE titre=:categorie", array (':categorie' => $categorie));
+		if ($resultat->rowCount() >= 1)
+			$categorie_id = $resultat->fetch (PDO::FETCH_NUM)[0];
 		else			
 			$contenu .= '<div class="alert alert-danger">La catégorie n\'existe pas.</div>';
 		}
 
 	if (empty($contenu))
 		{
-		$photoBDD = ''; // Par défaut, le champ est une string vide en BDD
 		if (empty($id))
 			$stringRequete = "INSERT INTO annonce VALUES (:id, :titre, :description_courte, :description_longue, :prix, :photo, :pays, :ville, :adresse, :code_postal, :membre_id, :categorie_id, NOW())";
 		else
@@ -107,7 +101,7 @@ if (!empty($_POST))
 		                       , ':description_courte' => $description_courte
 		                       , ':description_longue' => $description_longue
 		                       , ':prix' => $prix
-		                       , ':photo' => $photoBDD
+		                       , ':photo' => ''
 		                       , ':pays' => $pays
 		                       , ':ville' => $ville
 		                       , ':adresse' => $adresse
@@ -118,44 +112,69 @@ if (!empty($_POST))
 		if (!empty($id) && isset($date_enregistrement) && $date_enregistrement != '')
 			$arrayRequete[':date_enregistrement'] = $date_enregistrement;
 		$resultat = executerRequete ($stringRequete, $arrayRequete);
+
+		// J'upload la photo APRES avoir inséré l'annonce, de façon à connaître son id qui sert à rendre unique le nom de la photo
 		if ($resultat)
 			{
 			if (empty($id))
 				{
 				$resultat = executerRequete("SELECT id FROM annonce ORDER BY id DESC LIMIT 1");
-				$id = $resultat->fetch(PDO::FETCH_NUM[0]);
+				$id = $resultat->fetch(PDO::FETCH_NUM)[0];
 				}
-			if (isset($_POST['photo_actuelle'])) // Si on est en train de modifier le produit, on remet le chemin de la photo en BDD
-				{
-				$photoBDD = $_POST['photo_actuelle'];
-				}
+			$photoBDD = $_POST['photo_actuelle'] ?? ''; // Par défaut, le champ est la photo actuellement dans l'annonce, ou une string vide s'il n'y en a pas
 			if (!empty ($_FILES['photo']['name'])) // si on a un nom de fichier, c'est qu'on est en train de le télécharger
 				{
-				$extension = substr ($_FILES['photo']['name'], -4);
- 				$extension2 = substr ($_FILES['photo']['name'], -5);
-  				if (strcasecmp($extension, '.gif') && strcasecmp($extension, '.jpg') && strcasecmp($extension, '.png') && strcasecmp($extension, '.bmp') && strcasecmp($extension2, '.jpeg'))
+				// Vérifier que le nom est celui d'une image (pour bien faire, il faudrait aussi véridier le contenu ...)
+				$extension3 = substr ($_FILES['photo']['name'], -4); // extension de 3 lettres : gif, jpg, png ou bmp
+ 				$extension4 = substr ($_FILES['photo']['name'], -5); // extension de 4 lettres : jpeg
+  				if (strcasecmp($extension3, '.gif') && strcasecmp($extension3, '.jpg') && strcasecmp($extension3, '.png') && strcasecmp($extension3, '.bmp') && strcasecmp($extension4, '.jpeg'))
 					$contenu .= '<div class="alert alert-danger">Fichier photo invalide</div>';
 				else
 					{
-					// Construire un nom de fichier unique (on suppose que la référence est unique et qu'on l'a vérifié plus haut (voir unicité d'un pseudo dans l'inscription d'un membre))
-					$fichierPhoto = 'ref' . $id . '_' . $_FILES['photo']['name'];
-					$photoBDD = 'img/' . $fichierPhoto; // nom du fichier à utiliser ultérieurement dans des balises <img>
+					// S'il y a déjà une photo, l'effacer
+					$resultat = executerRequete ("SELECT photo from annonce WHERE id=:id", array(':id'=>$id));
+					if ($resultat)
+						{
+						$ancienNom = $resultat->fetch(PDO::FETCH_NUM)[0];
+						if (file_exists($ancienNom))
+							unlink ($ancienNom);
+						}
+					// Construire un nom de fichier unique (par construction l'id de l'annonce est unique), recopier la photo et l'enregistrer dans la BDD
+					$photoBDD = 'img/ref_' . $id . '_' . $_FILES['photo']['name']; // nom du fichier à utiliser ultérieurement dans des balises <img>
 					copy($_FILES['photo']['tmp_name'], $photoBDD);
+					executerRequete("UPDATE annonce set photo=:photo WHERE id=:id", array(':photo'=>$photoBDD, ':id'=>$id));
+					$_POST['photo']=$photoBDD;
 					}
 				}
 			if (empty($contenu))
 				{
-				//XXX Mettre le message en modale et redirect vers la fiche annonce
-				// $contenu .= '<div class="alert alert-success">L\'annonce a été enregistrée.</div>';
-				executerRequete("UPDATE annonce set photo=:photo WHERE id=:id", array(':photo'=>$photoBDD, ':id'=>$id));
-				header ('location:fiche_annonce.php?id='.$id);
-				exit ();
+				$message  = '<div class="modal fade" id="modaleOK" tabindex="-1" role="dialog" aria-labelledby="modaleOKTitle" aria-hidden="true">';
+				$message .=      '<div class="modal-dialog modal-dialog-centered modal" role="document">';
+				$message .=          '<div class="modal-content">';
+				$message .=              '<div class="modal-header">';
+				$message .=                  '<h5 class="modal-title" id="modaleAvisTitle">L\'annonce a été enregistrée</h5>';
+				$message .=                  '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
+				$message .=                      '<span aria-hidden="true">&times;</span>';
+				$message .=                  '</button>';
+				$message .=              '</div>';
+				$message .=              '<div class="modal-body">';
+				$message .=                  '<form method="post" action="fiche_annonce.php?id='.$id.'">';
+				$message .=                      '<button type="submit" name="OK" id="OK" class="btn btn-primary">&nbsp; OK &nbsp;</button>';
+				$message .=                  '</form>';
+				$message .=              '</div>';
+				$message .=          '</div>';
+				$message .=      '</div>';
+				$message .= '</div>';
+				$message .= '<script>$("#modaleOK").modal("show")</script>';
 				}
 			}
 		}
-	$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
-	$afficherFormulaire = true;
-	$annonceCourante = $_POST;
+	if (!empty($contenu))
+		{
+		$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
+		$afficherFormulaire = true;
+		$annonceCourante = $_POST;
+		}
 	} // if (!empty($_POST))
 
 // Suppression d'une annonce
@@ -166,8 +185,8 @@ if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'o
 	if ($resultat && $resultat->rowCount()==1)
 		{
 		$photo = $resultat->fetch(PDO::FETCH_NUM)[0];
-		if (!empty($photo))
-			unlink ('../'.$photo);
+		if (!empty($photo) && file_exists($photo))
+			unlink ($photo);
 		}
 	$resultat = executerRequete ("DELETE FROM commentaire WHERE annonce_id = :id", array (':id' => $_GET['suppression']));
 	$resultat = executerRequete ("DELETE FROM annonce WHERE id = :id", array (':id' => $_GET['suppression']));
@@ -191,65 +210,49 @@ $resultat = executerRequete ("SELECT titre FROM categorie");
 $listeCategories = $resultat->fetchAll (PDO::FETCH_NUM);
 
 
-
 require_once 'inc/header.php';
-echo '<script>$(".container").css("padding","0").css("margin","0");</script>';
-//echo '<style> .container {padding:0;margin:auto;}</style>';
 
 // Navigation entre les pages d'administration
 if (!isset($_GET['creation']))
 	navigationAdmin ('Annonces');
 
-echo $contenu; // pour afficher notamment les messages
+echo $contenu;
+if (isset($message)) echo $message;
 
 // Affichage du tableau des annonces :
 if ($afficherTableau)
 	{
 	// Selection de l'ordre et du sens du tri -->
-	echo '<div>';
-	echo     '<label for="critere-tri">Trier par :&nbsp;</label>';
-	echo     '<select name="tri" class="tri" id="critere-tri">';
-	echo         '<option value="id_annonce"'         .(($tri=='id_annonce')?         ' selected':'').'>Id</option>';
-	echo         '<option value="titre"'              .(($tri=='titre')?              ' selected':'').'>Titre</option>';
-	echo         '<option value="description_courte"' .(($tri=='description_courte')? ' selected':'').'>Description courte</option>';
-	echo         '<option value="description_longue"' .(($tri=='description_longue')? ' selected':'').'>Description longue</option>';
-	echo         '<option value="prix"'               .(($tri=='prix')?               ' selected':'').'>Prix</option>';
-	echo         '<option value="photo"'              .(($tri=='photo')?              ' selected':'').'>Photo</option>';
-	echo         '<option value="pays"'               .(($tri=='pays')?               ' selected':'').'>Pays</option>';
-	echo         '<option value="ville"'              .(($tri=='ville')?              ' selected':'').'>Ville</option>';
-	echo         '<option value="adresse"'            .(($tri=='adresse')?            ' selected':'').'>Adresse</option>';
-	echo         '<option value="code_postal"'        .(($tri=='code_postal')?        ' selected':'').'>Code postal</option>';
-	echo         '<option value="pseudo"'             .(($tri=='pseudo')?             ' selected':'').'>Membre</option>';
-	echo         '<option value="categorie"'          .(($tri=='categorie')?          ' selected':'').'>Catégorie</option>';
-	echo         '<option value="date_enregistrement"'.(($tri=='date_enregistrement')?' selected':'').'>Date</option>';
-	echo     '</select>';
-	echo     '<select name="sens" class="sens">';
-	echo         '<option value="ASC" selected>croissant</option>';
-	echo         '<option value="DESC"' .(($sens=='DESC')? ' selected':'').'>décroissant</option>';
-	echo     '</select>';
+	echo '<div class="row">';
+	echo     '<div class="col-sm-4">';
+	echo         '<div class="form-group form-inline">';
+	echo             '<label for="critere-tri">Trier par :&nbsp;</label>';
+	echo             '<select name="tri" class="form-control tri" id="critere-tri">';
+	echo                 '<option value="id_annonce"'         .(($tri=='id_annonce')?         ' selected':'').'>Id</option>';
+	echo                 '<option value="titre"'              .(($tri=='titre')?              ' selected':'').'>Titre</option>';
+	echo                 '<option value="description_courte"' .(($tri=='description_courte')? ' selected':'').'>Description courte</option>';
+	echo                 '<option value="description_longue"' .(($tri=='description_longue')? ' selected':'').'>Description longue</option>';
+	echo                 '<option value="prix"'               .(($tri=='prix')?               ' selected':'').'>Prix</option>';
+	echo                 '<option value="photo"'              .(($tri=='photo')?              ' selected':'').'>Photo</option>';
+	echo                 '<option value="pays"'               .(($tri=='pays')?               ' selected':'').'>Pays</option>';
+	echo                 '<option value="ville"'              .(($tri=='ville')?              ' selected':'').'>Ville</option>';
+	echo                 '<option value="adresse"'            .(($tri=='adresse')?            ' selected':'').'>Adresse</option>';
+	echo                 '<option value="code_postal"'        .(($tri=='code_postal')?        ' selected':'').'>Code postal</option>';
+	echo                 '<option value="pseudo"'             .(($tri=='pseudo')?             ' selected':'').'>Membre</option>';
+	echo                 '<option value="categorie"'          .(($tri=='categorie')?          ' selected':'').'>Catégorie</option>';
+	echo                 '<option value="date_enregistrement"'.(($tri=='date_enregistrement')?' selected':'').'>Date</option>';
+	echo             '</select>';
+	echo             '<select name="sens" class="form-control sens">';
+	echo                 '<option value="ASC" selected>croissant</option>';
+	echo                 '<option value="DESC"' .(($sens=='DESC')? ' selected':'').'>décroissant</option>';
+	echo             '</select>';
+	echo         '</div>';
+	echo     '</div>';
 	echo '</div>';
 	echo '<div id="tableau" class="table-responsive-sm" style="margin:10px">';
 	//       Emplacement du tableau, qui sera rempli via AJAX en fonction du tri choisi ci-dessus -->
 	echo '</div>';
 
-	/*
-		{
-		echo '<nav aria-label="Page navigation example">';
-		echo '<ul class="pagination">';
-		if ($numeroPage<=0)
-			echo '<li><a class="page-link" onclick="return false" href="">Précédente</a></li>';
-		else
-			echo '<li class="page-item"><a class="page-link" href="?page='.($numeroPage-1).'">Précédente</a></li>';
-		for ($i=0; $i<$nombrePages; $i++)
-			echo '<li class="page-item'.(($i==$numeroPage)?' active':'').'"><a class="page-link" href="?page='.$i.'">'.($i+1).'</a></li>';
-		if (($numeroPage>=$nombrePages-1))
-			echo '<li><a class="page-link" onclick="return false;" href="">Suivante</a></li>';
-		else
-			echo '<li class="page-item"><a class="page-link" href="?page='.($numeroPage+1).'">Suivante</a></li>';
-		echo '</ul>';
-		echo '</nav>';
-		} // fin if ($nombrePages > 1)
-		*/
 	} // fin if ($afficherTableau)
 
 
@@ -260,7 +263,7 @@ if ($afficherFormulaire)
 	isset($annonceCourante) && extract ($annonceCourante);
 ?>
 	<div class="cadre-formulaire">
-		<form id="formulaire" method="post" action="gestion_annonces.php?page=<?php echo $numeroPage ?>" enctype=multipart/form-data>
+		<form id="formulaire" method="post" action="gestion_annonces.php?page=<?php echo $_SESSION['page']??0?>" enctype=multipart/form-data>
 			<input type="hidden" name="id" value="<?php echo $id??0 ?>">
 			<div class="form-row">
 				<div class="form-group col-md-4">
@@ -354,7 +357,7 @@ if ($afficherFormulaire)
 				<div class="form-group col-md-2">
 					<?php
 					if (estAdmin() && !isset($_GET['creation']))
-						echo '<a href="'.RACINE_SITE.'gestion_annonces.php?page='.$numeroPage.'" class="btn btn-secondary">&nbsp; Annuler &nbsp;</a>';
+						echo '<a href="'.RACINE_SITE.'gestion_annonces.php?page='.($_SESSION['page']??0).'" class="btn btn-secondary">&nbsp; Annuler &nbsp;</a>';
 					else
 						echo '<a href="'.RACINE_SITE.'index.php" class="btn btn-secondary">&nbsp; Annuler &nbsp;</a>';
 					?>
@@ -362,8 +365,8 @@ if ($afficherFormulaire)
 			</div>
 		</form>
 	</div>
-<?php
 
+<?php
 	} // fin if ($afficherFormulaire)
 
 ?>
@@ -394,7 +397,7 @@ if ($afficherFormulaire)
 		function reponse (retour)
 			{
 			$('#tableau').html(retour);
-			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire"' ?>
+			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire";' ?>
 			$('.page-item').on('click', 'a', function(e)
 				{
 				page = e.target.id.replace(/[^0-9]/g, '');
@@ -403,14 +406,14 @@ if ($afficherFormulaire)
 			}
 
 		// trier si on clique sur une option du select
-		$('select.tri option').click(e=>{
-			tri = e.target.value;
-			requeteAjax();;
+		selectTri.change(_=>{
+			tri= selectTri.val();
+			requeteAjax ();
 		});
 
 		// trier si on clique sur une option du select
-		$('select.sens option').click(e=>{
-			sens = e.target.value;
+		selectSens.change(_=>{
+			sens = selectSens.val();
 			requeteAjax();;
 		});
 

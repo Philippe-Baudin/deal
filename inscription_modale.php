@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once 'inc/init.php';
 $messageInscription = '';
 
@@ -46,10 +46,6 @@ if ($_POST && isset ($_POST['pseudo']) && isset ($_POST['mdp']) && isset($_POST[
 			} // fin du if rowCount()
 		} // fin du if (empty ($contenu))
 	} // fin du if (!empty($_POST))
-/*
-if (!empty($messageInscription))
-	echo '<script>$("#modaleInscription").modal("show");</script>';
-*/
 
 // Fenêtre modale d'inscription
 if (empty($messageInscription))

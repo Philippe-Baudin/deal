@@ -1,4 +1,5 @@
-<?php
+﻿<?php
+$repertoire='';
 require_once 'inc/init.php';
 
 if (!estConnecte())
@@ -40,13 +41,13 @@ if (!empty($_POST))
 		{
 		// On débarque tout juste : selectionner les commentaires déjà saisis pour cette annonce
 		foreach ($_POST as $id_annonce => $vide);
-		$requete = executerRequete ("SELECT commentaire, commentaire.date_enregistrement date, pseudo
-		                             FROM commentaire, membre
-		                             WHERE annonce_id=:id_annonce AND membre.id=membre_id
-		                             ORDER BY date DESC", array (':id_annonce' => $id_annonce));
-		$commentaires = $requete->fetchAll (PDO::FETCH_ASSOC);
+		$resultat = executerRequete ("SELECT commentaire, commentaire.date_enregistrement date, pseudo
+		                              FROM commentaire, membre
+		                              WHERE annonce_id=:id_annonce AND membre.id=membre_id
+		                              ORDER BY date DESC", array (':id_annonce' => $id_annonce));
+		$commentaires = $resultat->fetchAll (PDO::FETCH_ASSOC);
 		$contenu .= '<h4>Commentaires précédents :</h4>';
-		$nombreCommentaires = $requete->rowCount();
+		$nombreCommentaires = $resultat->rowCount();
 		for ($i=0; $i<$nombreCommentaires; $i++)
 			{
 			extract ($commentaires[$i]);

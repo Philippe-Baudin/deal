@@ -1,4 +1,5 @@
 <?php
+$repertoire='';
 require_once 'inc/init.php';
 
 if (empty($_POST))
@@ -16,20 +17,20 @@ if (isset($_POST['commentaire']))
 // Aller chercher les commentaires sur cette annonce
 $commentaires = array();
 $id = $_POST['id'];
-$requete = executerRequete ("SELECT commentaire,
-                                    pseudo auteur_commentaire,
-                                    DATE_FORMAT(commentaire.date_enregistrement,'%d/%m/%Y') date
-                             FROM commentaire, membre
-                             WHERE membre.id = membre_id AND annonce_id = :id
-                             ORDER BY commentaire.date_enregistrement", array(':id'=>$id));
+$resultat = executerRequete ("SELECT commentaire,
+                                     pseudo auteur_commentaire,
+                                     DATE_FORMAT(commentaire.date_enregistrement,'%d/%m/%Y') date
+                              FROM commentaire, membre
+                              WHERE membre.id = membre_id AND annonce_id = :id
+                              ORDER BY commentaire.date_enregistrement", array(':id'=>$id));
 
 // S'il y a des commentaires, les afficher
-if ($requete->rowCount() > 0)
+if ($resultat->rowCount() > 0)
 	{
 	echo '<div class="row">';
 	echo '<p>Commentaires sur cette annonce :</p>';
 	echo '</div>';
-	$commentaires = $requete->fetchAll (PDO::FETCH_ASSOC);
+	$commentaires = $resultat->fetchAll (PDO::FETCH_ASSOC);
 	foreach ($commentaires as $commentaire)
 		{
 		echo '<div class="row">';

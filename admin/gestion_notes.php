@@ -4,6 +4,7 @@
 // affiche la liste des notes avec des liens vers modification et suppression
 // ainsi qu'un formulaire de modification
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+$repertoire='../';
 require_once '../inc/init.php';
 
 $afficherFormulaire = false;
@@ -30,9 +31,9 @@ if (!empty($_POST))
 		$contenu .= '<div class="alert alert-danger">Le pseudo de l\'auteur de la note doit être compris entre 4 et 20 caractères.</div>';
 	else
 		{
-		$requete = executerRequete ("SELECT id FROM membre WHERE pseudo=:auteur", array (':auteur'=> $auteur));
-		if ($requete->rowCount() >= 1)
-			$auteur_id = $requete->fetch (PDO::FETCH_NUM)[0];
+		$resultat = executerRequete ("SELECT id FROM membre WHERE pseudo=:auteur", array (':auteur'=> $auteur));
+		if ($resultat->rowCount() >= 1)
+			$auteur_id = $resultat->fetch (PDO::FETCH_NUM)[0];
 		else			
 			$contenu .= '<div class="alert alert-danger">Le membre "'.$auteur.'" n\'existe pas.</div>';
 		}
@@ -41,19 +42,19 @@ if (!empty($_POST))
 		$contenu .= '<div class="alert alert-danger">Le pseudo concerné par la note doit être compris entre 4 et 20 caractères.</div>';
 	else
 		{
-		$requete = executerRequete ("SELECT id FROM membre WHERE pseudo=:cible", array (':cible'=> $cible));
-		if ($requete->rowCount() >= 1)
-			$cible_id = $requete->fetch (PDO::FETCH_NUM)[0];
+		$resultat = executerRequete ("SELECT id FROM membre WHERE pseudo=:cible", array (':cible'=> $cible));
+		if ($resultat->rowCount() >= 1)
+			$cible_id = $resultat->fetch (PDO::FETCH_NUM)[0];
 		else			
 			$contenu .= '<div class="alert alert-danger">Le membre "'.$cible.'" n\'existe pas.</div>';
 		}
 
 	if (empty($contenu))
 		{
-		$requete = executerRequete ("REPLACE INTO note VALUES (:id, :note, :avis, :auteur_id, :cible_id, :date_enregistrement)",
+		$resultat = executerRequete ("REPLACE INTO note VALUES (:id, :note, :avis, :auteur_id, :cible_id, :date_enregistrement)",
 		                            array (':id' => $id, ':note' => $note, ':avis' => $avis, ':auteur_id' => $auteur_id, ':cible_id' => $cible_id, ':date_enregistrement' => $date_enregistrement));
 		}
-	if (empty($contenu) && $requete)
+	if (empty($contenu) && $resultat)
 		$contenu .= '<div class="alert alert-success">La note a été enregistrée.</div>';
 	else
 		{

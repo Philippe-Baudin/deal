@@ -1,4 +1,5 @@
-<?php
+﻿<?php
+$repertoire='';
 require_once 'inc/init.php';
 $commentaires = '';
 $avis = '';
@@ -17,10 +18,10 @@ if (!empty($_POST))
 	$contenu = validerMembre($_POST, !empty($_POST['mdp']));
 	if (empty($contenu))
 		{
-		$requete = executerRequete ("SELECT * FROM membre WHERE id!=:id AND pseudo=:pseudo",array(':id'=>$_POST['id'], ':pseudo'=>$_POST['pseudo']));
-		if ($requete->rowCount() == 0)
+		$resultat = executerRequete ("SELECT * FROM membre WHERE id!=:id AND pseudo=:pseudo",array(':id'=>$_POST['id'], ':pseudo'=>$_POST['pseudo']));
+		if ($resultat->rowCount() == 0)
 			{
-			$requete = executerRequete ("UPDATE membre SET civilite=:civilite, nom=:nom, prenom=:prenom, email=:email, telephone=:telephone WHERE id=:id",
+			$resultat = executerRequete ("UPDATE membre SET civilite=:civilite, nom=:nom, prenom=:prenom, email=:email, telephone=:telephone WHERE id=:id",
 			                            array (  ':id'                  => $_POST['id']
 			                                  ,  ':civilite'            => $_POST['civilite']
 			                                  ,  ':nom'                 => $_POST['nom']
@@ -29,15 +30,15 @@ if (!empty($_POST))
 			                                  ,  ':telephone'           => $_POST['telephone']
 			                                  )
 			                           );
-			if (!$requete)
+			if (!$resultat)
 				{
 				$contenu .=  '<div class="alert alert-danger">Erreur lors de l\'enregistrement du profil.</div>';
 				}
 			else if (!empty($_POST['mdp']))
 				{
 				$mdp = password_hash ($_POST['mdp'], PASSWORD_DEFAULT);
-				$requete = executerRequete ("UPDATE membre SET mdp=:mdp, date_enregistrement=NOW() WHERE id=:id", array (':id' => $_POST['id'], ':mdp' => $mdp));
-				if ($requete === false)
+				$resultat = executerRequete ("UPDATE membre SET mdp=:mdp, date_enregistrement=NOW() WHERE id=:id", array (':id' => $_POST['id'], ':mdp' => $mdp));
+				if ($resultat === false)
 					{
 					$contenu .=  '<div class="alert alert-danger">Erreur lors de l\'enregistrement du profil.</div>';
 					}
@@ -48,7 +49,7 @@ if (!empty($_POST))
 			$contenu .= '<div class="alert alert-danger">Le pseudo "'.$_POST['pseudo'].'" existe déjà.</div>';
 			}
 		}
-	if (empty($contenu) && isset($requete))
+	if (empty($contenu) && isset($resultat))
 		{
 		$contenu .= '<div class="alert alert-success">Vos modifications ont été enregistrées.</div>';
 		$resultat = executerRequete ("SELECT * FROM membre WHERE pseudo = :pseudo", array (':pseudo' => $_POST['pseudo']));
@@ -60,16 +61,16 @@ if (!empty($_POST))
 
 
 // Commentaires sur les annonces du membre
-$requeteCompteAnnonces = executerRequete ("SELECT COUNT(id) FROM annonce WHERE membre_id = :id",  array (':id' => $id));
-if ($requeteCompteAnnonces->fetch (PDO::FETCH_NUM)[0] != '0')
+$decompteAnnonces = executerRequete ("SELECT COUNT(id) FROM annonce WHERE membre_id = :id",  array (':id' => $id));
+if ($decompteAnnonces->fetch (PDO::FETCH_NUM)[0] != '0')
 	{
 	$commentaires .= '<hr>';
 	$commentaires .= '<div style="text-align:center"><h4>Commentaires des autres membres sur vos annonces</h4></div>';
-	$requeteAnnonces = executerRequete ("SELECT id, titre, date_enregistrement date
+	$listeAnnonces = executerRequete ("SELECT id, titre, date_enregistrement date
 	                                     FROM annonce
 	                                     WHERE membre_id = :id 
 	                                     ORDER BY date_enregistrement DESC", array (':id' => $id));
-	while ($annonce = $requeteAnnonces->fetch(PDO::FETCH_ASSOC))
+	while ($annonce = $listeAnnonces->fetch(PDO::FETCH_ASSOC))
 		{
 		$commentaires .= '<div style="background:lightgrey"><h5><a href="fiche_annonce.php?id='.$annonce['id'].'">annonce "'.$annonce['titre'].'", date : '.$annonce['date'].'</a></h5></div>';
 		// Afficher les commentaires de chaque annonce
@@ -86,22 +87,22 @@ if ($requeteCompteAnnonces->fetch (PDO::FETCH_NUM)[0] != '0')
 		}
 	}
 // Avis des autres membres
-$requete = executerRequete ("SELECT AVG(note) note, COUNT(note) nombre
+$resultat = executerRequete ("SELECT AVG(note) note, COUNT(note) nombre
                              FROM note
                              WHERE membre_id2 = :id", array (':id' => $id));
-$resultat = $requete->fetch (PDO::FETCH_ASSOC);
+$resultat = $resultat->fetch (PDO::FETCH_ASSOC);
 if ($resultat['nombre'] != '0')
 	{
 	$avis .= '<div style="text-align:center"><h4>Avis des autres membres : '.noteEnEtoiles($resultat['note']).'</h4></div>';
-	$requete = executerRequete ("SELECT avis, pseudo, note
+	$resultat = executerRequete ("SELECT avis, pseudo, note
 	                             FROM note
 	                             LEFT JOIN membre ON membre_id1 = membre.id
 	                             WHERE membre_id2 = :id
 	                             ORDER BY note.date_enregistrement DESC", array (':id' => $id));
-	while ($resultat = $requete->fetch (PDO::FETCH_ASSOC))
+	while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 		{
-		$avis .= "<h5>$resultat[pseudo] vous mets une note de $resultat[note]</h5>";
-		$avis .= "<p>$resultat[avis]</p>";
+		$avis .= "<h5>$ligne[pseudo] vous mets une note de $ligne[note]</h5>";
+		$avis .= "<p>$ligne[avis]</p>";
 		}
 	} // fin if ($resultat['nombre'] == '0')
 

@@ -1,16 +1,18 @@
 <?php
 //phpinfo();
 // Connexion à la base de données
+
+/*
 $pdo = new PDO( 'mysql:host=localhost;dbname=deal'
-//              , 'philippe'
-//              , 'Philippe'
-              , 'root'
-              , ''
+              , 'philippe'
+              , 'Philippe'
+//              , 'root'
+//              , ''
               , array ( PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING
               	      , PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
               	      )
               );
-/*
+*/              
 $pdo = new PDO( 'mysql:host=sql25.phpnet.org;dbname=ugw86162'
               , 'ugw86162'
               , 'aqwzsx963'
@@ -18,7 +20,6 @@ $pdo = new PDO( 'mysql:host=sql25.phpnet.org;dbname=ugw86162'
               	      , PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
               	      )
               );
-*/
 if ($pdo == false) die('Connexion impossible : ' . mysql_error());
 // Note: il est judicieux de supprimer l'affichage des erreurs SQL quand on passe en production.
 // Si on veut le garder uniquement pour les pages admin, il faut deux instances de PDO .
@@ -33,7 +34,7 @@ if (isset ($_GET['action']) && $_GET['action'] == 'deconnexion')
 	unset ($_SESSION['membre']);
 	unset ($_GET['action']);
 	}
-
+	
 // Définition du chemin du site :
 define('RACINE_SITE', $repertoire); // dossier dans lequel se situe le site (dans localhost). Sert à transformer les chemins relatifs en absolus pour les inclusions à différents niveaux.
 
@@ -57,6 +58,4 @@ $contenuDroite = '';
 
 // Inclusion des fonctions
 require_once 'functions.php';
-
-
 

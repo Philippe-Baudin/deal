@@ -1,4 +1,5 @@
 <?php
+$repertoire='../';
 require_once '../inc/init.php';
 if (!estAdmin())
 	{
@@ -45,7 +46,7 @@ $resultat = executerRequete ("SELECT c.id id, c.commentaire commentaire, m.pseud
 
 
 // Affichage du tableau des commentaires
-$marqueurTri = ($sens=='ASC') ? '&nbsp;&or;' : '&nbsp;&#94;'; 
+$marqueurTri = '<span style="color:grey;">'.(($sens=='ASC') ? '&nbsp;&or;' : '&nbsp;&#94;').'</span>';
 ?>
 <table class="table">
 	<thead class="thead-dark">
