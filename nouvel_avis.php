@@ -1,7 +1,7 @@
 ﻿<?php
 $repertoire='';
 require_once 'inc/init.php';
-//debug ($_POST);
+
 if (empty($_POST))
 	exit ();
 
@@ -11,11 +11,15 @@ $id = $_POST['id'];
 // Enregistrement d'un avis
 if (isset($_POST['avis']))
 	{
-	//XXX contrôle sur les valeurs
 	if (strlen($_POST['avis']) >= 3)
 		executerRequete ("INSERT INTO note (avis, note, membre_id1, membre_id2, date_enregistrement)
 		                  VALUES (:avis, :note, :membre_id1, :membre_id2, NOW())",
 		                 array (':avis' => $_POST['avis'], ':note' => $_POST['note'], ':membre_id1' => $_SESSION['membre']['id'], ':membre_id2' => $_POST['id']));
+	else
+		{
+		echo '<div class="alert alert-danger">Vous devez formuler un avis pour pouvoir mettre une note.</div>';
+		exit ();
+		}
 	}
 
 // Calculer la moyenne des notes de l'auteur de l'annonce et l'afficher

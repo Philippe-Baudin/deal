@@ -6,8 +6,10 @@
 $repertoire='';
 require_once 'inc/init.php';
 
+
 if (empty($_POST))
 	exit ();
+
 
 // Le début des requêtes à lancer
 $requeteDecompte = "SELECT COUNT(a.id)
@@ -124,11 +126,11 @@ $resultat = executerRequete ($requeteSelection.$clauseWhere.$clauseOrderBy.($lim
 // suivi de suffisamment de blancs pour que le nombre d'annonces puisse augmenter au delà du raisonnable
 echo "<!--$nombreAnnonces-->               ";
 
-/*
 // Afficher la requête SQL pour debug
+/*
 echo '<div class="row">';
 echo     '<div class="col-sm-12">';
-echo         '<p>requete SQL : '.$requeteSelection.$clauseWhere.$clauseOrderBy.'<p>';
+echo         '<p>requete SQL : '.$requeteSelection.$clauseWhere.$clauseOrderBy.($limite??'').'<p>';
 echo         '<p>'.print_r($marqueurs).'</p>';
 echo     '</div>';
 echo '</div>';

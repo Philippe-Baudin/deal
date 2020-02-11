@@ -155,8 +155,7 @@ if ($nombreAnnonces > 0)
 	$contenu .=     '<div class="col-sm-11" id="liste-annonces">';
 
 	//                  C'est là que va se loger le retour de la requête AJAX (je fais une requête AJAX pour avoir la même présentation que dans la page accueil)
-	//XXX ce serait mieux de faire un include. il faut renseigner $_POST
-	//require_once 'liste_annonces.php';
+
 	$contenu .=     '</div>';
 	$contenu .= '</div>';
 	}
@@ -207,12 +206,12 @@ if ($nombreAnnonces > 0)
 						for ($i=0; $i<$nombreAnnonces; $i++)
 						 	echo 'id_'.$i.' : '.$listeId[$i].',';
 						*/
-						 // version 2
-						 $i=0;
-						 foreach ($listeAnnonces as $id => $note)
-						 	echo 'id_'.($i++).' : ['.$id.','.$note.'],';
-					?>			                               
-                	}, reponse, "html");
+						// version 2
+						$i=0;
+						foreach ($listeAnnonces as $id => $note)
+							echo 'id_'.($i++).' : ['.$id.','.$note.'],';
+					?>
+					}, reponse, "html");
 				}
 			requeteAjax();
 

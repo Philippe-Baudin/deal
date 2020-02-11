@@ -12,6 +12,11 @@ if (isset($_POST['commentaire']))
 		executerRequete ("INSERT INTO commentaire (commentaire, membre_id, annonce_id, date_enregistrement)
 		                  VALUES (:commentaire, :membre_id, :annonce_id, NOW())",
 		                  array (':commentaire' => $_POST['commentaire'], ':membre_id' => $_SESSION['membre']['id'], ':annonce_id' => $_POST['id']));
+	else
+		{
+		echo '<div class="alert alert-danger">Vous devez formuler un avis pour pouvoir mettre une note.</div>';
+		exit ();
+		}
 	}
 
 // Aller chercher les commentaires sur cette annonce

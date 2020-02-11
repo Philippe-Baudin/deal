@@ -178,6 +178,7 @@ if (estConnecte())
 					</button>
 				</div>
 				<div class="modal-body">
+					<div id="message-erreur-commentaire"></div>
 					<div class="form-group">
 						<label for="commentaire" class="col-form-label">Postez un commentaire pour poser une question ou obtenir des précisions sur le produit ou le service proposé :</label>
 						<textarea class="form-control" id="commentaire" name="commentaire" rows="5"></textarea>
@@ -230,6 +231,7 @@ if (estConnecte())
 						</button>
 					</div>
 					<div class="modal-body">
+						<div id="message-erreur-avis"></div>
 						<input type="hidden" name="id" value="'.$id.'">
 						<input type="hidden" name="auteur" value="'.$auteur.'">
 						<div class="form-group">
@@ -317,7 +319,19 @@ echo $contenu;
 			}
 		function reponse (retour)
 			{
-			$("#affichage-commentaires").html(retour);
+			if (retour.substr (0,4) == '<div')
+				{
+				$("#message-erreur-commentaire").html (retour);
+				$("#modaleCommentaire").on('hidden.bs.modal', function(){
+					$("#modaleCommentaire").off('hidden.bs.modal');
+					$("#modaleCommentaire").modal('show');
+					});
+				}
+			else
+				{
+				$("#affichage-commentaires").html(retour);
+				$("#message-erreur-commentaire").html ('');
+				}
 			}
 		$.post("nouveau_commentaire.php", commande, reponse,"html");
 		$("#commentaire").val("");
@@ -335,7 +349,21 @@ echo $contenu;
 			note = $("#note").val();
 			commande = {avis:avis, note:note, id:id};
 			}
-		$.post("nouvel_avis.php", commande,	function(retour){console.log(retour);$("#affichage-note").html(retour)},"html");
+		$.post("nouvel_avis.php", commande,	function(retour){
+			if (retour.substr (0,4) == '<div')
+				{
+				$("#message-erreur-avis").html (retour);
+				$("#modaleAvis").on('hidden.bs.modal', function(){
+					$("#modaleAvis").off('hidden.bs.modal');
+					$("#modaleAvis").modal('show');
+					});
+				}
+			else
+				{
+				$("#message-erreur-avis").html ('');
+				$("#affichage-note").html(retour);
+				}
+			},"html");
 		$("#avis").val("");
 		$("#note").val(5)
 		}
