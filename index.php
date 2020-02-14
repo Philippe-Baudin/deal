@@ -17,6 +17,7 @@ if (!isset($_SESSION['filtre']['membre']))    $_SESSION['filtre']['membre']    =
 if (!isset($_SESSION['filtre']['prix']))      $_SESSION['filtre']['prix']      = '7';
 if (!isset($_SESSION['triAccueil']))          $_SESSION['triAccueil']          = '0';
 if (!isset($_SESSION['pageAccueil']))         $_SESSION['pageAccueil']         = '0';
+$_SESSION['mots-cles'] = '';
 
 // ---------------------------------------------------------------
 // SQL
@@ -207,7 +208,7 @@ require_once 'inc/header.php';
 			}
 
 		// listeners sur les différents select
-		categorie.change(_=>{
+		categorie.change(e=>{
 			filtreCategorie = categorie.val();
 			pageAccueil = 0;
 			requeteAjax ();

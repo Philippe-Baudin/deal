@@ -98,14 +98,12 @@ else // donc !isset ($_POST['filtreCategorie']) donc affichage sur la page de re
 	$requeteSelection = 'SELECT a.id id, titre, photo, description_longue, prix, pseudo, membre.id auteur, CASE';
 	for ($i=0; isset($_POST["id_$i"]); $i++)
 		$requeteSelection .= ' WHEN a.id = '.$_POST["id_$i"][0].' THEN '.$_POST["id_$i"][1];
-//remplacer les indices par des notes, ce qui impose de formatter $_POST comme un tableau de tableaux [id, note]
-//parce que là, c'est carrément absurde de trier deux fois les annonces
 	$requeteSelection .= " END as pertinence FROM annonce a LEFT JOIN membre ON membre_id = membre.id";
 	$clauseWhere = ' WHERE a.id IN (-1';
 	for ($i=0; isset($_POST["id_$i"]); $i++)
 		$clauseWhere .= ','.$_POST["id_$i"][0];
 	$clauseWhere .= ')';
-	$clauseOrderBy = ' ORDER BY pertinence DESC';
+	$clauseOrderBy = ' ORDER BY pertinence DESC, a.date_enregistrement DESC';
 	}
 
 // Compter les annonces sélectionnées

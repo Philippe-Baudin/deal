@@ -66,7 +66,7 @@ if (!empty($_POST))
 		$commentaireCourant = $_POST;
 		}
 	}
-
+/*
 // Suppression d'un commentaire
 if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
 	{
@@ -76,7 +76,7 @@ if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'o
 	else
 		$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression du commentaire.</div>';
 	}
-
+*/
 // Demande de modification d'un commentaire
 else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'est qu'on a cliqué sur "modification" dans le tableau ci-dessous
 	{
@@ -92,16 +92,18 @@ else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'e
 		$contenu .= '<div class="alert alert-danger">Erreur interne.</div>';
 	}
 
-// Affichage du tableau des commentaires : 
+// Emplaement du tableau des commentaires : 
 $contenu .='<div class="table-responsive" id="tableau">';
 $contenu .='</div>';
-/*
-$id = 0;
-$titre = '';
-$mots_cles = '';
-*/
+
 // Header standard
 require_once '../inc/header.php';
+
+// Emplacement du message de retour de suppression d'un commentaire
+echo '<div id="messageSuppression"></div>';
+
+// Modale de confirmation de la supression d'un commentaire'
+modaleSuppression ('ce commentaire', false);
 
 // Navigation entre les pages d'administration
 navigationAdmin ('Commentaires');
@@ -113,7 +115,7 @@ if ($afficherFormulaire)
 	isset ($commentaireCourant) && extract ($commentaireCourant);
 
 	// Formulaire de création/modification des commentaires
-?>
+	?>
 	<div class="cadre-formulaire" id="formulaire">
 		<form method="post" action="gestion_commentaires.php">
 			<input type="hidden" name="id" value="<?php echo $id??0 ?>"> <!-- hidden => éviter de le modifier par accident. value="0" => lors de l'insertion le SGBD utilisera l'auto-incrémentation -->
@@ -161,23 +163,43 @@ if ($afficherFormulaire)
 			echo 'let sens = "'.($_SESSION["sensCommentaire"]??0).'";';
 			echo 'let page = "'.($_SESSION["pageCommentaire"]??0).'";';
 		?>
+		let cible;
 
-		// réception et traitement de la réponse à la requête AJAX
+		// clic sur le bouton 'oui' de la fenêtre modale de confirmation de suppression
+		$(".ok-suppression").on ('click', function(){
+			$.post('suppression_commentaire.php', {id:cible},function(reponse){
+				$('#modaleSuppression').modal('hide');
+				$('#messageSuppression').html(reponse);
+				afficherTableau ();
+				}, 'html');
+			});
+
+		// réception et traitement de la réponse à la requête AJAX d'affichage du tableau
 		function reponse (contenu)
 			{
 			$('#tableau').html(contenu);
 			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire"' ?>
 
+			// clic sur une icône "poubelle" du tableau
+			$(".demande-suppression").on ('click', function(e){
+				cible = e.currentTarget.id.replace(/[^0-9]/g,'');
+				$('#modaleSuppression').modal('show');
+				});
+
+			// clic sur une des cases de la pagination
 			$('.page-item').on('click', 'a', function(e)
 				{
 				page = e.target.id.replace(/[^0-9]/g, '');
-				requeteAjax ();
+				afficherTableau ();
 				});
 			}
 
-		// Lancement de la requête AJAX
-		function requeteAjax ()
+		// Lancement de la requête AJAX d'affichage du tableau
+		function afficherTableau ()
 			{
+			// arrêter les listener de demande de supression
+			$(".demande-suppression").off("click");
+
 			// Emission de la requête AJAX
 			$.post('table_commentaires.php', { triCommentaire  : tri,
 			                                   sensCommentaire : sens,
@@ -189,11 +211,11 @@ if ($afficherFormulaire)
 		$('#tableau').on('click', 'th.tri', function(e){
 			if (tri == e.target.id) sens = ((sens=='ASC')?'DESC':'ASC');
 			else { tri = e.target.id; sens='ASC'; }
-			requeteAjax();
+			afficherTableau();
 		});
 
 		// A l'affichage de la page, lancer une première fois la requête AJAX
-		requeteAjax ();
+		afficherTableau ();
 
 	}); // document ready
 </script>

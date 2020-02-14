@@ -15,9 +15,20 @@ if (!estAdmin())
 	exit ();
 	}
 
-// Modification ou ajout d'une catégorie
+// Suppression, modification ou ajout d'une catégorie
 if (!empty($_POST))
 	{
+	// Suppression d'une catégorie
+	if (isset ($_POST['suppression']))
+		{
+		$resultat = executerRequete ("DELETE FROM categorie WHERE id = :id", array (':id' => $_POST['suppression']));
+		if ($resultat->rowCount() == 1)
+			echo '<div class="alert alert-success">La catégorie a bien été supprimé.</div>';
+		else
+			echo '<div class="alert alert-danger">Erreur lors de la suppression de la catégorie.</div>';
+		exit ();
+		}
+	// Modification ou ajout
 	extract ($_POST);
 	if (!isset ($titre) || strlen($titre) < 4 || strlen ($titre) > 100)
 		$contenu .= '<div class="alert alert-danger">Le titre doit être compris entre 4 et 100 caractères.</div>';
@@ -36,20 +47,10 @@ if (!empty($_POST))
 		$contenu .= '<div class="alert alert-danger">Erreur lors de l\'enregistrement</div>';
 		$categorieCourante = $_POST;
 		}
-
 	}
 
-// Suppression d'une catégorie
-if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
-	{
-	$resultat = executerRequete ("DELETE FROM categorie WHERE id = :id", array (':id' => $_GET['suppression']));
-	if ($resultat->rowCount() == 1)
-		$contenu .= '<div class="alert alert-success">La catégorie a bien été supprimé.</div>';
-	else
-		$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression de la catégorie.</div>';
-	}
 // Modification d'une catégorie
-else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'est qu'on a cliqué sur "modification" dans le tableau ci-dessous
+if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'est qu'on a cliqué sur "modification" dans le tableau ci-dessous
 	{
 	$resultat = executerRequete ("SELECT * FROM categorie WHERE id = :id", array (':id' => $_GET['modification']));
 	if ($resultat->rowCount() == 1)
@@ -85,11 +86,12 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retourn
 	// Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
 	$contenu .= '<td>';
 	$contenu .= '<a href="?modification='.$ligne['id'].'#formulaire" class="lien-noir">'.MODIFIER.'</a> ';
-	$contenu .= '<a href="?suppression='.$ligne['id'].'" ';
 	if (isset($nombreAnnonces[$id]))
-		$contenu .= 'onclick="alert(\'Il y a '.$nombreAnnonces[$id].' annonces pour cette catégorie. Vous ne pouvez pas la supprimer.\'); return false;" class="lien-noir">'.POUBELLE.'</a>';
+		$contenu .= '<span class="lien-noir refus-suppression" id="suppression_'.$id.'_'.$nombreAnnonces[$id].'">'.POUBELLE.'</span>';
 	else
-		$contenu .= 'onclick="return confirm(\'Etes vous certain de vouloir supprimer cette catégorie ?\')" class="lien-noir">'.POUBELLE.'</a>';
+		$contenu .= '<span class="lien-noir demande-suppression" id="suppression_'.$id.'">'.POUBELLE.'</span>';
+
+
 	$contenu .= '</td>';
 	$contenu .= '</tr>';
 	}
@@ -101,6 +103,12 @@ $mots_cles = '';
 
 require_once '../inc/header.php';
 
+// Emplacement du message de retour de suppression d'une catégorie
+echo '<div id="messageSuppression"></div>';
+
+// Modale de confirmation de la supression d'une catégorie
+modaleSuppression ('cette catégorie', false);
+
 // Navigation entre les pages d'administration
 navigationAdmin ('Catégories');
 
@@ -110,7 +118,8 @@ isset ($categorieCourante) && extract ($categorieCourante);
 // Formulaire de création/modification des catégories
 echo '<br>';
 if (isset ($_GET['modification']))
-	echo '<div><p style="text-align: center;">Modifier la catégorie '.$titre.' (id '.$id.')</p></div>';
+	//echo '<div><p style="text-align: center;">Modifier la catégorie '.$titre.' (id '.$id.')</p></div>';
+	echo '<div class="alert alert-success">Modifier la catégorie '.$titre.' (id '.$id.')</div>'
 ?>
 <div class="cadre-formulaire">
 	<form id="formulaire" method="post" action="gestion_categories.php">
@@ -137,34 +146,12 @@ if (isset ($_GET['modification']))
 	</form>
 </div>
 
-<!-- Modale de confirmation de la suppression -->
-<div class="modal fade" id="modaleConfrmerSuppression" tabindex="-1" role="dialog" aria-labelledby="modaleConfrmerSuppressionTitle" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="modaleConfrmerSuppressionTitle">Etes-vous sûr de vouloir supprimer cette categorie ?</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="row">
-				<div class="col-sm-2">
-					<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="supprimerCategorie();">Oui</button>
-				</div>
-				<div class="col-sm">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
 <!-- Modale d'interdiction de la suppression -->
-<div class="modal fade" id="modaleConfrmerSuppression" tabindex="-1" role="dialog" aria-labelledby="modaleConfrmerSuppressionTitle" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+<div class="modal" id="modaleRefusSuppression" tabindex="-1" role="dialog" aria-labelledby="modaleRefusSuppressionTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="modaleConfrmerSuppressionTitle">Vous ne pouvez pas supprimer une catégorie qui contient des annonces.</h5>
+				<h5 class="modal-title" id="modaleRefusSuppressionTitle">Vous ne pouvez pas supprimer une catégorie qui contient des annonces.</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
@@ -177,11 +164,66 @@ if (isset ($_GET['modification']))
 </div>
 
 <script>
-	
-	function supprimerCategorie ()
-		{
+	$(function(){ // document ready
 
-		}
+		let cible;
+
+		// clic sur le bouton 'oui' de la fenêtre modale de confirmation de suppression
+		$(".ok-suppression").on ('click', function(){
+			$.post('gestion_categories.php', {suppression:cible},function(reponse){
+				$('#modaleSuppression').modal('hide');
+				console.log (reponse);
+				location.reload();
+				}, 'html');
+			});
+
+		// clic sur une icône "poubelle" du tableau
+		$(".demande-suppression").on ('click', function(e){
+			cible = e.currentTarget.id.replace(/[^0-9]/g,'');
+			$('#modaleSuppression').modal('show');
+			});
+
+		// clic sur une icône "poubelle" du tableau
+		$(".refus-suppression").on ('click', function(e){
+			$('#modaleRefusSuppression').modal('show');
+			});
+/*
+		// réception et traitement de la réponse à la requête AJAX d'affichage du tableau
+		function reponse (contenu)
+			{
+			$('#tableau').html(contenu);
+			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire"' ?>
+
+			// clic sur une des cases de la pagination
+			$('.page-item').on('click', 'a', function(e)
+				{
+				page = e.target.id.replace(/[^0-9]/g, '');
+				afficherTableau ();
+				});
+			}
+
+		// Lancement de la requête AJAX d'affichage du tableau
+		function afficherTableau ()
+			{
+			// arrêter les listener de demande de supression
+			$(".demande-suppression").off("click");
+
+			// Emission de la requête AJAX
+			$.post('table_annonces.php', { tri : tri, sens : sens, page : page, }, reponse, 'html');
+			}
+
+	    // trier si on clique sur une entête du tableau
+		$('#tableau').on('click', 'th.tri', function(e){
+			if (tri == e.target.id) sens = ((sens=='ASC')?'DESC':'ASC');
+			else { tri = e.target.id; sens='ASC'; }
+			afficherTableau();
+		});
+
+		// A l'affichage de la page, lancer une première fois la requête AJAX
+		afficherTableau ();
+*/
+	}); // document ready
 </script>
+
 <?php
 require_once '../inc/footer.php';

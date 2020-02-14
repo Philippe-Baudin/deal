@@ -64,20 +64,6 @@ if (!empty($_POST))
 		}
 	}
 
-// Suppression d'un membre
-if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
-	{
-	$resultat = executerRequete ("UPDATE annonce SET  membre_id = NULL WHERE membre_id = :id", array (':id' => $_GET['suppression']));
-	$resultat = executerRequete ("UPDATE commentaire SET  membre_id = NULL WHERE membre_id = :id", array (':id' => $_GET['suppression']));
-	$resultat = executerRequete ("UPDATE note SET  membre_id1 = NULL WHERE membre_id1 = :id", array (':id' => $_GET['suppression']));
-	$resultat = executerRequete ("DELETE FROM note WHERE membre_id2 = :id", array (':id' => $_GET['suppression']));
-	$resultat = executerRequete ("DELETE FROM membre WHERE id = :id", array (':id' => $_GET['suppression']));
-	if ($resultat->rowCount() == 1)
-		$contenu .= '<div class="alert alert-success">Le membre a bien été supprimé.</div>';
-	else
-		$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression du membre.</div>';
-	}
-
 // Demande de modification d'un membre
 else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'est qu'on a cliqué sur "modification" dans le tableau ci-dessous
 	{
@@ -95,6 +81,12 @@ $contenu .= '</div>';
 
 // Header standard
 require_once '../inc/header.php';
+
+// Emplacement du message de retour de suppression d'un membre
+echo '<div id="messageSuppression"></div>';
+
+// Modale de confirmation de la supression d'un membre
+modaleSuppression ('ce membre', true);
 
 // Navigation entre les pages d'administration
 navigationAdmin ('Membres');
@@ -183,79 +175,80 @@ if ($afficherFormulaire)
 	<?php
 	} // fin du if ($afficherFormulaire)
 	?>
-	<!-- Modale de confirmation de la suppression d'un membre -->
-<!--
-   <div class="modal fade" id="modaleSuppressionMembre" tabindex="-1" role="dialog" aria-labelledby="modaleSuppressionMembreTitle" aria-hidden="true">
-     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-       <div class="modal-content">
-         <div class="modal-header">
-           <h5 class="modal-title" id="modaleSuppressionMembreLongTitle">Suppression d'un membre</h5>
-           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-             <span aria-hidden="true">&times;</span>
-           </button>
-         </div>
-         <div class="modal-body">
-			<p>
-           <form method="post" action="#">
-             <input type="hidden" name="id" value="'.$id.'">
-             <div class="form-group">
-               <label for="commentaire" class="col-form-label">Postez un commentaire pour poser une question ou obtenir des précisions sur le produit ou le service proposé :</label>
-               <textarea class="form-control" id="commentaire" name="commentaire" rows="5"></textarea>
-             </div>
-             <div class="row">
-               <div class="col-sm-2">
-                 <button type="submit" class="btn btn-primary">Envoyer</button>
-               </div>
-               <div class="col-sm-2">
-                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-               </div>
-             </div>
-           </form>
-         </div>
-       </div>
-     </div>
-   </div>
--->
 <script>
 	$(function(){ // document ready
 
 		// Le tri et le numéro de page
 		<?php
-			echo 'let tri  = "'.($_SESSION["triMembre"]??0).'";';
-			echo 'let sens = "'.($_SESSION["sensMembre"]??0).'";';
+			echo 'let tri  = "'.($_SESSION["triCommentaire"]??0).'";';
+			echo 'let sens = "'.($_SESSION["sensCommentaire"]??0).'";';
 			echo 'let page = "'.($_SESSION["pageCommentaire"]??0).'";';
 		?>
+		let cible;
 
-		// réception et traitement de la réponse à la requête AJAX
+		// clic sur le bouton 'oui' de la fenêtre modale de confirmation de suppression
+		$(".ok-suppression").on ('click', function(){
+			$.post('suppression_membre.php', {id:cible},function(reponse){
+				$('#modaleSuppression').modal('hide');
+				$('#messageSuppression').html(reponse);
+				afficherTableau ();
+				}, 'html');
+			});
+
+		// Lancement de la requête AJAX d'affichage du tableau
+		function afficherTableau ()
+			{
+			// arrêter les listener de demande de suppression
+			$(".demande-suppression").off("click");
+			// Emission de la requête AJAX
+			$.post('table_membres.php', { triMembre:tri, sensMembre:sens, pageMembre:page }, reponse, 'html');
+			}
+
+		// réception et traitement de la réponse à la requête AJAX d'affichage du tableau
 		function reponse (contenu)
 			{
 			$('#tableau').html(contenu);
 			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire"' ?>
 
-			// On ne peut lancer ce listener qu'après avoir affiché le tableau
+			// clic sur une icône "poubelle" du tableau
+			$(".demande-suppression").on ('click', function(e){
+				let decoupe = e.currentTarget.id.split('_');
+				let pseudo = decoupe[0];
+				cible = decoupe[1];
+				let nombreAnnonces = decoupe[2];
+				let complement = '';
+				switch (nombreAnnonces)
+					{
+					case '0' : complement = pseudo+' n\'a déposé aucune annonce.'; break;
+					case '1' : complement = pseudo+' a déposé une annonce qui sera inaccessible aux utilisateurs si vous supprimez son compte.'; break;
+					default : complement = pseudo+' a déposé '+nombreAnnonces+' annonces qui seront inaccessibles aux utilisateurs si vous supprimez son compte.'; break;
+					}
+				//$('#complement').html(complement);
+				let modaleSuppression = $('#modaleSuppression');
+				modaleSuppression.on('show.bs.modal', _=> {$('#complement').text(complement)})
+				modaleSuppression.modal('show');
+				});
+
+			// clic sur une des cases de la pagination
 			$('.page-item').on('click', 'a', function(e)
 				{
 				page = e.target.id.replace(/[^0-9]/g, '');
-				requeteAjax ();
+				afficherTableau ();
 				});
 			}
 
-		// Lancement de la requête AJAX
-		function requeteAjax ()
-			{
-			$.post('table_membres.php', { triMembre:tri, sensMembre:sens, pageMembre:page }, reponse, 'html');
-			}
 	    // trier si on clique sur une entête du tableau
 		$('#tableau').on('click', 'th.tri', function(e){
 			if (tri == e.target.id) sens = ((sens=='ASC')?'DESC':'ASC');
-			else tri = e.target.id;
-			requeteAjax();
+			else { tri = e.target.id; sens='ASC'; }
+			afficherTableau();
 		});
 
 		// A l'affichage de la page, lancer une première fois la requête AJAX
-		requeteAjax ();
+		afficherTableau ();
 
 	}); // document ready
 </script>
+
 <?php
 require_once '../inc/footer.php';

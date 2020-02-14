@@ -14,7 +14,7 @@ if (isset($_POST['commentaire']))
 		                  array (':commentaire' => $_POST['commentaire'], ':membre_id' => $_SESSION['membre']['id'], ':annonce_id' => $_POST['id']));
 	else
 		{
-		echo '<div class="alert alert-danger">Vous devez formuler un avis pour pouvoir mettre une note.</div>';
+		echo '<div class="alert alert-danger">Ecrivez votre commentaire avant de l\'envoyer&nbsp;...</div>';
 		exit ();
 		}
 	}

@@ -96,6 +96,7 @@ foreach ($listeMotsCles as $indice => $motCle)
 	}
 $resultat = executerRequete ($requete, $marqueurs);
 $nombreAnnonces = $resultat ? $resultat->rowCount() : 0;
+$listeAnnonces = array();
 if ($nombreAnnonces > 0)
 	{
 	$listesAnnonces=array();
@@ -106,7 +107,6 @@ if ($nombreAnnonces > 0)
 		$listesAnnonces[$indice][$id]=$note;
 		}
 	// 2. Fusion des listes
-	$listeAnnonces = array();
 	foreach ($listesAnnonces[0] as $id => $note)
 		{
 		for ($i=1; $i<$nombreMotsCles; $i++)
@@ -122,20 +122,20 @@ if ($nombreAnnonces > 0)
 		if ($note) $listeAnnonces [$id] = $note;
 		}
 	}
-
+$nombreAnnonces = sizeof ($listeAnnonces);
 
 // ---------------------------------------------------
 // Présentation du résultat de la sélection d'annonces
 // ---------------------------------------------------
 
 
-$contenu .= '<br>';
+//$contenu .= '<br>';
 $contenu .= '<div class="row">';
 
 
 // Nombre d'annonces sélectionnées
 // -------------------------------
-$contenu .=     '<div class="col-sm-12">';
+$contenu .=     '<div class="col-sm-8">';
 $contenu .=         '<p>';
 switch ($nombreAnnonces)
 	{
@@ -144,7 +144,10 @@ switch ($nombreAnnonces)
 	default   : $contenu .= $nombreAnnonces.' annonces correspondent à votre recherche.'; break;
 	}
 $contenu .=         '</p>';
-$contenu .=     '</div>'; // col-sm-12
+$contenu .=     '</div>'; // col-sm-8
+$contenu .=     '<div class="col-sm">';
+$contenu .=     '<a href="index.php">retour à l\'accueil</a>';
+$contenu .=     '</div>';
 $contenu .= '</div>'; // row
 
 if ($nombreAnnonces > 0)

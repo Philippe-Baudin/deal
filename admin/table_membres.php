@@ -2,9 +2,8 @@
 $repertoire='../';
 require_once '../inc/init.php';
 if (!estAdmin())
-	{
 	exit ();
-	}
+
 // Les consignes envoyées par la requête AJAX
 $tri   = $_POST['triMembre']  ?? '0';
 $sens  = $_POST['sensMembre'] ?? '0';
@@ -33,6 +32,12 @@ $_SESSION['pageMembre']  = $page;
 // Compter les membres, pour la pagination
 $resultat = executerRequete ("SELECT COUNT(*) FROM membre");
 $nombreMembres = $resultat ? ($resultat->fetch(PDO::FETCH_NUM)[0]) : 0;
+
+// Compter les annonces de chaque membre
+$nombreAnnonces = array ();
+$resultat = executerRequete ("SELECT membre_id, COUNT(id) nb from annonce group by membre_id");
+while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
+	$nombreAnnonces[$ligne['membre_id']] = $ligne['nb'];
 
 // En déduire les membres à afficher, en fonction du numéro de page
 if ($nombreMembres > TAILLE_PAGE_MEMBRE)
@@ -80,19 +85,8 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC))
 
 	// Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
 	echo     '<td>';
-	echo         '<a href="?page='.$page.'&modification='.$ligne['id'].'#formulaire" class="lien-noir">'.MODIFIER.'</a>'."\n";
-	switch ($nombreMembres[$id]??'0')
-		{
-		case '0':
-			echo '<a href="?page='.$page.'&suppression='.$ligne['id'].'" onclick="return confirm(\'Etes-vous certain de vouloir supprimer le compte de '.$pseudo.' ?\')" class="lien-noir">'.POUBELLE.'</a>';
-			break;
-		case '1':
-			echo '<a href="?page='.$page.'&suppression='.$ligne['id'].'" onclick="return confirm(\''.$pseudo.' a déposé une annonce qui sera inaccessible aux utilisateurs si vous supprimez son compte. Etes-vous certain de vouloir supprimer son compte ?\')" class="lien-noir">'.POUBELLE.'</a>';
-			break;
-		default :
-			echo '<a href="?page='.$page.'&suppression='.$ligne['id'].'" onclick="return confirm(\''.$pseudo.' a déposé '.($nombreMembres[$id]??'0').' annonces qui seront inaccessibles aux utilisateurs si vous supprimez son compte. Etes-vous certain de vouloir supprimer son compte ?\')" class="lien-noir">'.POUBELLE.'</a>';
-			break;
-		}
+	echo         '<a href="?page='.$page.'&modification='.$id.'#formulaire" class="lien-noir">'.MODIFIER.'</a>'."\n";
+	echo         '<span class="lien-noir demande-suppression" id="'.$pseudo.'_'.$id.'_'.($nombreAnnonces[$id]??0).'">'.POUBELLE.'</span>';
 	echo     '</td>';
 	echo '</tr>';
 	}

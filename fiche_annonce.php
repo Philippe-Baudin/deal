@@ -11,7 +11,7 @@ $pageCourante = 'fiche_annonce.php';
 // Impossible d'afficher cette page sans id d'annonce : retour à l'accueil
 if (!isset($_GET['id']))
 	{
-//	header ('location:'.RACINE_SITE.'index.php');
+	header ('location:'.RACINE_SITE.'index.php');
 	exit ();
 	}
 
@@ -43,6 +43,31 @@ if (!$resultat || $resultat->rowCount() == 0)
 	exit ();
 	}
 extract($resultat->fetch(PDO::FETCH_ASSOC));
+
+
+// Envoyer un email à l'auteur d'une annonce
+if (!empty($_POST))
+	{
+	if (!isset ($_POST['message']))
+		$contenu .= '<div class="alert alert-success">Erreur lors de l\'envoi du message.</div>';
+	else if (strlen($_POST['message']) <4)
+		$contenu .= '<div class="alert alert-success">Message trop court.</div>';
+	if (empty ($contenu))
+		{
+		$resultat = executerRequete ("SELECT pseudo, email FROM membre WHERE id=:auteur", array (':auteur' => $_POST['auteur']));
+		if ($resultat->rowCount() != 1)
+			$contenu .= '<div class="alert alert-success">Erreur lors de l\'envoi du message.</div>';
+		else
+			{
+			extract($resultat->fetch(PDO::FETCH_ASSOC));
+			$to = $email;
+			$subject = 'Message de '.$_SESSION['membre']['pseudo'];
+			if (!mail ($to, $subject, str_replace ("\n.", "\n..", $_POST['message'])))
+				$contenu .= '<div class="alert alert-success">Erreur lors de l\'envoi du message.</div>';
+			}
+		}
+	}
+
 
 // Suggestion d'autres annonces
 /*
@@ -104,8 +129,10 @@ $contenu .=     '<div class="col-sm-3">';
 $contenu .=         '<p>Date de publication : '.$date.'</p>';
 $contenu .=     '</div>';
 $contenu .=     '<div class="col-sm-3">';
-$contenu .=         '<p>auteur : '.$pseudo.' <span id="affichage-note"></span>';
-$contenu .=         '</p>';
+	if (estAdmin())
+		$contenu .= '<p>auteur : <a href="admin/gestion_membres.php?modification='.$auteur.'#formulaire">'.$pseudo.'</a> <span id="affichage-note"></span></p>';
+	else
+		$contenu .= '<p>auteur : '.$pseudo.' <span id="affichage-note"></span></p>';
 $contenu .=     '</div>';
 $contenu .=     '<div class="col-sm-2">';
 $contenu .=         '<p>prix : '.sprintf("%.02f €",$prix).'</p>';
@@ -150,13 +177,28 @@ if (estConnecte())
 else
 	$contenu .= 'Deposer <a data-toggle="modal" href="#modaleConnexion">un commentaire sur l\'annonce</a> ou <a data-toggle="modal" href="#modaleConnexion">un avis sur '.$pseudo.'</a>';
 $contenu .= '</div>';
-$contenu .= '<div class="col-sm-2">';
+$contenu .=     '<div class="col-sm-2">';
 if (estAdmin())
-	$contenu .= '<a href="gestion_annonces.php?modification='.$id.'#formulaire">Modifier</a>';
-$contenu .= '</div>';
-$contenu .= '<div class="col-sm">';
-$contenu .= '<a href="index.php">Retour vers les annonces</a>';
-$contenu .= '</div>';
+	$contenu .=     '<a href="gestion_annonces.php?modification='.$id.'#formulaire">Modifier</a>';
+$contenu .=     '</div>';
+$contenu .=     '<div class="col-sm">';
+$contenu .=         '<script>';
+$contenu .=             'function revenir()';
+$contenu .=                 '{';
+$contenu .=                 'console.log(document.referrer);';
+$contenu .=                 'if(document.referrer.substr(-19,19)=="/deal/recherche.php")';
+$contenu .=                     '{';                                     
+$contenu .=                     'window.location.href="recherche.php";';
+$contenu .=                     '}';
+$contenu .=                  'else';
+$contenu .=                     '{';
+$contenu .=                     'window.location.href="index.php";';
+$contenu .=                     '}';
+$contenu .=                 'return false;';
+$contenu .=             '}';
+$contenu .=         '</script>';
+$contenu .=         '<a href="#" onclick="revenir()">Retour vers les annonces</a>';
+$contenu .=     '</div>';
 $contenu .= '</div>';
 
 require_once 'inc/header.php';
@@ -173,7 +215,7 @@ if (estConnecte())
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="modaleCommentaireTitle">Déposer un commentaire</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#message-erreur-commentaire').html ('')">
 					<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -185,10 +227,10 @@ if (estConnecte())
 					</div>
 					<div class="row">
 						<div class="col-sm-2">
-							<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="envoyerCommentaire(<?php echo $id ?>,1);">Envoyer</button>
+							<button type="button" class="btn btn-primary" onclick="envoyerCommentaire(<?php echo $id ?>,1);">Envoyer</button>
 						</div>
 						<div class="col-sm-2">
-							<button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+							<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$('#message-erreur-commentaire').html ('')">Annuler</button>
 						</div>
 					</div>
 				</div>
@@ -226,7 +268,7 @@ if (estConnecte())
 				<div class="modal-content">
 					<div class="modal-header">
 						<h5 class="modal-title" id="modaleAvisTitle">Donnez votre avis sur <?php echo $pseudo.' et notez l'.(($civilite=='M.')?'e':'a') ?> :</h5>
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#message-erreur-avis').html ('')">
 							<span aria-hidden="true">&times;</span>
 						</button>
 					</div>
@@ -253,10 +295,10 @@ if (estConnecte())
 						</div>
 						<div class="row">
 							<div class="col-sm-2">
-								<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="envoyerAvis(<?php echo $auteur ?>,1);">Envoyer</button>
+								<button type="button" class="btn btn-primary" onclick="envoyerAvis(<?php echo $auteur?>,1)">Envoyer</button>
 							</div>
 							<div class="col-sm">
-								<button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+								<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$('#message-erreur-avis').html ('')">Annuler</button>
 							</div>
 						</div>
 					</div>
@@ -278,15 +320,15 @@ if (estConnecte())
 				</div>
 				<div class="modal-body">
 					<form method="post" action="#">
-						<input type="hidden" name="id" value="'.$id.'">
-						<input type="hidden" name="auteur" value="'.$auteur.'">
+						<input type="hidden" name="id" value="<?php echo $id?>">
+						<input type="hidden" name="auteur" value="<?php echo $auteur?>">
 						<div class="form-group">
 							<label for="message" class="col-form-label">Votre message :</label>
 							<textarea class="form-control" id="message" name="message" rows="5"></textarea>
 						</div>
 						<div class="row">
 							<div class="col-sm-2">
-								<button type="submit" class="btn btn-primary">Envoyer</button><br><br>
+								<button type="submit" class="btn btn-primary">Envoyer</button>
 							</div>
 							<div class="col-sm">
 								<button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
@@ -306,68 +348,63 @@ echo $contenu;
 
 <!-- script de zoom des images -->
 <script src="js/zoom.js"></script>
-<!-- script d'ajout d'un commentaire -->
+<!-- script d'ajout de commentaire et d'avis -->
 <script>
-	function envoyerCommentaire(id, commentaire)
-		{
-		if (typeof commentaire === "undefined")
-			commande = {id:id};
-		else
+	$(function(){ // document ready
+		function envoyerCommentaire(id, commentaire)
 			{
-			commentaire = $("#commentaire").val();
-			commande = {commentaire:commentaire, id:id};
-			}
-		function reponse (retour)
-			{
-			if (retour.substr (0,4) == '<div')
-				{
-				$("#message-erreur-commentaire").html (retour);
-				$("#modaleCommentaire").on('hidden.bs.modal', function(){
-					$("#modaleCommentaire").off('hidden.bs.modal');
-					$("#modaleCommentaire").modal('show');
-					});
-				}
+			if (typeof commentaire === "undefined")
+				commande = {id:id};
 			else
 				{
-				$("#affichage-commentaires").html(retour);
-				$("#message-erreur-commentaire").html ('');
+				commentaire = $("#commentaire").val();
+				commande = {commentaire:commentaire, id:id};
 				}
-			}
-		$.post("nouveau_commentaire.php", commande, reponse,"html");
-		$("#commentaire").val("");
-		}
-	envoyerCommentaire (<?php echo $id ?>);
-</script>
-<!-- script d'ajout d'un avis -->
-<script>
-	function envoyerAvis(id, avis) {
-		if (typeof avis === "undefined")
-			commande = {id:id};
-		else
-			{
-			avis = $("#avis").val();
-			note = $("#note").val();
-			commande = {avis:avis, note:note, id:id};
-			}
-		$.post("nouvel_avis.php", commande,	function(retour){
-			if (retour.substr (0,4) == '<div')
+			function reponse (retour)
 				{
-				$("#message-erreur-avis").html (retour);
-				$("#modaleAvis").on('hidden.bs.modal', function(){
-					$("#modaleAvis").off('hidden.bs.modal');
-					$("#modaleAvis").modal('show');
-					});
+				if (retour.substr (0,17) == '<div class="alert')
+					{
+					$("#message-erreur-commentaire").html (retour);
+					}
+				else
+					{
+					$("#affichage-commentaires").html(retour);
+					$("#message-erreur-commentaire").html ('');
+					$("#modaleCommentaire").modal('hide');
+					}
 				}
+			$.post("nouveau_commentaire.php", commande, reponse,"html");
+			$("#commentaire").val("");
+			}
+		envoyerCommentaire (<?php echo $id ?>);
+
+		function envoyerAvis(id, avis) {
+			if (typeof avis === "undefined")
+				commande = {id:id};
 			else
 				{
-				$("#message-erreur-avis").html ('');
-				$("#affichage-note").html(retour);
+				avis = $("#avis").val();
+				note = $("#note").val();
+				commande = {avis:avis, note:note, id:id};
 				}
-			},"html");
-		$("#avis").val("");
-		$("#note").val(5)
-		}
-	envoyerAvis (<?php echo $auteur ?>);
+			$.post("nouvel_avis.php", commande,	function(retour){
+				if (retour.substr (0,17) == '<div class="alert')
+					{
+					$("#message-erreur-avis").html (retour);
+					}
+				else
+					{
+					$("#message-erreur-avis").html ('');
+					$("#affichage-note").html(retour);
+					$("#modaleAvis").modal('hide');
+					}
+				},"html");
+			$("#avis").val("");
+			$("#note").val(5)
+			}
+		envoyerAvis (<?php echo $auteur ?>);
+		console.log(document.referrer.substr(-19,19));
+	});
 </script>
 
 <?php

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le :  mar. 11 fév. 2020 à 16:01
+-- Généré le :  ven. 31 jan. 2020 à 14:55
 -- Version du serveur :  10.4.10-MariaDB
 -- Version de PHP :  7.3.12
 
@@ -46,14 +46,14 @@ CREATE TABLE IF NOT EXISTS `annonce` (
   PRIMARY KEY (`id`),
   KEY `membre_id` (`membre_id`),
   KEY `categorie_id` (`categorie_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `annonce`
 --
 
 INSERT INTO `annonce` (`id`, `titre`, `description_courte`, `description_longue`, `prix`, `photo`, `pays`, `ville`, `adresse`, `code_postal`, `membre_id`, `categorie_id`, `date_enregistrement`) VALUES
-(1, 'Vends maison', 'Maison T5 à vendre à Chéroy (Yonne 89)', 'Venez visiter cette maison située dans un secteur calme avec les commerces, écoles et crèche à pied.\r\nElle se compose d\'une entrée sur pièce à vivre de 44 m² avec pôele à bois et cuisine aménagée ouverte, chambre de plain pied, salle de bains avec baignoire et douche, wc.\r\nA l\'étage : palier, deux belles chambres de 15 m² et 18 m², wc.\r\nAbri voiture et atelier.\r\nDouble vitrage.\r\nTerrasse.\r\nTout à l\'égout.\r\nAucun vis à vis pour ce terrain clos et arboré de 1320 m².\r\nDisponible immédiatement. &lt;a href=&quot;https://philippe-baudin.fr/pacman/pacman.html&quot;&gt;pacman&lt;/a&gt;  ', 100000, 'img/ref1_9926069611_1.JPG', 'France', 'Chéroy', 'adresse', '89123', 4, 3, '2020-01-19 12:35:48'),
+(1, 'Vends maison', 'Maison T5 à vendre à Chéroy (Yonne 89)', 'Venez visiter cette maison située dans un secteur calme avec les commerces, écoles et crèche à pied.\r\nElle se compose d\'une entrée sur pièce à vivre de 44 m² avec pôele à bois et cuisine aménagée ouverte, chambre de plain pied, salle de bains avec baignoire et douche, wc.\r\nA l\'étage : palier, deux belles chambres de 15 m² et 18 m², wc.\r\nAbri voiture et atelier.\r\nDouble vitrage.\r\nTerrasse.\r\nTout à l\'égout.\r\nAucun vis à vis pour ce terrain clos et arboré de 1320 m².\r\nDisponible immédiatement.', 100000, 'img/ref1_9926069611_1.JPG', 'France', 'Chéroy', 'adresse', '89123', 4, 3, '2020-01-19 12:35:48'),
 (4, 'Pantalon', 'Pantalon noir taille 38', 'Vends Pantalon noir taille 38, neuf.', 123, 'img/ref4_ref3_pantalon1.jpg', 'France', 'Paris', 'dfsgfdshfsh', '75000', 2, 10, '2020-01-20 11:22:08'),
 (6, 'Vends AIXAM Diesel', 'A vendre : voiture sans permis AIXAM Diesel', 'AIXAM Diesel 9 900 €.\r\nCITY SPORT S9\r\nDATE 1ERE MISE EN CIRCULATION 14/10/2019\r\n2 430KMS\r\nAUTORADIO TACTILE 6,2 POUCES+ PORT USB + CAMERA DE RECUL INTEGRÉ\r\nREVISEE ET GARANTIE DANS NOS ATELIERS\r\nFRAIS D\'IMMATRICULATION + KIT DE SECURITE + PLEIN DE GASOIL OFFERTS\r\nPOSSIBILITE DE FINANCEMENT A PARTIR DE 207,94€/MOIS', 9900, 'img/ref0_9926129682_1.jpg', 'France', 'La Ferté-Bernard', 'GARAGE TOUZEAU', '72400', 2, 1, '2020-01-21 12:34:16'),
 (9, 'Mercedes Classe E 220 ', 'A vendre : Mercedes Classe E 220 berline bleue', 'Mercedes Classe E 220 BlueTEC Sportline A (9 CV) *, Berline, Diesel, Mars/2016, 43000 Km , 4 portes.\r\nEquipements et options : ABS, Contrôle de pression des pneus, Antipatinage (ASR), Airbag conducteur, Airbag frontaux, Contrôle de stabilité (ESP), Allumage automatique des feux, Rétroviseurs électriques, Filtres à particules (FAP), Banquette AR 1/3 - 2/3, Vitres électriques, Ordinateur de bord, Accoudoir central, Vitres teintées.\r\n', 28500, 'img/ref9_WV158653936_1.jpeg', 'France', 'Four', '10 Rue de Général De Gaulle', '38080', 6, 1, '2020-01-21 12:53:47'),
@@ -76,12 +76,7 @@ INSERT INTO `annonce` (`id`, `titre`, `description_courte`, `description_longue`
 (39, 'Studio espagne', 'Appartement T1 à vendre à Empuriabrava, Espagne', 'Studio 20 m2, entièrement refait, charge 280€/ an, taxe foncière 250/an.\r\nLe studio est idéalement placé.\r\nLe stationnement est gratuit autour de l immeuble, le studio est face à la piscine, vue sur les Pyrénées.\r\nLe matin vous entendrez les oiseaux.\r\nAu pied de l\'immeuble, un petit café entièrement refait à neuf avec un jeune proprio super sympa. Un réel plus...\r\nLe studio est au deuxième étage. Expo sud, sud est.\r\nEn face de l immeuble, vous avez un supermarché Montserrat, un bazard géant chinois, Lidle, une laverie et la station essence la moins chère du coin. Vous êtes à 5 mn d une plage de rêve, immense. Une trottinette électrique sera idéal pour passer de super vacance. Affaire à saisir rapidement.\r\nSurface : 20m2 environ\r\nEmission de gaz à effet de serre : 5 kgéq/m².an  \r\n Consommation énergétique : 5 kWh/m² an', 38000, 'img/ref0_WI164083109_1.jpeg', 'Espagne', 'Empuriabrava', '... ...', '00000', 16, 3, '2020-01-28 14:25:09'),
 (40, 'Porte vélo Siena 2 Fixe', 'Porte vélos universel pour rotule d\'attelage', 'Porte vélos universel type plateforme pour rotule d\'attelage \r\nEquipé d\'un système de fixation rapide et très compact \r\nSangles de sécurité cousues sur le porte vélo \r\nCadre jusqu\'à 60 mm de diamètre \r\nSupports de roues amovibles selon l’espace entre les roues du/des vélos transportés\r\nSupport de plaque complet homologué selon la norme européenne avec feux et prise 13 broches \r\nModèle à assembler \r\nFabriqué en Italie \r\nVerrouillable vélo sur porte-vélo       NON\r\nVerrouillable porte-vélo sur boule d\'attelage   NON\r\nCharge max      34 kg \r\nDimensions (HxLxP)      610 x 1090 x 700/1150 cm', 159, 'img/ref40_porte-velo-siena-2-fixe.jpg', 'France', 'Paris', 'Palais de l\'Elysée, 55 rue du Faubourg-Saint-Honoré', '75008', 8, 4, '2020-01-28 14:28:01'),
 (41, 'Bracelets caoutchouc', '10 Bracelets caoutchouc court', 'Ces bracelets courts en caoutchouc de chez Cabanon permettent de fixer le double toit au sol.\r\nCouleur principale : Beige\r\nMatière : Caoutchouc\r\nDimensions : 40 X 48 X 9 mm\r\nGarantie : 2 ans\r\nUtilisation : Equipement Tentes, Fixation', 4, 'img/ref0_bracelets-caoutchouc-court-les-10-cabanon.jpg', 'France', 'Paris', 'Palais de l\'Elysée, 55 rue du Faubourg-Saint-Honoré', '75008', 8, 4, '2020-01-28 14:29:50'),
-(47, 'Drone', 'Drone 2.4G avec caméra ', 'Drone 2.4G avec caméra très bon état mais sans télécommande ( cassée )\r\nvisible et enlèvement à Dieppe', 50, 'img/ref_47_WB164218847_1.jpeg', 'France', 'Dieppe', '3 place de la Mairie', '76200', 15, 6, '2020-02-10 14:03:06'),
-(48, 'Caméra d\'épaule', 'Caméra semi pro d\'épaule neuf', ' Vends caméra semi-pro d\'épaule en excellent état, très peu servi. je la vends pour cause de doublon.\r\nElle filme en 1080P progressif. processeur ExmorR CMOS, ouverture maxi 1.8 Excellent dans des conditions de basse lumière.\r\nElle possède le WiFi et dispose d\'une lampe LED frontale. Elle est équipé de 3 griffes porte accessoires pour y ajouter 1 micro en plus de celui qu\'elle possède ou d\'un projecteur supplémentaire.\r\nProduit qui donne d\'excellents résultats et qui vous ravira pour garder de bons souvenirs des fêtes.\r\nJ\'ajoute dans le colis 1 seconde batterie + sac de transport.', 650, 'img/ref_48_WB163738115_1.jpeg', 'France', 'Recurt', 'Grande Route', '65330', 15, 5, '2020-02-10 14:06:09'),
-(49, 'Webcam ', 'Webcam neuve', ' Webcam pour tchat, skype, vidéo conférence, ?\r\nMarque : ARCO\r\nModèle : AR1462\r\nInterface : USB\r\nFournie dans sa boite avec son manuel et son CD d\'installation\r\nEn très bon état (matériel neuf', 5, 'img/ref_49_WB154258967_1.jpeg', 'France', 'Recurt', 'Grande Route', '65330', 15, 5, '2020-02-10 14:11:05'),
-(50, 'Moto HARLEY-DAVIDSON Custom', 'HARLEY-DAVIDSON Custom - 1340 cm³ - 81000 km', 'HARLEY-DAVIDSON, 1340 Cm3 , Custom, Essence 4 temps, 1998, 81000 Km , 9 CV , 6 900 €.\r\nCylindrée : 1340 cm³\r\nAnnée : Juin 1998\r\nKilométrage : 81000 km\r\nEnergie : Essence 4 temps\r\nType : Custom\r\nPuissance fiscale : 9 ', 6900, 'img/ref_50_WV164219604_1.jpeg', 'France', 'Charleville-Mézières', '... ...', '08000', 19, 1, '2020-02-10 14:20:50'),
-(53, 'Champ', 'Paturâge', 'Magnifique champ à l\'herbe bien grasse', 25000, 'img/ref_53_sizecrop_1000x1000.jpeg', 'France', 'Rouen', 'Ferme des 5 vaches', '76000', 21, 3, '2020-02-10 14:57:41'),
-(54, 'Briquet', 'Briquet chalumeau', 'Acheter briquet chalumeau pas cher.\r\nNotre boutique vous propose une grande sélection de briquets chalumeau.\r\nSa particularité : une flamme puissante et bleue à l’image de celle du chalumeau.\r\nVous profitez de la puissance et de la précision d’une flamme de chalumeau dans un petit briquet à gaz de poche. Facile d’utilisation, le briquet chalumeau convient à tous types d’usages et notamment pour allumer : les blunts, cigares et autres charbons chicha.\r\nEssayez-le et vous ne pourrez plus vous en séparer.\r\n', 3.9, 'img/ref_54_155BK-1-300x300.jpg', 'France', 'Rouen', 'place du vieux marché', '75000', 6, 7, '2020-02-10 15:17:38');
+(42, 'Briquet', 'Briquet chalumeau', 'Acheter briquet chalumeau pas cher\r\nNotre boutique vous propose une grande sélection de briquets chalumeau. Sa particularité : une flamme puissante et bleue à l’image de celle du chalumeau. Vous profitez de la puissance et de la précision d’une flamme de chalumeau dans un petit briquet à gaz de poche. Facile d’utilisation, le briquet chalumeau convient à tous types d’usages et notamment pour allumer : les blunts, cigares et autres charbons chicha. Essayez-le et vous ne pourrez plus vous en séparer.\r\n', 3.9, 'img/ref0_2.7.155BK-1-300x300.jpg', 'France', 'Rouen', 'place du vieux marché', '75000', 6, 7, '2020-01-31 10:00:41');
 
 -- --------------------------------------------------------
 
@@ -130,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `commentaire` (
   PRIMARY KEY (`id`),
   KEY `annonce_id` (`annonce_id`),
   KEY `membre_id` (`membre_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `commentaire`
@@ -148,7 +143,7 @@ INSERT INTO `commentaire` (`id`, `commentaire`, `membre_id`, `annonce_id`, `date
 (28, 'Je me balade ...\r\nEt toi ?', 14, 20, '2020-01-30 21:53:36'),
 (29, 'J\'essaie d\'écouler mes vieilles chaussettes !', 9, 20, '2020-01-30 21:54:00'),
 (30, 'Bon, ça va, les filles.\r\nC\'est pas un site de chat, ici !', 5, 20, '2020-01-30 21:54:27'),
-(32, 'oh, ça vas le RALEURRRRRRR\n', 9, 20, '2020-02-10 17:08:58');
+(31, 'fbgbhngnjghnjhf,khfjgnjghfj', 5, 6, '2020-01-31 13:41:47');
 
 -- --------------------------------------------------------
 
@@ -169,7 +164,7 @@ CREATE TABLE IF NOT EXISTS `membre` (
   `role` enum('user','admin') COLLATE utf8mb4_unicode_ci NOT NULL,
   `date_enregistrement` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `membre`
@@ -194,8 +189,7 @@ INSERT INTO `membre` (`id`, `pseudo`, `mdp`, `nom`, `prenom`, `telephone`, `emai
 (17, 'Laurent', '$2y$10$SmCEHut0lZU0fgmkgvb3Xezq6RBHaXn9kwrhoLIR5hPWoNDAJwoPC', 'CHAPPUIS', 'Laurent', '0123456789', 'lchappuis@gmail.com', 'M.', 'user', '2020-01-28 14:40:27'),
 (18, 'christophe', '$2y$10$R5B4I3ygaF0NV2nZGTDdc.PK7npCPoZDI1nbAZIZdemFAh3bgoLbS', 'JOSSE', 'Christophe', '0123456789', 'cjosse@gmail.com', 'M.', 'user', '2020-01-28 14:40:16'),
 (19, 'benjamin', '$2y$10$ZUXD4e4IRUrdX/Y3w66lOetEPO9tGODyyczwCwUht98s8e1REyjBa', 'Benjamin', 'ESTEVES', '0123456789', 'besteve@gmail.com', 'M.', 'user', '2020-01-28 14:40:06'),
-(20, 'aurélien', '$2y$10$NftNDcf4pNBQpfAwHXMAOu/f2yOL9X/RqR8kedwlDnzR.s2pMU.16', 'BELINGARD', 'Aurélien', '0123456789', 'abelingard@gmail.com', 'M.', 'user', '2020-01-28 14:39:57'),
-(21, 'Bœuf', '$2y$10$0UtIRJFtAjsPkXw.vqD9T.ncNnmBo3P2wGCH9IDXoMRKfA4mRuXUm', 'Vache', 'Marguerite', '0123454321', 'Marguerite@lavache.com', 'Mme', 'user', '2020-02-10 14:55:09');
+(20, 'aurélien', '$2y$10$NftNDcf4pNBQpfAwHXMAOu/f2yOL9X/RqR8kedwlDnzR.s2pMU.16', 'BELINGARD', 'Aurélien', '0123456789', 'abelingard@gmail.com', 'M.', 'user', '2020-01-28 14:39:57');
 
 -- --------------------------------------------------------
 
@@ -214,7 +208,7 @@ CREATE TABLE IF NOT EXISTS `note` (
   PRIMARY KEY (`id`),
   KEY `membre_id1` (`membre_id1`),
   KEY `membre_id2` (`membre_id2`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `note`
@@ -230,7 +224,7 @@ INSERT INTO `note` (`id`, `note`, `avis`, `membre_id1`, `membre_id2`, `date_enre
 (8, 4, 'RAS', 5, 3, '2020-01-20 09:45:24'),
 (10, 4, 'Merci de nous faire rêver ...', 7, 6, '2020-01-24 16:41:44'),
 (11, 5, 'Allez, je te mets 5 étoiles.', 14, 9, '2020-01-30 21:58:39'),
-(13, 5, 'aaaaaaaaaaa', 5, 6, '2020-02-11 13:19:49');
+(12, 5, 'aaaaaaaaaaaaaaaaaaaaaaa', 5, 2, '2020-01-31 13:42:51');
 
 -- --------------------------------------------------------
 

@@ -153,6 +153,7 @@ function noteEnEtoiles ($note)
 	return $retour;
 	}
 
+// générer les paramêtres d'URL à partie du contenu de $_GET
 function retablirGET ($deconnexion)
 	{
 	$retour = '';
@@ -175,6 +176,40 @@ function retablirGET ($deconnexion)
 		}
 	return $retour;
 	}
+
+// Modale de confirmation de la suppression de quelque chose ...
+function modaleSuppression ($titre, $plus)
+	{
+	?>
+	<div class="modal modal<?php echo ($plus?'_lg':'')?>" id="modaleSuppression" tabindex="-1" role="dialog" aria-labelledby="modaleSuppressionTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal<?php echo ($plus?'_lg':'')?>" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modaleSuppressionTitle">Etes vous certain de vouloir supprimer <?php echo $titre?>&nbsp;?</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<?php if($plus){?>
+							<div class="col-sm-12" id="complement"></div><div class="col-sm-12"><hr></div>
+						<?php }?>
+						<div class="col-sm-2">
+							<button type="button" class="btn btn-primary ok-suppression">Oui</button>
+						</div>
+						<div class="col-sm-2">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php
+	}
+
+
 // ----------------------------------------------
 // Requete SQL :
 // ----------------------------------------------

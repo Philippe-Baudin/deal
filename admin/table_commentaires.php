@@ -71,8 +71,8 @@ while ($ligne = $resultat->fetch(PDO::FETCH_ASSOC)) // pour chaque ligne retourn
 	echo     '<td>' . $date_enregistrement . '</td>';
 	         // Là, il y a un petit bout de javaScript fûté : quand on retourne false dans un onclick, ça bloque le lien. Na.
 	echo     '<td>';
-	echo         '<a href="?modification='.$ligne['id'].'#formulaire" class="lien-noir">'.MODIFIER.'</a>'."\n";
-	echo         '<a href="?suppression='.$ligne['id'].'" onclick="return confirm(\'Etes-vous certain de vouloir supprimer ce commentaire ?\')" class="lien-noir">'.POUBELLE.'</a>';
+	echo         '<a href="?modification='.$id.'#formulaire" class="lien-noir">'.MODIFIER.'</a> ';
+	echo         '<span class="lien-noir demande-suppression" id="suppression_'.$id.'">'.POUBELLE.'</span>';
 	echo     '</td>';
 	echo '</tr>';
 	}

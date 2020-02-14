@@ -65,16 +65,6 @@ if (!empty($_POST))
 
 	}
 
-// Suppression d'une note
-if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
-	{
-	$resultat = executerRequete ("DELETE FROM note WHERE id = :id", array (':id' => $_GET['suppression']));
-	if ($resultat->rowCount() == 1)
-		$contenu .= '<div class="alert alert-success">La note a bien été supprimé.</div>';
-	else
-		$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression de la note.</div>';
-	}
-
 // Demande de modification d'une note
 else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'est qu'on a cliqué sur "modification" dans le tableau ci-dessous
 	{
@@ -96,6 +86,13 @@ $contenu .='</div>';
 
 
 require_once '../inc/header.php';
+
+// Emplacement du message de retour de suppression d'un commentaire
+echo '<div id="messageSuppression"></div>';
+
+// Modale de confirmation de la supression d'un commentaire'
+modaleSuppression ('cette note', false);
+
 
 // Navigation entre les pages d'administration
 navigationAdmin ('Notes');
@@ -154,7 +151,7 @@ if ($afficherFormulaire)
 	</div>
 	<?php
 	} // fin du if ($afficherFormulaire)
-	?>	
+	?>
 <script>
 	$(function(){ // document ready
 
@@ -164,23 +161,43 @@ if ($afficherFormulaire)
 			echo 'let sens = "'.($_SESSION["sensNote"]??0).'";';
 			echo 'let page = "'.($_SESSION["pageNote"]??0).'";';
 		?>
+		let cible;
 
-		// réception et traitement de la réponse à la requête AJAX
+		// clic sur le bouton 'oui' de la fenêtre modale de confirmation de suppression
+		$(".ok-suppression").on ('click', function(){
+			$.post('suppression_note.php', {id:cible},function(reponse){
+				$('#modaleSuppression').modal('hide');
+				$('#messageSuppression').html(reponse);
+				afficherTableau ();
+				}, 'html');
+			});
+
+		// réception et traitement de la réponse à la requête AJAX d'affichage du tableau
 		function reponse (contenu)
 			{
 			$('#tableau').html(contenu);
 			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire"' ?>
 
+			// clic sur une icône "poubelle" du tableau
+			$(".demande-suppression").on ('click', function(e){
+				cible = e.currentTarget.id.replace(/[^0-9]/g,'');
+				$('#modaleSuppression').modal('show');
+				});
+
+			// clic sur une des cases de la pagination
 			$('.page-item').on('click', 'a', function(e)
 				{
 				page = e.target.id.replace(/[^0-9]/g, '');
-				requeteAjax ();
+				afficherTableau ();
 				});
 			}
 
-		// Lancement de la requête AJAX
-		function requeteAjax ()
+		// Lancement de la requête AJAX d'affichage du tableau
+		function afficherTableau ()
 			{
+			// arrêter les listener de demande de supression
+			$(".demande-suppression").off("click");
+
 			// Emission de la requête AJAX
 			$.post('table_notes.php', { triNote  : tri, sensNote : sens, pageNote : page,}, reponse, 'html');
 			}
@@ -189,13 +206,14 @@ if ($afficherFormulaire)
 		$('#tableau').on('click', 'th.tri', function(e){
 			if (tri == e.target.id) sens = ((sens=='ASC')?'DESC':'ASC');
 			else { tri = e.target.id; sens='ASC'; }
-			requeteAjax();
+			afficherTableau();
 		});
 
 		// A l'affichage de la page, lancer une première fois la requête AJAX
-		requeteAjax ();
+		afficherTableau ();
 
 	}); // document ready
 </script>
+
 <?php
 require_once '../inc/footer.php';

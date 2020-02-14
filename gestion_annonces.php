@@ -39,6 +39,13 @@ else
 	$afficherFormulaire = true;
 	}
 
+$nombrePages = 1;
+$_SESSION['page courante'] = 'gestion_annonce.php';
+$tri = $_SESSION['tri'] ?? 'date_enregistrement';
+$sens = $_SESSION['sens'] ?? 'ASC';
+$_SESSION['tri'] = $tri;
+$_SESSION['sens'] = $sens;
+
 // Modification/Creation d'une annonce
 if (!empty($_POST))
 	{
@@ -177,25 +184,6 @@ if (!empty($_POST))
 		}
 	} // if (!empty($_POST))
 
-// Suppression d'une annonce
-if (isset ($_GET['suppression'])) // Si on a 'suppression' dans l'URL c'est qu'on a cliqué sur "suppression" dans le tableau ci-dessous
-	{
-	// Récupérer l'URL de la photo et supprimer le fichier
-	$resultat = executerRequete ("SELECT photo FROM annonce WHERE id = :id", array (':id' => $_GET['suppression']));
-	if ($resultat && $resultat->rowCount()==1)
-		{
-		$photo = $resultat->fetch(PDO::FETCH_NUM)[0];
-		if (!empty($photo) && file_exists($photo))
-			unlink ($photo);
-		}
-	$resultat = executerRequete ("DELETE FROM commentaire WHERE annonce_id = :id", array (':id' => $_GET['suppression']));
-	$resultat = executerRequete ("DELETE FROM annonce WHERE id = :id", array (':id' => $_GET['suppression']));
-	if ($resultat->rowCount() == 1)
-		$contenu .= '<div class="alert alert-success">L\'annonce a bien été supprimée.</div>';
-	else
-		$contenu .= '<div class="alert alert-danger">Erreur lors de la suppression de l\'annonce.</div>';
-	}
-
 // Modification d'une annonce
 else if (isset ($_GET['modification'])) // Si on a 'modification' dans l'URL c'est qu'on a cliqué sur "modification" dans le tableau ci-dessous
 	{
@@ -211,6 +199,12 @@ $listeCategories = $resultat->fetchAll (PDO::FETCH_NUM);
 
 
 require_once 'inc/header.php';
+
+// Emplacement du message de retour de suppression d'une annonce
+echo '<div id="messageSuppression"></div>';
+
+// Modale de confirmation de la supression d'une annonce'
+modaleSuppression ('cette annonce', false);
 
 // Navigation entre les pages d'administration
 if (!isset($_GET['creation']))
@@ -373,62 +367,66 @@ if ($afficherFormulaire)
 <script>
 	$(function(){ // document ready
 
-	    // Tri du tableau en fonction du choix de l'internaute.
-	    // Le tri est réalisé dans "table_annonces.php" qui dessine le tableau à afficher.
-	    // Le pilotage est fait par une requête AJAX post.
-
+		// Le tri et le numéro de page
 		<?php
 			echo 'let tri  = "'.($_SESSION["tri"]??0).'";';
 			echo 'let sens = "'.($_SESSION["sens"]??0).'";';
 			echo 'let page = "'.($_SESSION["page"]??0).'";';
 		?>
+		let cible;
 
-		// éviter de faire plusieurs fois les JQuery
-		let selectTri = $('select.tri');
-		let selectSens = $('select.sens')
+		// clic sur le bouton 'oui' de la fenêtre modale de confirmation de suppression
+		$(".ok-suppression").on ('click', function(){
+			$.post('admin/suppression_annonce.php', {id:cible},function(reponse){
+				$('#modaleSuppression').modal('hide');
+				$('#messageSuppression').html(reponse);
+				afficherTableau ();
+				}, 'html');
+			});
 
-	    // lancer la requete AJAX pour l'affichage initial
-	    function requeteAjax()
-	    	{
-			$.post('table_annonces.php', {tri : tri, sens : sens, page : page}, reponse, 'html');
-			}
-
-	    // fonction de réponse à la requête ajax
-		function reponse (retour)
+		// réception et traitement de la réponse à la requête AJAX d'affichage du tableau
+		function reponse (contenu)
 			{
-			$('#tableau').html(retour);
-			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire";' ?>
+			$('#tableau').html(contenu);
+			<?php if ($afficherFormulaire) echo 'location.hash = "#formulaire"' ?>
+
+			// clic sur une icône "poubelle" du tableau
+			$(".demande-suppression").on ('click', function(e){
+				cible = e.currentTarget.id.replace(/[^0-9]/g,'');
+				$('#modaleSuppression').modal('show');
+				});
+
+			// clic sur une des cases de la pagination
 			$('.page-item').on('click', 'a', function(e)
 				{
 				page = e.target.id.replace(/[^0-9]/g, '');
-				requeteAjax ();
+				afficherTableau ();
 				});
 			}
 
-		// trier si on clique sur une option du select
-		selectTri.change(_=>{
-			tri= selectTri.val();
-			requeteAjax ();
-		});
+		// Lancement de la requête AJAX d'affichage du tableau
+		function afficherTableau ()
+			{
+			// arrêter les listener de demande de supression
+			$(".demande-suppression").off("click");
 
-		// trier si on clique sur une option du select
-		selectSens.change(_=>{
-			sens = selectSens.val();
-			requeteAjax();;
-		});
+			// Emission de la requête AJAX
+			$.post('table_annonces.php', { tri : tri, sens : sens, page : page, }, reponse, 'html');
+			}
 
 	    // trier si on clique sur une entête du tableau
 		$('#tableau').on('click', 'th.tri', function(e){
 			if (tri == e.target.id) sens = ((sens=='ASC')?'DESC':'ASC');
-			else tri = e.target.id;
-			requeteAjax();;
-			selectTri.val(tri);
-			selectSens.val(sens);
+			else { tri = e.target.id; sens='ASC'; }
+			afficherTableau();
 		});
 
-		requeteAjax();
+		// A l'affichage de la page, lancer une première fois la requête AJAX
+		afficherTableau ();
+
 	}); // document ready
 </script>
+
 
 <?php
 require_once 'inc/footer.php';

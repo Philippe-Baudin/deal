@@ -59,14 +59,30 @@ $contenu .=     '</div>';
 $contenu .=     '<div class="row">';
 $contenu .=         '<div class="col-sm-6">';
 $contenu .=             '<h4>Membres les mieux notés</h4>';
+$contenu .=             '<div class="row">';
+$contenu .=                 '<div class="col-sm-3">';
 for ($i=0; $i<5 && $i<sizeof($tableAvis); $i++)
-	$contenu .=         '<p>'.($i+1).' - '. $tableAvis[$i]['pseudo'].' : '.noteEnEtoiles($tableAvis[$i]['moyenne']).' (basé sur '.$tableAvis[$i]['nombreAvis'].' avis)</p>';
+	$contenu .=                 '<p>'.($i+1).' - '. $tableAvis[$i]['pseudo'].' :<p>';
+$contenu .=                 '</div>';
+$contenu .=                 '<div class="col-sm">';
+for ($i=0; $i<5 && $i<sizeof($tableAvis); $i++)
+	$contenu .=                 '<p>'.noteEnEtoiles($tableAvis[$i]['moyenne']).' (basé sur '.$tableAvis[$i]['nombreAvis'].' avis)</p>';
+$contenu .=                 '</div>';
+$contenu .=             '</div>';
 $contenu .=         '</div>'; // class="col-sm-6">';
 
 $contenu .=         '<div class="col-sm-6">';
 $contenu .=             '<h4>Membres les plus actifs</h4>';
+$contenu .=             '<div class="row">';
+$contenu .=                 '<div class="col-sm-3">';
 for ($i=0; $i<5 && $i<sizeof($tableActifs); $i++)
-	$contenu .=         '<p>'.($i+1).' - '. $tableActifs[$i]['pseudo'].' : '.$tableActifs[$i]['nombreAnnonces'].' annonces</p>';
+	$contenu .=                 '<p>'.($i+1).' - '. $tableActifs[$i]['pseudo'].' :</p>';
+$contenu .=                 '</div>';
+$contenu .=                 '<div class="col-sm">';
+for ($i=0; $i<5 && $i<sizeof($tableActifs); $i++)
+	$contenu .=                 '<p>'.$tableActifs[$i]['nombreAnnonces'].' annonces</p>';
+$contenu .=                 '</div>';
+$contenu .=             '</div>';
 $contenu .=         '</div>'; // class="col-sm-6">';
 $contenu .=     '</div>'; // class="row">';
 
@@ -75,14 +91,30 @@ $contenu .=     '<div class="row"><hr></div>';
 $contenu .=     '<div class="row">';
 $contenu .=         '<div class="col-sm-6">';
 $contenu .=             '<h4>Annonces les plus anciennes</h4>';
+$contenu .=             '<div class="row">';
+$contenu .=                 '<div class="col-sm-3">';
 for ($i=0; $i<5 && $i<sizeof($tableAnnonces); $i++)
-	$contenu .=         '<p>'.($i+1).' - annonce '. $tableAnnonces[$i]['id'].' : '.$tableAnnonces[$i]['titre'].', postée le '.$tableAnnonces[$i]['date'].'</p>';
+	$contenu .=                 '<p>'.($i+1).' - annonce '. $tableAnnonces[$i]['id'].' :</p>';
+$contenu .=                 '</div>';
+$contenu .=                 '<div class="col-sm">';
+for ($i=0; $i<5 && $i<sizeof($tableAnnonces); $i++)
+	$contenu .=                 '<p>'.$tableAnnonces[$i]['titre'].', postée le '.$tableAnnonces[$i]['date'].'</p>';
+$contenu .=                 '</div>';
+$contenu .=             '</div>';
 $contenu .=         '</div>'; // class="col-sm-6">';
 
 $contenu .=         '<div class="col-sm-6">';
 $contenu .=             '<h4>Catégories contenant le plus d\'annonces</h4>';
+$contenu .=             '<div class="row">';
+$contenu .=                 '<div class="col-sm-5">';
 for ($i=0; $i<5 && $i<sizeof($tableCategories); $i++)
-	$contenu .=         '<p>'.($i+1).' - catégorie '. $tableCategories[$i]['titre'].' : '.$tableCategories[$i]['nombreAnnonces'].' annonce'.(($tableCategories[$i]['nombreAnnonces']*1)>1?'s':'').'</p>';
+	$contenu .=                 '<p>'.($i+1).' - catégorie '. $tableCategories[$i]['titre'].' :</p>';
+$contenu .=                 '</div>';
+$contenu .=                 '<div class="col-sm">';
+for ($i=0; $i<5 && $i<sizeof($tableCategories); $i++)
+	$contenu .=                 '<p>'.$tableCategories[$i]['nombreAnnonces'].' annonce'.(($tableCategories[$i]['nombreAnnonces']*1)>1?'s':'').'</p>';
+$contenu .=                 '</div>';
+$contenu .=             '</div>';
 $contenu .=             '<hr>';
 $contenu .=         '</div>'; // class="col-sm-6">';
 $contenu .=     '</div>'; // class="row">';

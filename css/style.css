@@ -1,6 +1,9 @@
 .lien-noir {
 	color:black;
 	}
+.lien-noir:hover {
+	cursor:pointer;
+	}
 #zoom {
 	position: fixed;
 	display: flex;
@@ -31,4 +34,5 @@
 	padding:10px;
 	box-shadow: 3px 3px 6px darkgrey;
 	}
-
+.titre {text-align:center; width:100%; margin-bottom:20px;}
+.souligner {text-decoration:underline !important;}
