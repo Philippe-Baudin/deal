@@ -3,21 +3,29 @@ $repertoire='';
 require_once 'inc/init.php';
 
 if (empty($_POST))
-	exit ();
+	exit;
+extract ($_POST);
 
 // Enregistrement d'un commentaire
-if (isset($_POST['commentaire']))
+$erreur = false;
+if (estConnecte() && isset($commentaire))
 	{
-	if (strlen($_POST['commentaire']) >= 3)
-		executerRequete ("INSERT INTO commentaire (commentaire, membre_id, annonce_id, date_enregistrement)
-		                  VALUES (:commentaire, :membre_id, :annonce_id, NOW())",
-		                  array (':commentaire' => $_POST['commentaire'], ':membre_id' => $_SESSION['membre']['id'], ':annonce_id' => $_POST['id']));
+	$erreur = true;
+	if (!isset ($id))
+		echo '<div class="alert alert-danger">Non !</div>';
+	elseif (strlen($commentaire) < 3)
+		echo '<div class="alert alert-danger">Le commentaire est trop court.</div>';
+	elseif (!preg_match ("/^[- ²,;:!?.\/€%*+()\"'\n\r&\_a-zA-Z0-9ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝÞàáâãäåæçèéêëìíîïðñòóôõöùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ]*$/u", $commentaire))
+		echo '<div class="alert alert-danger">Il y a des caractères invalides dans le commentaire.</div>';
 	else
 		{
-		echo '<div class="alert alert-danger">Ecrivez votre commentaire avant de l\'envoyer&nbsp;...</div>';
-		exit ();
+		executerRequete ("INSERT INTO commentaire (commentaire, membre_id, annonce_id, date_enregistrement)
+		                  VALUES (:commentaire, :membre_id, :annonce_id, NOW())",
+		                  array (':commentaire' => $commentaire, ':membre_id' => $_SESSION['membre']['id'], ':annonce_id' => $id));
+		$erreur = false;
 		}
 	}
+if ($erreur) exit;
 
 // Aller chercher les commentaires sur cette annonce
 $commentaires = array();

@@ -21,8 +21,16 @@ $marqueurs = array ();
 // Cas de la page accueil : filtres et tri
 if (isset ($_POST['filtreCategorie']))
 	{
-	$requeteSelection = 'SELECT a.id id, titre, photo, description_longue, prix, pseudo, membre.id auteur
-	                     FROM annonce a
+	$requeteSelection = 'SELECT a.id id,
+	                            a.titre titre,
+	                            photo,
+	                            description_longue,
+	                            description_courte,
+	                            prix,
+	                            pseudo,
+	                            membre.id auteur,
+	                            categorie.titre categorie
+	                     FROM categorie INNER JOIN annonce a ON categorie.id = a.categorie_id
 	                     LEFT JOIN membre ON membre_id = membre.id';
 
 	// Les consignes envoyées par la requête AJAX
@@ -81,9 +89,9 @@ if (isset ($_POST['filtreCategorie']))
 	switch ($triAccueil)
 		{
 		case 1  : $clauseOrderBy = ' ORDER BY a.date_enregistrement'; break;
-		case 2  : $clauseOrderBy = ' ORDER BY prix'; break;
-		case 3  : $clauseOrderBy = ' ORDER BY prix DESC'; break;
-		case 4  : $clauseOrderBy = ' ORDER BY (select COUNT(*) from annonce b where a.membre_id = b.membre_id group by b.membre_id) DESC, a.membre_id'; break;
+		case 2  : $clauseOrderBy = ' ORDER BY prix, a.date_enregistrement DESC'; break;
+		case 3  : $clauseOrderBy = ' ORDER BY prix DESC, a.date_enregistrement DESC'; break;
+		case 4  : $clauseOrderBy = ' ORDER BY (select COUNT(*) from annonce b where a.membre_id = b.membre_id group by b.membre_id) DESC, a.membre_id, a.date_enregistrement DESC'; break;
 		default : break;
 		}
 	$taillePage = TAILLE_PAGE_ACCUEIL;
@@ -95,10 +103,21 @@ else // donc !isset ($_POST['filtreCategorie']) donc affichage sur la page de re
 	$_SESSION['pageRecherche'] = $page;
 	$taillePage = TAILLE_PAGE_RECHERCHE;
 
-	$requeteSelection = 'SELECT a.id id, titre, photo, description_longue, prix, pseudo, membre.id auteur, CASE';
+	$requeteSelection = 'SELECT a.id id,
+	                            a.titre titre,
+	                            photo,
+	                            description_longue,
+	                            description_courte,
+	                            prix,
+	                            pseudo,
+	                            membre.id auteur,
+	                            categorie.titre categorie,
+	                            CASE';
 	for ($i=0; isset($_POST["id_$i"]); $i++)
 		$requeteSelection .= ' WHEN a.id = '.$_POST["id_$i"][0].' THEN '.$_POST["id_$i"][1];
-	$requeteSelection .= " END as pertinence FROM annonce a LEFT JOIN membre ON membre_id = membre.id";
+	$requeteSelection .= " END as pertinence
+	                       FROM categorie INNER JOIN annonce a ON categorie.id = a.categorie_id
+	                       LEFT JOIN membre ON membre_id = membre.id";
 	$clauseWhere = ' WHERE a.id IN (-1';
 	for ($i=0; isset($_POST["id_$i"]); $i++)
 		$clauseWhere .= ','.$_POST["id_$i"][0];
@@ -138,38 +157,43 @@ echo '</div>';
 while ($ligne = $resultat->fetch (PDO::FETCH_ASSOC))
 	{
 	extract ($ligne);
-	if (strlen ($description_longue) > 250) $description_longue = mb_substr($description_longue, 0, 250, 'UTF-8').'...';
+	if (strlen ($description_longue) > 250) $description_longue = mb_substr($description_longue, 0, 230, 'UTF-8').'...';
 	echo '<div class="row">';
 	echo     '<div class="col-sm-12">';
-	echo     '<hr></div>';
+	echo         '<hr></div>';
 	if (!empty ($photo))
 		{
 		echo '<div class="col-sm-4">';
 		echo     '<a href="fiche_annonce.php?id='.$id.'">';
-		echo         '<img src='.$photo.' style="max-width:100%; max-height:150px">';
+		echo         "<img src='$photo' class='img-fluid' alt='$titre' title='$description_courte' style='max-width:100%; max-height:140px'>";
 		echo     '</a>';
 		echo '</div>'; // "col-sm-4"
 		}
 	echo     '<div class="col-sm">';
-	echo         '<a href="fiche_annonce.php?id='.$id.'">';
-	echo             "<h3>$titre</h3>";
-	echo         '</a>';
+	echo         '<div class="row">';
+	echo             '<div class="col-sm-auto">';
+	echo                 '<a href="fiche_annonce.php?id='.$id.'">';
+	echo                     "<h4>$titre</h4>";
+	echo                 '</a>';
+	echo             '</div>';
+	echo             '<div class="col-sm">';
+	echo                 "<p>($categorie)</p>";
+	echo             '</div>';
+	echo         '</div>';
 	echo         "<p>$description_longue</p>";
 	echo     '</div>';
 	echo '</div>'; // "row"
 	echo '<div class="row">';
 	echo     '<div class="col-sm-9">';
 	echo         '<div class="row">';
-	if (estAdmin())
-		echo         '<a href="admin/gestion_membres.php?modification='.$auteur.'#formulaire"><h4>'.$pseudo.'&nbsp;</h4></a>';
-	else
-		echo         '<h4>'.$pseudo.'&nbsp;</h4>';
+	echo             '<a class="admin" href="admin/gestion_membres.php?modification='.$auteur.'#formulaire"><h4>'.$pseudo.'&nbsp;</h4></a>';
+	echo             '<h4 class="pas-admin">'.$pseudo.'&nbsp;</h4>';
 	if (isset($listeNotes[$pseudo])) echo '<p>'.noteEnEtoiles($listeNotes[$pseudo]).'</p>';
 	echo         '</div>';
 	echo     '</div>';
-	echo      '<div class="col-sm">';
-	echo          "<h4>$prix €</h4>";
-	echo      '</div>';
+	echo     '<div class="col-sm">';
+	echo         "<h4>$prix €</h4>";
+	echo     '</div>';
 	echo '</div>'; // "row"
 	}
 
